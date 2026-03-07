@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class ItemPedidoSalvarResquestDTO {
+public class ItemPedidoSalvarRequestDTO {
 
     @Schema(description = "ID único da variação exata do produto escolhido (ex: Maiô Preto - Tamanho M)")
     @NotNull(message = "A variação do produto é obrigatória")

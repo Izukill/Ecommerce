@@ -7,7 +7,7 @@ import lombok.Data;
 
 
 @Data
-public class EnderecoSalvarResquestDTO {
+public class EnderecoSalvarRequestDTO {
 
 
     @Schema(description = "CEP do endereço", example = "58400-000")

@@ -7,10 +7,12 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.example.rest.dto.AutenticacaoRequestDTO;
 import org.example.rest.dto.TokenResponseDTO;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Tag(name = "Autenticação", description = "Gerenciamento de login e emissão de tokens de acesso web")
 public interface AutenticacaoRestControllerAPI {
@@ -33,5 +35,4 @@ public interface AutenticacaoRestControllerAPI {
     })
     ResponseEntity<TokenResponseDTO> efetuarLogin(
             @RequestBody(description = "Credenciais do usuário para autenticação.") AutenticacaoRequestDTO dados);
-
 }

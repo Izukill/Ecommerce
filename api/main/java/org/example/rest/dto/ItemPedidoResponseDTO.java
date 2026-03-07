@@ -11,7 +11,11 @@ public class ItemPedidoResponseDTO {
 
     private UUID lookupId;
 
-    private VariacaoProduto produto;
+    private String nomeProduto;
+
+    private String tamanho;
+
+    private String cor;
 
     private Integer quantidade;
 

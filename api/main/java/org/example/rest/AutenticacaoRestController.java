@@ -17,28 +17,27 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/login")
-public class AutenticacaoRestController {
+public class AutenticacaoRestController implements AutenticacaoRestControllerAPI {
 
-    //classe do spring security que vai no banco e checa se as credenciais batem
     @Autowired
     private AuthenticationManager manager;
 
     @Autowired
     private TokenService tokenService;
 
+    @Override
     @PostMapping
     public ResponseEntity<TokenResponseDTO> efetuarLogin(@RequestBody @Valid AutenticacaoRequestDTO dados) {
 
-        // 1. Transforma o DTO em um formato que o Spring Security entende
         var authenticationToken = new UsernamePasswordAuthenticationToken(dados.getEmail(), dados.getSenha());
 
-        // 2. Chama o Spring Security para validar. Se a senha estiver errada, ele trava aqui e lança exceção (Erro 403)
         Authentication authentication = manager.authenticate(authenticationToken);
 
-        // 3. Se a senha estiver certa, pegamos o usuário (Pessoa) logado e geramos o JWT
         var tokenJWT = tokenService.gerarToken((Pessoa) authentication.getPrincipal());
 
-        // 4. Devolvemos o token na resposta com status 200 OK
         return ResponseEntity.ok(new TokenResponseDTO(tokenJWT));
+
+
     }
+
 }

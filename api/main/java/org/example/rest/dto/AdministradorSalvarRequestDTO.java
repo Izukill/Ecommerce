@@ -1,18 +1,20 @@
 package org.example.rest.dto;
 
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
+import org.example.model.EnumCargo;
 
 @Data
-public class ClienteSalvarResquestDTO {
+public class AdministradorSalvarRequestDTO {
 
-    @Schema(description = "Nome completo do cliente", example = "Jaqueline Ferreira")
+    @Schema(description = "Nome completo do administrador", example = "Jaqueline Ferreira")
     @NotBlank(message = "O nome é obrigatório")
     private String nome;
 
-    @Schema(description = "Email do cliente para login", example = "jaqueline@gmail.com")
+    @Schema(description = "Email do administrador para login", example = "jaqueline@gmail.com")
     @NotBlank(message = "O email é obrigatório")
     @Email
     private String email;
@@ -21,9 +23,10 @@ public class ClienteSalvarResquestDTO {
     @NotBlank(message = "A senha é obrigatória")
     private String senha;
 
-    @Schema(description = "Telefone de contato do cliente", example = "83 99999-9999")
-    @NotBlank(message = "O telefone é obrigatório para contato")
-    private String telefone;
+    @Schema(description = "Cargo ocupado pelo administrador", example = "FUNCIONARIO")
+    @NotBlank(message = "O cargo é obrigatório")
+    private EnumCargo cargo;
+
 
 
 }
