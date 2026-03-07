@@ -46,7 +46,7 @@ public class SecurityFilter extends OncePerRequestFilter {
             }
         }
 
-        // 6. Continua o fluxo normal da requisição (vai para o Controller ou é barrado nas regras)
+        //continua o fluxo normal da requisição (vai para o Controller ou é barrado nas regras)
         filterChain.doFilter(request, response);
     }
 

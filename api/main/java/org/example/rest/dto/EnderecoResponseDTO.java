@@ -18,6 +18,8 @@ public class EnderecoResponseDTO {
 
     private String complemento;
 
+    private boolean pagarNaEntrega;
+
 
 
 

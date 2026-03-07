@@ -32,6 +32,8 @@ public class VariacaoProduto {
     @Enumerated(EnumType.STRING)
     private EnumTamanho tamanho;
 
+    private String cor;
+
     private Integer quantidadeEstoque;
 
 

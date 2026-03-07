@@ -27,6 +27,10 @@ public class AdministradorSalvarRequestDTO {
     @NotBlank(message = "O cargo é obrigatório")
     private EnumCargo cargo;
 
+    @Schema(description = "Caso seja ativado o ADM possui permissão total ao sistema", example = "true")
+    @NotBlank(message = "A permissão ou negação é obrigatória")
+    private boolean permissaoTotal;
+
 
 
 }

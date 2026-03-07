@@ -1,6 +1,7 @@
 package org.example.rest.dto;
 
 import lombok.Data;
+import org.example.model.EnumTamanho;
 import org.example.model.VariacaoProduto;
 
 import java.math.BigDecimal;

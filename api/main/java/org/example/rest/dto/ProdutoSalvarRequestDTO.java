@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
+import org.example.model.EnumCategoria;
 
 import java.math.BigDecimal;
 
@@ -17,7 +18,7 @@ public class ProdutoSalvarRequestDTO {
 
     @Schema(description = "Categoria do produto", example = "Moda Praia")
     @NotBlank(message = "A categoria é obrigatória")
-    private String categoria;
+    private EnumCategoria categoria;
 
     @Schema(description = "Preço base do produto", example = "129.90")
     @NotNull(message = "O preço é obrigatório")
@@ -27,6 +28,10 @@ public class ProdutoSalvarRequestDTO {
     @Schema(description = "Status do produto (Ativo/Inativo)")
     @NotNull(message = "O status é obrigatório")
     private boolean ativo;
+
+    @Schema(description = "Imagem do produto")
+    @NotBlank(message = "A imagem é obrigatória")
+    private String imagemUrl;
 
 
 }

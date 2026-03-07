@@ -15,4 +15,6 @@ public class AdministradorResponseDTO {
     private String email;
 
     private EnumCargo cargo;
+
+    private boolean permissaoTotal;
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Getter
@@ -38,6 +39,6 @@ public class Produto {
     private EnumCategoria categoria;
 
     @OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.PERSIST)
-    private VariacaoProduto variacaoProduto;
+    private List<VariacaoProduto> variacaoProduto;
 
 }

@@ -1,4 +1,4 @@
 package org.example.service;
 
-public class AdiministradorService {
+public class AdministradorService {
 }
