@@ -1,12 +1,12 @@
 package org.example.rest.dto;
 
 import lombok.Data;
+import org.example.model.EnumCargo;
 
 import java.util.UUID;
 
 @Data
-public class ClienteResponseDTO {
-
+public class AdministradorResponseDTO {
 
     private UUID lookupId;
 
@@ -14,6 +14,5 @@ public class ClienteResponseDTO {
 
     private String email;
 
-    private String telefone;
-
+    private EnumCargo cargo;
 }

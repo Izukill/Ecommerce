@@ -22,6 +22,7 @@ public class Cliente extends Pessoa {
 
     private LocalDate dataCadastro;
 
+    @Column(unique = true)
     private String telefone;
 
     @OneToMany(mappedBy = "cliente", orphanRemoval = true, cascade = CascadeType.PERSIST)
