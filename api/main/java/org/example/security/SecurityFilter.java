@@ -9,10 +9,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Component
 public class SecurityFilter extends OncePerRequestFilter {
 
     @Autowired
@@ -35,14 +37,19 @@ public class SecurityFilter extends OncePerRequestFilter {
             //se o token for true da true ele vai retornar o email ou seja não vai ser vazio
             if (!emailDonoDoToken.isEmpty()) {
 
-                //busca a pessoa no banco usando o email
-                UserDetails usuario = pessoaRepository.findByEmail(emailDonoDoToken);
+                var usuarioOptional = pessoaRepository.findByEmail(emailDonoDoToken);
 
-                //cria um objeto de autenticação com as permissões (roles) do usuário
-                var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+                if (usuarioOptional.isPresent()) {
 
-                //avisa ao spring "tá liberado dog, eu conheço esse cara, ele tá logado"
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                    //busca a pessoa no banco usando o email
+                    UserDetails usuario = usuarioOptional.get();
+
+                    //cria um objeto de autenticação com as permissões (roles) do usuário
+                    var authentication = new UsernamePasswordAuthenticationToken(usuario, null, usuario.getAuthorities());
+
+                    //avisa ao spring "tá liberado dog, eu conheço esse cara, ele tá logado"
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                }
             }
         }
 
