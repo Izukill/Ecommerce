@@ -27,16 +27,20 @@ public class Produto {
         this.lookupId = UUID.randomUUID();
     }
 
+    @Column(nullable = false)
     private String nome;
 
     private String imagemUrl;
 
+    @Column(nullable = false)
     private BigDecimal preco;
 
-    private boolean ativo;
+    @Column(nullable = false)
+    private boolean ativo= true;
 
-    @Enumerated(EnumType.STRING)
-    private EnumCategoria categoria;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "categoria_id")
+    private Categoria categoria;
 
     @OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<VariacaoProduto> variacaoProduto;

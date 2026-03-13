@@ -1,8 +1,8 @@
 package org.example.mapper;
 
 import org.example.model.Endereco;
-import org.example.rest.dto.EnderecoResponseDTO;
-import org.example.rest.dto.EnderecoSalvarRequestDTO;
+import org.example.rest.dto.Endereco.EnderecoResponseDTO;
+import org.example.rest.dto.Endereco.EnderecoSalvarRequestDTO;
 import org.springframework.stereotype.Component;
 
 @Component

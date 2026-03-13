@@ -2,8 +2,8 @@ package org.example.mapper;
 
 import org.example.model.Cliente;
 import org.example.model.EnumPerfil;
-import org.example.rest.dto.ClienteResponseDTO;
-import org.example.rest.dto.ClienteSalvarRequestDTO;
+import org.example.rest.dto.Cliente.ClienteResponseDTO;
+import org.example.rest.dto.Cliente.ClienteSalvarRequestDTO;
 import org.springframework.stereotype.Component;
 
 @Component

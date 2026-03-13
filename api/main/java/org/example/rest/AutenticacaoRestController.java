@@ -2,8 +2,8 @@ package org.example.rest;
 
 import jakarta.validation.Valid;
 import org.example.model.Pessoa;
-import org.example.rest.dto.AutenticacaoRequestDTO;
-import org.example.rest.dto.TokenResponseDTO;
+import org.example.rest.dto.Autenticacao.AutenticacaoRequestDTO;
+import org.example.rest.dto.Autenticacao.TokenResponseDTO;
 import org.example.security.TokenService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

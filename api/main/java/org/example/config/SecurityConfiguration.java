@@ -36,6 +36,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(authorize -> authorize
 
                         //rotas públicas (qualquer um acessa, sem token)
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta
                         .requestMatchers(HttpMethod.GET, "/produtos/**").permitAll() //ver a vitrine

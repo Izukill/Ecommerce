@@ -11,7 +11,11 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.exception.MirlleException;
-import org.example.rest.dto.*;
+import org.example.rest.dto.Endereco.EnderecoResponseDTO;
+import org.example.rest.dto.Endereco.EnderecoSalvarRequestDTO;
+import org.springdoc.core.annotations.ParameterObject;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 
@@ -22,19 +26,14 @@ import java.util.UUID;
 @SecurityRequirement(name = "bearerAuth")
 public interface EnderecoRestControllerAPI {
 
-
-    @Operation(summary = "Retornar todos os Endereços.",
-            description = "Retorna todos os endereços, sem restrição alguma de quantidade.",
-            tags = { "endereco" })
+    @Operation(summary = "Meus Endereços (Visão do Cliente).",
+            description = "Retorna todos os endereços salvos na conta do cliente logado.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200",
-                    description = "Operação realizada com sucesso.",
+            @ApiResponse(responseCode = "200", description = "Operação realizada com sucesso.",
                     content = @Content(mediaType = "application/json",
                             array = @ArraySchema(schema = @Schema(implementation = EnderecoResponseDTO.class)))),
-            @ApiResponse(responseCode = "500",
-                    description = "Erro inesperado.",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
     })
     ResponseEntity<List<EnderecoResponseDTO>> listar() throws MirlleException;
 
@@ -56,7 +55,7 @@ public interface EnderecoRestControllerAPI {
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
     ResponseEntity<EnderecoResponseDTO> criar(@RequestBody(description = "Dados do endereço a ser criado.")
-                                                  EnderecoSalvarRequestDTO dto) throws MirlleException;
+                                              EnderecoSalvarRequestDTO dto) throws MirlleException;
 
     @Operation(summary = "Recuperar um endereço existente.",
             description = "Recupera um endereço existente com base no seu lookupId.")
@@ -93,10 +92,7 @@ public interface EnderecoRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
-    ResponseEntity<EnderecoResponseDTO> atualizar(@Parameter(description = "LookupId do endereço a ser atualizado.")
-                                                  UUID lookupId,
-                                                  @RequestBody(description = "Dados do endereço a ser atualizado.")
-                                                  EnderecoSalvarRequestDTO dto) throws MirlleException;
+    ResponseEntity<EnderecoResponseDTO> atualizar(@Parameter UUID lookupId, @RequestBody EnderecoSalvarRequestDTO dto) throws MirlleException;
 
     @Operation(summary = "Remover um endereço existente.",
             description = "Remove um endereço existente com base no seu lookupId.")
@@ -113,11 +109,21 @@ public interface EnderecoRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
-    ResponseEntity<Void> remover(@Parameter(description = "LookupId do endereço a ser removido.")
-                                 UUID lookupId) throws MirlleException;
+    ResponseEntity<Void> remover(@Parameter(description = "LookupId do endereço a ser removido.") UUID lookupId) throws MirlleException;
 
 
-
-
+    @Operation(summary = "Listar todos os endereços (Visão do Administrador).",
+            description = "Recupera todos os endereços do sistema de forma paginada.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Operação realizada com sucesso."),
+            @ApiResponse(responseCode = "500",
+                    description = "Erro inesperado.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    ResponseEntity<Page<EnderecoResponseDTO>> buscar(@ParameterObject Pageable pageable) throws MirlleException;
 
 }
+
+

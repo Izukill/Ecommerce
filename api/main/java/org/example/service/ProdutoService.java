@@ -3,7 +3,7 @@ package org.example.service;
 import org.example.exception.RegraNegocioException;
 import org.example.model.Produto;
 import org.example.repository.ProdutoRepository;
-import org.example.rest.dto.ProdutoBuscarDTO;
+import org.example.rest.dto.Produto.ProdutoBuscarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +48,7 @@ public class ProdutoService {
         produtoExistente.setPreco(dadosAtualizados.getPreco());
         produtoExistente.setCategoria(dadosAtualizados.getCategoria());
         produtoExistente.setImagemUrl(dadosAtualizados.getImagemUrl());
+        produtoExistente.setAtivo(dadosAtualizados.isAtivo());
 
         return produtoRepository.save(produtoExistente);
     }
@@ -56,15 +57,11 @@ public class ProdutoService {
     @Transactional
     public void remover(UUID lookupId) throws RegraNegocioException {
         Produto produto = recuperarPor(lookupId);
-
-
-        produto.setAtivo(false);
-
-        produtoRepository.save(produto);
+        produtoRepository.delete(produto);
     }
 
 
-    public Page<Produto> buscarVitrine(ProdutoBuscarDTO dto, Pageable pageable) {
+    public Page<Produto> buscar(ProdutoBuscarDTO dto, Pageable pageable) {
 
         //filtro por nome
         if (dto.getNome() != null && !dto.getNome().isBlank()) {

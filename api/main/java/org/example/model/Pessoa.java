@@ -61,7 +61,7 @@ public abstract class Pessoa implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email; //o "nome de usuário" no e-commerce é o email mas eu poderia passar um nick unique também
+        return this.email;
     }
 
     //os métodos abaixo são para controle de bloqueio de conta

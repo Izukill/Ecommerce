@@ -4,13 +4,12 @@ import org.example.model.Endereco;
 import org.example.model.ItemPedido;
 import org.example.model.Pedido;
 import org.example.model.VariacaoProduto;
-import org.example.rest.dto.ItemPedidoResponseDTO;
-import org.example.rest.dto.PedidoCheckoutRequestDTO;
-import org.example.rest.dto.PedidoResponseDTO;
+import org.example.rest.dto.ItemPedido.ItemPedidoResponseDTO;
+import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
+import org.example.rest.dto.Pedido.PedidoResponseDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.UUID;
 
 @Component
 public class PedidoMapper {

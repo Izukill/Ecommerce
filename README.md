@@ -30,3 +30,15 @@ https://github.com/Izukill/Ecommerce/blob/480e3691930a56946d1b806e2ffb326f821928
 
 Diagrama de Classe:
 https://github.com/Izukill/Ecommerce/blob/480e3691930a56946d1b806e2ffb326f82192803/Diagrama%20de%20Classe%20Ecommerce.pdf
+
+
+Como Rodar o projeto?
+
+para rodar o projeto basta dar os seguintes comandos abaixo:
+
+-cd app
+
+-npm install axios
+
+-npm run dev
+

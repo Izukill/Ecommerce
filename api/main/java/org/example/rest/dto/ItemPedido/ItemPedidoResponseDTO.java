@@ -1,0 +1,25 @@
+package org.example.rest.dto.ItemPedido;
+
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.util.UUID;
+
+@Data
+public class ItemPedidoResponseDTO {
+
+    private UUID lookupId;
+
+    private String nomeProduto;
+
+    private String tamanho;
+
+    private String cor;
+
+    private Integer quantidade;
+
+    private BigDecimal precoUnitario;
+
+
+
+}

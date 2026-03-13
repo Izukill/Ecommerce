@@ -77,8 +77,6 @@ public class EnderecoService {
 
     public List<Endereco> listar() throws RegraNegocioException {
         Cliente clienteLogado = obterClienteLogado();
-
-
         return clienteLogado.getEnderecos();
     }
 

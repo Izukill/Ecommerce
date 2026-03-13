@@ -6,6 +6,7 @@ import org.example.model.*;
 import org.example.repository.ClienteRepository;
 import org.example.repository.PedidoRepository;
 import org.example.repository.VariacaoProdutoRepository;
+import org.example.rest.dto.Pedido.PedidoBuscarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -88,9 +89,19 @@ public class PedidoService {
 
 
     //listar para usuario
-    public Page<Pedido> listarMeusPedidos(Pageable pageable) throws RegraNegocioException {
+    public Page<Pedido> listarMeusPedidos(PedidoBuscarDTO dto, Pageable pageable) throws RegraNegocioException {
 
         Cliente clienteLogado = obterClienteLogado();
+
+
+        if (dto.getStatus() != null) {
+
+            return pedidoRepository.findByStatus(dto.getStatus(), pageable);
+        }
+
+        if(dto.getDataInicial() != null && dto.getDataFinal() != null){
+            return pedidoRepository.findByDataHoraBetween(dto.getDataInicial(), dto.getDataFinal(), pageable);
+        }
 
         return pedidoRepository.findByCliente(clienteLogado, pageable);
 
@@ -98,9 +109,19 @@ public class PedidoService {
 
 
     //listar para admin
-    public Page<Pedido> listarPedidosAdmin(Pageable pageable){
+    public Page<Pedido> listarPedidosAdmin(PedidoBuscarDTO dto, Pageable pageable){
+
+        if (dto.getStatus() != null) {
+
+            return pedidoRepository.findByStatus(dto.getStatus(), pageable);
+        }
+
+        if(dto.getDataInicial() != null && dto.getDataFinal() != null){
+            return pedidoRepository.findByDataHoraBetween(dto.getDataInicial(), dto.getDataFinal(), pageable);
+        }
 
         return pedidoRepository.findAll(pageable);
+
     }
 
 

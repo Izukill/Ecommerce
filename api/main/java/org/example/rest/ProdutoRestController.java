@@ -2,55 +2,73 @@ package org.example.rest;
 
 import org.example.exception.MirlleException;
 import org.example.mapper.ProdutoMapper;
-import org.example.rest.dto.ProdutoBuscarDTO;
-import org.example.rest.dto.ProdutoResponseDTO;
-import org.example.rest.dto.ProdutoSalvarRequestDTO;
+import org.example.model.Produto;
+import org.example.rest.dto.Produto.ProdutoBuscarDTO;
+import org.example.rest.dto.Produto.ProdutoResponseDTO;
+import org.example.rest.dto.Produto.ProdutoSalvarRequestDTO;
 import org.example.service.ProdutoService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/produtos")
 public class ProdutoRestController implements ProdutoRestControllerAPI{
 
+    @Autowired
     private ProdutoService service;
 
+    @Autowired
     private ProdutoMapper mapper;
 
 
-
     @Override
-    public ResponseEntity<List<ProdutoResponseDTO>> listar() throws MirlleException {
-        return null;
+    @PostMapping
+    public ResponseEntity<ProdutoResponseDTO> criar(@RequestBody ProdutoSalvarRequestDTO dto) throws MirlleException {
+
+        Produto produto = mapper.from(dto);
+        Produto produtoSalvo = service.criar(produto);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.from(produtoSalvo));
     }
 
     @Override
-    public ResponseEntity<ProdutoResponseDTO> adicionar(ProdutoSalvarRequestDTO dto) throws MirlleException {
-        return null;
+    @GetMapping("/{lookupId}")
+    public ResponseEntity<ProdutoResponseDTO> recuperarPor(@PathVariable UUID lookupId) throws MirlleException {
+
+        Produto produto = service.recuperarPor(lookupId);
+        return ResponseEntity.ok(mapper.from(produto));
+
+
     }
 
     @Override
-    public ResponseEntity<ProdutoResponseDTO> recuperarPor(UUID lookupId) throws MirlleException {
-        return null;
+    @PutMapping("/{lookupId}")
+    public ResponseEntity<ProdutoResponseDTO> atualizar(@PathVariable UUID lookupId,@RequestBody ProdutoSalvarRequestDTO dto) throws MirlleException {
+
+        Produto produtoNovosDados = mapper.from(dto);
+        Produto produtoAtualizado = service.atualizar(lookupId, produtoNovosDados);
+        return ResponseEntity.ok(mapper.from(produtoAtualizado));
+
     }
 
     @Override
-    public ResponseEntity<ProdutoResponseDTO> atualizar(UUID lookupId, ProdutoSalvarRequestDTO dto) throws MirlleException {
-        return null;
+    @DeleteMapping("/{lookupId}")
+    public ResponseEntity<Void> remover(@PathVariable UUID lookupId) throws MirlleException {
+        service.remover(lookupId);
+        return ResponseEntity.noContent().build();
+
     }
 
     @Override
-    public ResponseEntity<Void> remover(UUID lookupId) throws MirlleException {
-        return null;
-    }
-
-    @Override
-    public ResponseEntity<Page<ProdutoResponseDTO>> buscar(ProdutoBuscarDTO dto) throws MirlleException {
-        return null;
+    @GetMapping
+    public ResponseEntity<Page<ProdutoResponseDTO>> buscar(ProdutoBuscarDTO dto, Pageable pageable) throws MirlleException {
+        Page<Produto> pagina = service.buscar(dto, pageable);
+        return ResponseEntity.ok(pagina.map(mapper::from));
     }
 }

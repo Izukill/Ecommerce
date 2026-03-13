@@ -2,8 +2,8 @@ package org.example.mapper;
 
 import org.example.model.Administrador;
 import org.example.model.EnumPerfil;
-import org.example.rest.dto.AdministradorResponseDTO;
-import org.example.rest.dto.AdministradorSalvarRequestDTO;
+import org.example.rest.dto.Administrador.AdministradorResponseDTO;
+import org.example.rest.dto.Administrador.AdministradorSalvarRequestDTO;
 import org.springframework.stereotype.Component;
 
 @Component

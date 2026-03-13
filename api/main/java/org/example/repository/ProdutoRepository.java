@@ -1,6 +1,7 @@
 package org.example.repository;
 
 
+import org.example.model.Categoria;
 import org.example.model.EnumCategoria;
 import org.example.model.Produto;
 import org.springframework.data.domain.Page;
@@ -18,7 +19,7 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     Page<Produto> findByAtivoTrue(Pageable pageable);
 
-    Page<Produto> findByCategoriaAndAtivoTrue(EnumCategoria categoria, Pageable pageable);
+    Page<Produto> findByCategoriaAndAtivoTrue(Categoria categoria, Pageable pageable);
 
     Page<Produto> findByNomeContainingIgnoreCaseAndAtivoTrue(String nome, Pageable pageable);
 

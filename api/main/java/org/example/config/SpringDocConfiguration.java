@@ -20,8 +20,8 @@ public class SpringDocConfiguration {
                         .version("1.0.0")
                         .contact(new Contact()
                                 .name("Luan Loreto")
-                                .url("https://github.com/Izukill/EduConnectSpring")
-                                .email("luan.loreto@academico.ifpb.edu.br"))
+                                .url("https://github.com/Izukill/Ecommerce")
+                                .email("luanloreto639@gmail.com"))
                         .license(new License()
                                 .name("Apache 2.0")
                                 .url("http://www.apache.org/licenses/LICENSE-2.0")));

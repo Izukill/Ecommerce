@@ -5,9 +5,8 @@ import org.example.exception.RegraNegocioException;
 import org.example.model.Cliente;
 import org.example.model.EnumPerfil;
 import org.example.repository.ClienteRepository;
-import org.example.repository.PessoaRepository;
-import org.example.rest.dto.AlterarSenhaSalvarRequestDTO;
-import org.example.rest.dto.ClienteBuscarDTO;
+import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
+import org.example.rest.dto.Cliente.ClienteBuscarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -39,7 +38,7 @@ public class ClienteService {
 
         cliente.setTipoPerfil(EnumPerfil.CLIENTE);
 
-        return cliente;
+        return clienteRepository.save(cliente);
 
     }
 
@@ -95,8 +94,8 @@ public class ClienteService {
             throw new RegraNegocioException("A senha atual informada está incorreta");
         }
 
-        if(passwordEncoder.matches(dto.getSenhaVelha(), cliente.getSenha())){
-            throw new RegraNegocioException("A senha velha não pode ser igual a nova senha");
+        if(passwordEncoder.matches(dto.getSenhaNova(), cliente.getSenha())){
+            throw new RegraNegocioException("A nova senha não pode ser igual à senha atual");
         }
 
         cliente.setSenha(passwordEncoder.encode(dto.getSenhaNova()));

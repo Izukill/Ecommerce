@@ -3,15 +3,12 @@ package org.example.service;
 import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.RegraNegocioException;
 import org.example.model.Administrador;
-import org.example.model.EnumCargo;
 import org.example.model.EnumPerfil;
 import org.example.repository.AdministradorRepository;
-import org.example.repository.PessoaRepository;
-import org.example.rest.dto.AdministradorBuscarDTO;
-import org.example.rest.dto.AlterarSenhaSalvarRequestDTO;
+import org.example.rest.dto.Administrador.AdministradorBuscarDTO;
+import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -75,10 +72,17 @@ public class AdministradorService {
     }
 
 
-    public Page<Administrador> buscar(AdministradorBuscarDTO dto){
+    public Page<Administrador> buscar(AdministradorBuscarDTO dto,  Pageable pageable){
 
-        Pageable paginacao = PageRequest.of(0, 10);
-        return administradorRepository.findAll(paginacao);
+        if(dto.getEmail() != null && !dto.getEmail().isBlank()){
+            return administradorRepository.findByEmail(dto.getEmail(),pageable);
+        }
+
+        if(dto.getNome() != null && !dto.getNome().isBlank()){
+            return administradorRepository.findByNome(dto.getNome(), pageable);
+        }
+
+        return administradorRepository.findAll(pageable);
     }
 
 
