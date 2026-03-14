@@ -35,7 +35,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
     : String(produto.categoria).replace("_", " ");
 
   // Imagem fictícia elegante
-  const imagemPadrao = "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80";
+  const imagemPadrao = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQtmxVOgRHZXCtddSexghCaWre121JSe_cdPw&s";
   const imagem = produto.imagemUrl || imagemPadrao;
 
   // Verifica o status ativo

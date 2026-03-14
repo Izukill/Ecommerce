@@ -23,6 +23,8 @@ public class ProdutoResponseDTO {
 
     private boolean ativo;
 
+    private String imagemUrl;
+
     private List<VariacaoProdutoResponseDTO> variacoes;
 
 

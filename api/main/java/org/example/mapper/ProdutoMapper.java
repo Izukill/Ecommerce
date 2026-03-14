@@ -33,6 +33,7 @@ public class ProdutoMapper {
         dto.setCategoria(entity.getCategoria());
         dto.setNome(entity.getNome());
         dto.setAtivo(entity.isAtivo());
+        dto.setImagemUrl(entity.getImagemUrl());
         dto.setPreco(entity.getPreco());
 
 

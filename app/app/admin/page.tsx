@@ -2,37 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/app/contexts/AuthContext";
-
-// ==========================================
-// NOSSO NOVO COMPONENTE: Card de Ação Admin
-// ==========================================
-interface ActionCardProps {
-  icone: string;
-  titulo: string;
-  descricao: string;
-  textoBotao: string;
-  href: string;
-}
-
-function ActionCard({ icone, titulo, descricao, textoBotao, href }: ActionCardProps) {
-  return (
-    <div className="bg-black p-6 rounded-xl shadow-2xl border-t-4 border-[#C2AE82] flex flex-col items-center justify-center text-center hover:bg-neutral-900 transition-colors">
-      <span className="text-5xl mb-4">{icone}</span>
-      <h3 className="text-xl font-bold text-white mb-2">{titulo}</h3>
-      <p className="text-gray-400 text-sm mb-6">{descricao}</p>
-
-      {/* Botão Padronizado Dourado */}
-      <Link
-        href={href}
-        className="px-6 py-2 bg-[#C2AE82] text-black font-extrabold rounded-lg hover:bg-[#a8956b] transition-all shadow-lg hover:scale-105"
-      >
-        {textoBotao}
-      </Link>
-    </div>
-  );
-}
-// ==========================================
-
+import ActionCard from "@/app/components/ActionCard";
 
 export default function AdminDashboardPage() {
   const { usuario } = useAuth();
@@ -49,7 +19,7 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-10">
 
-      {/* 1. CABEÇALHO */}
+      {/*CABEÇALHO */}
       <div>
         <h2 className="text-3xl font-extrabold text-white tracking-tight">
           Olá, <span className="text-[#C2AE82] capitalize">{primeiroNome}</span>
@@ -81,7 +51,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 3. LISTA DE PEDIDOS RECENTES */}
+      {/* LISTA DE PEDIDOS RECENTES */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-white">Últimos Pedidos</h3>
@@ -131,7 +101,7 @@ export default function AdminDashboardPage() {
 
       <hr className="border-neutral-800 my-8" />
 
-      {/* 4. ATALHOS DE GERENCIAMENTO (Agora usando nosso componente!) */}
+      {/*ATALHOS DE GERENCIAMENTO */}
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Ações Rápidas</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

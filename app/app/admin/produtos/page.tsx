@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import ProdutoCard from "@/app/components/ProdutoCard"; // IMPORTAÇÃO DO SEU NOVO COMPONENTE
+import ProdutoCard from "@/app/components/ProdutoCard";
 
 interface Categoria {
   lookupId: string;
@@ -30,6 +30,11 @@ export default function ListaProdutosPage() {
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
   const [filtroPreco, setFiltroPreco] = useState("");
 
+  // ==========================================
+  // NOVO ESTADO: Controle do Modal de Exclusão
+  // ==========================================
+  const [produtoParaExcluir, setProdutoParaExcluir] = useState<Produto | null>(null);
+
   const carregarDados = async () => {
     try {
       const [resProdutos, resCategorias] = await Promise.all([
@@ -54,15 +59,19 @@ export default function ListaProdutosPage() {
     carregarDados();
   }, []);
 
-  const handleExcluir = async (lookupId: string, nome: string) => {
-    const confirmacao = window.confirm(`Tem certeza que deseja excluir "${nome}"?`);
-    if (!confirmacao) return;
+  // ==========================================
+  // NOVA FUNÇÃO: Confirmar a exclusão pelo Modal
+  // ==========================================
+  const confirmarExclusao = async () => {
+    if (!produtoParaExcluir) return;
 
     try {
-      await api.delete(`/produtos/${lookupId}`);
-      setProdutos(produtos.filter(p => p.lookupId !== lookupId));
+      await api.delete(`/produtos/${produtoParaExcluir.lookupId}`);
+      setProdutos(produtos.filter(p => p.lookupId !== produtoParaExcluir.lookupId));
+      setProdutoParaExcluir(null); // Fecha o modal após o sucesso
     } catch (error) {
       alert("Erro ao excluir o produto. Ele pode estar atrelado a algum pedido.");
+      setProdutoParaExcluir(null); // Fecha o modal mesmo se der erro
     }
   };
 
@@ -88,7 +97,7 @@ export default function ListaProdutosPage() {
     });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -171,7 +180,6 @@ export default function ListaProdutosPage() {
           {produtosFiltradosEOrdenados.map((produto) => (
             <div key={produto.lookupId} className="flex flex-col gap-3">
 
-              {/* Card do Produto passando a flag isAdmin como true */}
               <ProdutoCard produto={produto} isAdmin={true} />
 
               {/* Botões do Administrador (Editar / Excluir) */}
@@ -187,7 +195,7 @@ export default function ListaProdutosPage() {
                 </Link>
 
                 <button
-                  onClick={() => handleExcluir(produto.lookupId, produto.nome)}
+                  onClick={() => setProdutoParaExcluir(produto)} // <--- AQUI CHAMA O MODAL AGORA
                   className="flex justify-center items-center px-4 py-2.5 bg-red-950/30 text-red-500 font-bold text-sm rounded-lg border border-red-900/50 hover:bg-red-900/50 hover:text-red-400 transition-all shadow-md"
                   title="Excluir Produto"
                 >
@@ -199,6 +207,32 @@ export default function ListaProdutosPage() {
 
             </div>
           ))}
+        </div>
+      )}
+
+      {/* modal para confirmação de exclusão de produto */}
+      {produtoParaExcluir && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+          <div className="bg-neutral-900 border-t-4 border-red-600 rounded-xl shadow-2xl p-6 w-full max-w-md animate-in fade-in zoom-in duration-200">
+            <h3 className="text-xl font-extrabold text-white mb-2">Excluir Produto?</h3>
+            <p className="text-gray-400 text-sm mb-6">
+              Tem certeza que deseja excluir <span className="text-white font-bold">"{produtoParaExcluir.nome}"</span>? Esta ação não poderá ser desfeita.
+            </p>
+            <div className="flex justify-end gap-3">
+              <button
+                onClick={() => setProdutoParaExcluir(null)}
+                className="px-4 py-2 text-sm font-bold text-gray-300 bg-neutral-800 rounded-lg hover:bg-neutral-700 hover:text-white transition-colors border border-neutral-700"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmarExclusao}
+                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
+              >
+                Sim, Excluir
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

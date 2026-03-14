@@ -42,17 +42,21 @@ public class SecurityConfiguration {
                 //definição das regras dos endpoints (o mais importante)
                 .authorizeHttpRequests(authorize -> authorize
 
+
+
                         //rotas públicas (qualquer um acessa, sem token)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta
                         .requestMatchers(HttpMethod.GET, "/produtos/**").permitAll() //ver a vitrine
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll() //ver categorias
+                        .requestMatchers("/error").permitAll() //rota de erro liberada para não mascara excessões
 
                         //rotas pra ADM
                         .requestMatchers(HttpMethod.POST, "/produtos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/admin").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/upload/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categorias").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/categorias/**").hasRole("ADMIN")
