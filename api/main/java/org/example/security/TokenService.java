@@ -32,6 +32,7 @@ public class TokenService {
                     .withSubject(pessoa.getEmail()) // a informação principal que a gente quer guardar (no caso o email)
                     .withClaim("id", pessoa.getId()) // se pode guardar informações extras como o id
                     .withClaim("perfil", pessoa.getTipoPerfil().name()) //guarda se é cliente ou admin
+                    .withClaim("nome", pessoa.getNome())
                     .withExpiresAt(dataExpiracao()) //define a expiração
                     .sign(algoritmo); //finaliza
 

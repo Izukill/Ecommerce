@@ -15,6 +15,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,6 +39,7 @@ public class ClienteService {
         cliente.setSenha(passwordEncoder.encode(cliente.getSenha()));
 
         cliente.setTipoPerfil(EnumPerfil.CLIENTE);
+        cliente.setDataCadastro(LocalDate.now());
 
         return clienteRepository.save(cliente);
 

@@ -2,7 +2,6 @@ package org.example.repository;
 
 
 import org.example.model.Categoria;
-import org.example.model.EnumCategoria;
 import org.example.model.Produto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

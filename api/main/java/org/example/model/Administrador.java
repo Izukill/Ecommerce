@@ -2,6 +2,8 @@ package org.example.model;
 
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -18,6 +20,7 @@ import lombok.experimental.SuperBuilder;
 @Table(name = "Administradores")
 public class Administrador extends Pessoa {
 
+    @Enumerated(EnumType.STRING)
     private EnumCargo cargo;
 
     private boolean permissaoTotal;
