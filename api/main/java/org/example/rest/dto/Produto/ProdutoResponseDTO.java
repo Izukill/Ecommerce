@@ -21,6 +21,8 @@ public class ProdutoResponseDTO {
 
     private String status;
 
+    private boolean ativo;
+
     private List<VariacaoProdutoResponseDTO> variacoes;
 
 

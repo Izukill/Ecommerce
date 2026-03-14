@@ -26,6 +26,8 @@ public class CategoriaService {
             throw new RegraNegocioException("Já existe uma categoria cadastrada com este nome.");
         }
 
+        categoria.setAtivo(true);
+
         return categoriaRepository.save(categoria);
     }
 

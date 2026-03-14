@@ -2,7 +2,7 @@ package org.example.rest;
 
 import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
-import org.example.mapper.ClienteMapper; // Ajuste para o seu pacote
+import org.example.mapper.ClienteMapper;
 import org.example.model.Cliente;
 import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
 import org.example.rest.dto.Cliente.ClienteBuscarDTO;

@@ -1,7 +1,9 @@
 package org.example.service;
 
 import org.example.exception.RegraNegocioException;
+import org.example.model.Categoria;
 import org.example.model.Produto;
+import org.example.repository.CategoriaRepository;
 import org.example.repository.ProdutoRepository;
 import org.example.rest.dto.Produto.ProdutoBuscarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,16 +20,24 @@ public class ProdutoService {
     @Autowired
     private ProdutoRepository produtoRepository;
 
+    @Autowired
+    private CategoriaRepository categoriaRepository;
+
 
     @Transactional
     public Produto criar(Produto produto) {
 
-        produto.setAtivo(true);
+        UUID categoriaLookupId = produto.getCategoria().getLookupId();
+        Categoria categoriaReal = categoriaRepository.findByLookupId(categoriaLookupId)
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada!"));
 
         //seta cada variacao o produto a qual ela pertence
         if (produto.getVariacaoProduto() != null && !produto.getVariacaoProduto().isEmpty()) {
             produto.getVariacaoProduto().forEach(variacao -> variacao.setProduto(produto));
         }
+
+        produto.setCategoria(categoriaReal);
+        produto.setAtivo(true);
 
         return produtoRepository.save(produto);
     }

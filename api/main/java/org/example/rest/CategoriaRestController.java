@@ -1,6 +1,6 @@
 package org.example.rest;
 
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
 import org.example.mapper.CategoriaMapper;

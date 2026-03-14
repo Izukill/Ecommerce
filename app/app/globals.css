@@ -8,6 +8,12 @@
   --foreground: 243 244 246; /* gray-100: #F3F4F6 */
 }
 
+@layer base {
+  html {
+    font-size: 80%;
+  }
+}
+
 body {
   color: rgb(var(--foreground));
   background: rgb(var(--background));

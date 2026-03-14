@@ -17,7 +17,6 @@ public class ProdutoMapper {
         return Produto.builder()
                 .nome(dto.getNome())
                 .categoria(dto.getCategoria())
-                .ativo(dto.isAtivo())
                 .preco(dto.getPreco())
                 .imagemUrl(dto.getImagemUrl())
                 .build();
@@ -33,6 +32,7 @@ public class ProdutoMapper {
         dto.setLookupId(entity.getLookupId());
         dto.setCategoria(entity.getCategoria());
         dto.setNome(entity.getNome());
+        dto.setAtivo(entity.isAtivo());
         dto.setPreco(entity.getPreco());
 
 

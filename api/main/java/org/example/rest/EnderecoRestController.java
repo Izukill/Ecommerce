@@ -1,7 +1,7 @@
 package org.example.rest;
 
 import org.example.exception.MirlleException;
-import org.example.mapper.EnderecoMapper; // Ajuste para o seu pacote
+import org.example.mapper.EnderecoMapper;
 import org.example.model.Endereco;
 import org.example.rest.dto.Endereco.EnderecoResponseDTO;
 import org.example.rest.dto.Endereco.EnderecoSalvarRequestDTO;

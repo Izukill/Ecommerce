@@ -1,5 +1,7 @@
 package org.example.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,6 +19,7 @@ import java.util.UUID;
 public class Produto {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
@@ -35,6 +38,7 @@ public class Produto {
     @Column(nullable = false)
     private BigDecimal preco;
 
+    @Builder.Default
     @Column(nullable = false)
     private boolean ativo= true;
 
@@ -42,6 +46,7 @@ public class Produto {
     @JoinColumn(name = "categoria_id")
     private Categoria categoria;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<VariacaoProduto> variacaoProduto;
 

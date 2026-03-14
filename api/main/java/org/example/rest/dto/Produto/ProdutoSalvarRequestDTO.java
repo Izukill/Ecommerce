@@ -25,10 +25,6 @@ public class ProdutoSalvarRequestDTO {
     @Positive
     private BigDecimal preco;
 
-    @Schema(description = "Status do produto (Ativo/Inativo)")
-    @NotNull(message = "O status é obrigatório")
-    private boolean ativo;
-
     @Schema(description = "Imagem do produto")
     @NotBlank(message = "A imagem é obrigatória")
     private String imagemUrl;

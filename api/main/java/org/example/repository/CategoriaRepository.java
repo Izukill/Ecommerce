@@ -18,8 +18,8 @@ public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
     boolean existsByNomeIgnoreCase(String nome);
 
-    @Query("SELECT c FROM Categoria c WHERE " +
-            "(:nome IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) AND " +
-            "(:ativo IS NULL OR c.ativo = :ativo)")
+    @Query("SELECT c FROM Categoria c " +
+            "WHERE (:nome IS NULL OR LOWER(c.nome) LIKE LOWER(CONCAT('%', CAST(:nome AS String), '%'))) " +
+            "AND (:ativo IS NULL OR c.ativo = :ativo)")
     Page<Categoria> buscarPorFiltros(@Param("nome") String nome, @Param("ativo") Boolean ativo, Pageable pageable);
 }
