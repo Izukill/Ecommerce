@@ -4,8 +4,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,6 +40,8 @@ public class Produto {
     @Column(nullable = false)
     private BigDecimal preco;
 
+    private String descricao;
+
     @Builder.Default
     @Column(nullable = false)
     private boolean ativo= true;
@@ -47,7 +51,11 @@ public class Produto {
     private Categoria categoria;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.PERSIST)
+    @OneToMany(mappedBy = "produto", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<VariacaoProduto> variacaoProduto;
+
+    @CreationTimestamp
+    @Column(nullable = false)
+    private LocalDateTime dataCriacao;
 
 }

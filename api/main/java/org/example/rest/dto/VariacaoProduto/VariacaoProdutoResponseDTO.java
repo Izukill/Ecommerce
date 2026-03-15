@@ -14,5 +14,7 @@ public class VariacaoProdutoResponseDTO {
 
     private Integer quantidadeEstoque;
 
+    private String imagemUrl;
+
 
 }

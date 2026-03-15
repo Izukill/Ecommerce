@@ -5,6 +5,7 @@ import org.example.model.Categoria;
 import org.example.rest.dto.VariacaoProduto.VariacaoProdutoResponseDTO;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,8 @@ public class ProdutoResponseDTO {
     private UUID lookupId;
 
     private String nome;
+
+    private String descricao;
 
     private Categoria categoria;
 
@@ -26,6 +29,8 @@ public class ProdutoResponseDTO {
     private String imagemUrl;
 
     private List<VariacaoProdutoResponseDTO> variacoes;
+
+    private LocalDateTime dataCriacao;
 
 
 }

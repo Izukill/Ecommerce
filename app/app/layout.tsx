@@ -1,11 +1,10 @@
 import type { Metadata } from "next";
 import { Inter, Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "./contexts/AuthContext";
+import { CartProvider } from './contexts/CartContext';
 import "./globals.css";
 
-
 const inter = Inter({ subsets: ["latin"] });
-
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,9 +28,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="scroll-smooth">
-      <body className={inter.className}>
+      <body className={`${inter.className} ${geistSans.variable} ${geistMono.variable} bg-neutral-950 text-white min-h-screen flex flex-col antialiased`}>
         <AuthProvider>
-          {children}
+          <CartProvider>
+            {children}
+          </CartProvider>
         </AuthProvider>
       </body>
     </html>

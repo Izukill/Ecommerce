@@ -30,6 +30,8 @@ public class VariacaoProduto {
     @JoinColumn(name = "produto_id")
     private Produto produto;
 
+    private String imagemUrl;
+
     @Enumerated(EnumType.STRING)
     private EnumTamanho tamanho;
 

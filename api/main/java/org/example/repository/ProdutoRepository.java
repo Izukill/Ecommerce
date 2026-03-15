@@ -16,11 +16,11 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     Optional<Produto> findByLookupId(UUID lookupId);
 
-    Page<Produto> findByAtivoTrue(Pageable pageable);
-
     Page<Produto> findByCategoriaAndAtivoTrue(Categoria categoria, Pageable pageable);
 
     Page<Produto> findByNomeContainingIgnoreCaseAndAtivoTrue(String nome, Pageable pageable);
+
+    Page<Produto> findAll(Pageable pageable);
 
 
 }

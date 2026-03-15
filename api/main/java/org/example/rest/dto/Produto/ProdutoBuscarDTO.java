@@ -4,6 +4,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.example.model.Categoria;
 
+import java.time.LocalDateTime;
+
 @Data
 public class ProdutoBuscarDTO {
 
@@ -12,6 +14,9 @@ public class ProdutoBuscarDTO {
 
     @Schema(description = "Filtra pela categoria", example = "Moda Praia")
     private Categoria categoria;
+
+    @Schema(description = "Filtra pela data de criação")
+    private LocalDateTime dataCriacao;
 
     @Schema(description = "Número da página a ser retornada. Começa com zero.")
     private Integer numeroPagina = 0;

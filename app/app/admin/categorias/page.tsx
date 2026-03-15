@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import ModalExclusao from "@/app/components/ModalExclusao";
 
 interface Categoria {
   lookupId: string;
@@ -20,6 +21,11 @@ export default function CategoriasPage() {
   const [sucesso, setSucesso] = useState(false);
 
   const [categoriaEditando, setCategoriaEditando] = useState<Categoria | null>(null);
+
+  // ==========================================
+  // Controle do Modal Externalizado
+  // ==========================================
+  const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
   const [categoriaParaExcluir, setCategoriaParaExcluir] = useState<Categoria | null>(null);
 
   const carregarCategorias = async () => {
@@ -43,6 +49,22 @@ export default function CategoriasPage() {
     carregarCategorias();
   }, []);
 
+// ==========================================
+  // FUNÇÃO AUXILIAR: Formatar nome (Capitalize)
+  // Ex: "moda praia" -> "Moda Praia"
+  // ==========================================
+  const formatarNomeCategoria = (texto: string) => {
+    return texto
+      .trim()
+      .split(/\s+/) // Divide as palavras considerando um ou mais espaços
+      .map(palavra => {
+        // Ignora palavras vazias se houver múltiplos espaços
+        if (palavra.length === 0) return "";
+        return palavra.charAt(0).toUpperCase() + palavra.slice(1).toLowerCase();
+      })
+      .join(" ");
+  };
+
   const handleSalvarCategoria = async (e: FormEvent) => {
     e.preventDefault();
     setErroSalvar("");
@@ -55,35 +77,30 @@ export default function CategoriasPage() {
       return;
     }
 
-    // ==========================================
-    // NOVA VALIDAÇÃO INTELIGENTE DE DUPLICATAS
-    // ==========================================
-    // Transforma "Moda Praia" em "modapraia"
+    const nomeFormatado = formatarNomeCategoria(nomeDigitado);
+
+    //validação Inteligente (Ignora maiúsculas e espaços)
     const nomeLimpoDigitado = nomeDigitado.toLowerCase().replace(/\s+/g, '');
-
     const categoriaDuplicada = categorias.find(cat => {
-      // Se estivermos editando, ignoramos a própria categoria para não dar falso positivo
-      if (categoriaEditando && cat.lookupId === categoriaEditando.lookupId) {
-        return false;
-      }
-
+      if (categoriaEditando && cat.lookupId === categoriaEditando.lookupId) return false;
       const nomeLimpoExistente = cat.nome.toLowerCase().replace(/\s+/g, '');
       return nomeLimpoDigitado === nomeLimpoExistente;
     });
 
     if (categoriaDuplicada) {
       setErroSalvar(`A categoria "${categoriaDuplicada.nome}" já existe. Evite nomes repetidos ou muito parecidos.`);
-      return; // Interrompe o salvamento aqui mesmo!
+      return;
     }
-    // ==========================================
 
     setSalvando(true);
 
     try {
       if (categoriaEditando) {
-        await api.put(`/categorias/${categoriaEditando.lookupId}`, { nome: nomeDigitado });
+        // Envia o nomeFormatado para a API
+        await api.put(`/categorias/${categoriaEditando.lookupId}`, { nome: nomeFormatado });
       } else {
-        await api.post("/categorias", { nome: nomeDigitado });
+        // Envia o nomeFormatado para a API
+        await api.post("/categorias", { nome: nomeFormatado });
       }
 
       setSucesso(true);
@@ -112,16 +129,26 @@ export default function CategoriasPage() {
     setErroSalvar("");
   };
 
+  const abrirModalExclusao = (categoria: Categoria) => {
+    setCategoriaParaExcluir(categoria);
+    setIsModalExclusaoAberto(true);
+  };
+
+  const fecharModalExclusao = () => {
+    setIsModalExclusaoAberto(false);
+    setCategoriaParaExcluir(null);
+  };
+
   const confirmarExclusao = async () => {
     if (!categoriaParaExcluir) return;
 
     try {
       await api.delete(`/categorias/${categoriaParaExcluir.lookupId}`);
       setCategorias(categorias.filter(c => c.lookupId !== categoriaParaExcluir.lookupId));
-      setCategoriaParaExcluir(null);
+      fecharModalExclusao();
     } catch (error) {
       alert("Erro ao excluir. Essa categoria já deve estar vinculada a algum produto.");
-      setCategoriaParaExcluir(null);
+      fecharModalExclusao();
     }
   };
 
@@ -196,7 +223,7 @@ export default function CategoriasPage() {
 
           <div className="bg-black rounded-xl shadow-2xl border border-neutral-800 overflow-hidden">
             {carregando ? (
-              <div className="p-10 text-center text-gray-400 font-medium">
+              <div className="p-10 text-center text-[#C2AE82] font-bold tracking-widest uppercase animate-pulse">
                 Carregando categorias...
               </div>
             ) : categorias.length === 0 ? (
@@ -220,7 +247,7 @@ export default function CategoriasPage() {
 
                         <td className="px-6 py-4 whitespace-nowrap">
                           <Link
-                            href={`/admin/produtos?categoria=${categoria.lookupId}`}
+                            href={`/admin/produtos?categoria=${categoria.nome}`}
                             title="Ver produtos desta categoria"
                             className="text-lg font-bold text-gray-100 hover:text-[#C2AE82] transition-colors cursor-pointer inline-block"
                           >
@@ -241,7 +268,7 @@ export default function CategoriasPage() {
                           </button>
 
                           <button
-                            onClick={() => setCategoriaParaExcluir(categoria)}
+                            onClick={() => abrirModalExclusao(categoria)}
                             className="text-red-500 hover:text-red-400 transition-colors inline-block"
                             title="Excluir Categoria"
                           >
@@ -259,34 +286,20 @@ export default function CategoriasPage() {
             )}
           </div>
         </div>
-
       </div>
 
-      {/* MODAL DE CONFIRMAÇÃO */}
-      {categoriaParaExcluir && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-          <div className="bg-neutral-900 border-t-4 border-red-600 rounded-xl shadow-2xl p-6 w-full max-w-md animate-in fade-in zoom-in duration-200">
-            <h3 className="text-xl font-extrabold text-white mb-2">Excluir Categoria?</h3>
-            <p className="text-gray-400 text-sm mb-6">
-              Tem certeza que deseja excluir a categoria <span className="text-white font-bold">"{categoriaParaExcluir.nome}"</span>? Esta ação não poderá ser desfeita.
-            </p>
-            <div className="flex justify-end gap-3">
-              <button
-                onClick={() => setCategoriaParaExcluir(null)}
-                className="px-4 py-2 text-sm font-bold text-gray-300 bg-neutral-800 rounded-lg hover:bg-neutral-700 hover:text-white transition-colors border border-neutral-700"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={confirmarExclusao}
-                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-lg"
-              >
-                Sim, Excluir
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* USO DO COMPONENTE EXTERNALIZADO */}
+      <ModalExclusao
+        isOpen={isModalExclusaoAberto}
+        onClose={fecharModalExclusao}
+        onConfirm={confirmarExclusao}
+        titulo="Excluir Categoria?"
+        mensagem={
+          <>
+            Tem certeza que deseja excluir a categoria <span className="text-white font-bold">"{categoriaParaExcluir?.nome}"</span>? Esta ação não poderá ser desfeita.
+          </>
+        }
+      />
 
     </div>
   );

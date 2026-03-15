@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Service
@@ -53,12 +54,29 @@ public class ProdutoService {
     public Produto atualizar(UUID lookupId, Produto dadosAtualizados) throws RegraNegocioException {
         Produto produtoExistente = recuperarPor(lookupId);
 
+        UUID categoriaLookupId = dadosAtualizados.getCategoria().getLookupId();
+        Categoria categoriaReal = categoriaRepository.findByLookupId(categoriaLookupId)
+                .orElseThrow(() -> new RuntimeException("Categoria não encontrada!"));
+
+
 
         produtoExistente.setNome(dadosAtualizados.getNome());
         produtoExistente.setPreco(dadosAtualizados.getPreco());
-        produtoExistente.setCategoria(dadosAtualizados.getCategoria());
+        produtoExistente.setCategoria(categoriaReal);
         produtoExistente.setImagemUrl(dadosAtualizados.getImagemUrl());
         produtoExistente.setAtivo(dadosAtualizados.isAtivo());
+        produtoExistente.setDescricao(dadosAtualizados.getDescricao());
+
+        if (produtoExistente.getVariacaoProduto() != null) {
+            produtoExistente.getVariacaoProduto().clear();
+        }
+
+        if (dadosAtualizados.getVariacaoProduto() != null && !dadosAtualizados.getVariacaoProduto().isEmpty()) {
+            dadosAtualizados.getVariacaoProduto().forEach(novaVariacao -> {
+                novaVariacao.setProduto(produtoExistente);
+                produtoExistente.getVariacaoProduto().add(novaVariacao);
+            });
+        }
 
         return produtoRepository.save(produtoExistente);
     }
@@ -83,7 +101,7 @@ public class ProdutoService {
             return produtoRepository.findByCategoriaAndAtivoTrue(dto.getCategoria(), pageable);
         }
 
-        //se n tiver filtros returona tudo que estiver ativo
-        return produtoRepository.findByAtivoTrue(pageable);
+        //se n tiver filtros returona tudo
+        return produtoRepository.findAll(pageable);
     }
 }
