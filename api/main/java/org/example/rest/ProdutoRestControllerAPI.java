@@ -18,6 +18,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
@@ -118,5 +120,17 @@ public interface ProdutoRestControllerAPI {
     })
     ResponseEntity<Page<ProdutoResponseDTO>> buscar(@ParameterObject ProdutoBuscarDTO dto, @ParameterObject Pageable pageable) throws MirlleException;
 
+    @Operation(summary = "Ativar um produto desativado (admin).",
+            description = "Ativa um produto que o admin desativou através do atalho da tela de produtos.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Operação realizada com sucesso."),
+            @ApiResponse(responseCode = "500",
+                    description = "Erro inesperado.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @PatchMapping("/{lookupId}/ativar")
+    ResponseEntity<Void> ativar(@PathVariable("lookupId") UUID lookupId) throws MirlleException;
 
 }

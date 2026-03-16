@@ -57,8 +57,10 @@ public class EnderecoService {
 
 
         enderecoExistente.setCep(dadosAtualizados.getCep());
-        enderecoExistente.setPagarNaEntrega(dadosAtualizados.isPagarNaEntrega());
         enderecoExistente.setRua(dadosAtualizados.getRua());
+        enderecoExistente.setCidade(dadosAtualizados.getCidade());
+        enderecoExistente.setEstado(dadosAtualizados.getEstado());
+        enderecoExistente.setLogradouro(dadosAtualizados.getLogradouro());
         enderecoExistente.setNumero(dadosAtualizados.getNumero());
         enderecoExistente.setComplemento(dadosAtualizados.getComplemento());
         enderecoExistente.setBairro(dadosAtualizados.getBairro());

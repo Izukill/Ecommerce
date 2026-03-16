@@ -60,58 +60,56 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
   };
 
   const handleAdicionarOuAtualizarVariacao = () => {
-    setErroVariacao("");
+     setErroVariacao("");
 
-    // Validação 1: Campos Vazios
-    if (!corAtual.trim() || !estoqueAtual) {
-      setErroVariacao("Preencha a cor e o estoque.");
-      limparCamposVariacao(); // Limpa ao dar erro
-      return;
-    }
+     // Validação 1: Campos Vazios
+     if (!corAtual.trim() || !estoqueAtual) {
+       setErroVariacao("Preencha a cor e o estoque.");
+       // 👇 Removi o limparCampos() daqui para o usuário não perder os dados digitados
+       return;
+     }
 
-    const corFormatada = formatarCor(corAtual);
+     const corFormatada = formatarCor(corAtual);
 
-    // Validação 2: Variação exata já existe
-    const jaExiste = variacoes.some((v, index) =>
-      v.cor === corFormatada && v.tamanho === tamanhoAtual && index !== editandoIndex
-    );
+     // Validação 2: Variação exata já existe
+     const jaExiste = variacoes.some((v, index) =>
+       v.cor === corFormatada && v.tamanho === tamanhoAtual && index !== editandoIndex
+     );
 
-    if (jaExiste) {
-      setErroVariacao(`Atenção: A variação "${corFormatada} - ${tamanhoAtual}" já está na lista.`);
-      limparCamposVariacao(); // Limpa ao dar erro
-      return;
-    }
+     if (jaExiste) {
+       setErroVariacao(`Atenção: A variação "${corFormatada} - ${tamanhoAtual}" já está na lista.`);
+       return;
+     }
 
-    // Validação 3: Cor já possui uma imagem diferente
-    if (imagemVariacaoAtual) {
-      const corJaTemOutraImagem = variacoes.some((v, index) =>
-        v.cor === corFormatada && v.imagemUrl !== undefined && v.imagemUrl !== imagemVariacaoAtual && index !== editandoIndex
-      );
+     const novaVariacao: Variacao = {
+       tamanho: tamanhoAtual,
+       cor: corFormatada,
+       quantidadeEstoque: parseInt(estoqueAtual, 10),
+       imagemUrl: imagemVariacaoAtual || undefined
+     };
 
-      if (corJaTemOutraImagem) {
-        setErroVariacao("Erro, a cor já possui uma imagem relacionada.");
-        limparCamposVariacao(); // Limpa ao dar erro
-        return;
-      }
-    }
+     let novasVariacoes = [...variacoes];
 
-    const novaVariacao: Variacao = {
-      tamanho: tamanhoAtual,
-      cor: corFormatada,
-      quantidadeEstoque: parseInt(estoqueAtual, 10),
-      imagemUrl: imagemVariacaoAtual || undefined
-    };
+     if (editandoIndex !== null) {
+       novasVariacoes[editandoIndex] = novaVariacao;
+     } else {
+       novasVariacoes.push(novaVariacao);
+     }
 
-    if (editandoIndex !== null) {
-      const novasVariacoes = [...variacoes];
-      novasVariacoes[editandoIndex] = novaVariacao;
-      setVariacoes(novasVariacoes);
-    } else {
-      setVariacoes([...variacoes, novaVariacao]);
-    }
+     // 👇 O NOVO TRUQUE DE UX:
+     // Se você atualizou a foto dessa cor, nós replicamos ela para TODOS os tamanhos dessa mesma cor!
+     if (imagemVariacaoAtual) {
+       novasVariacoes = novasVariacoes.map(v => {
+         if (v.cor === corFormatada) {
+           return { ...v, imagemUrl: imagemVariacaoAtual };
+         }
+         return v;
+       });
+     }
 
-    // Limpa após o sucesso
-    limparCamposVariacao();
+
+     setVariacoes(novasVariacoes);
+     limparCamposVariacao();
   };
 
   const handleEditarVariacao = (index: number) => {

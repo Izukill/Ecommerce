@@ -6,7 +6,9 @@ import org.example.model.*;
 import org.example.repository.ClienteRepository;
 import org.example.repository.PedidoRepository;
 import org.example.repository.VariacaoProdutoRepository;
+import org.example.rest.dto.ItemPedido.ItemPedidoSalvarRequestDTO;
 import org.example.rest.dto.Pedido.PedidoBuscarDTO;
+import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.UUID;
 
 @Service
@@ -33,50 +36,89 @@ public class PedidoService {
 
 
     @Transactional
-    public Pedido processarCheckout(Pedido pedido) throws RegraNegocioException {
+    public Pedido processarCheckout(PedidoCheckoutRequestDTO dto) throws RegraNegocioException {
 
-        Cliente clienteLogado = obterClienteLogado();
-        pedido.setCliente(clienteLogado);
+        // =========================================================
+        // 1. BUSCA OU CRIA O CLIENTE (O "Cliente Fantasma")
+        // =========================================================
+        Cliente cliente = clienteRepository.findByEmail(dto.getCliente().getEmail())
+                .orElseGet(() -> {
+                    // Se não achou, cria um novo cliente silenciosamente!
+                    Cliente novoCliente = new Cliente();
+                    novoCliente.setNome(dto.getCliente().getNome());
+                    novoCliente.setEmail(dto.getCliente().getEmail());
+                    novoCliente.setCpf(dto.getCliente().getCpf());
+                    novoCliente.setTelefone(dto.getCliente().getTelefone());
 
+                    // Salva e retorna o novo cliente para usarmos no pedido
+                    return clienteRepository.save(novoCliente);
+                });
+
+
+        // =========================================================
+        // 2. MONTA O PEDIDO E O ENDEREÇO
+        // =========================================================
+        Pedido pedido = new Pedido();
+        pedido.setItens(new ArrayList<>());
+        pedido.setCliente(cliente);
         pedido.setStatus(EnumStatusPedido.EM_PROCESSO);
         pedido.setDataHora(LocalDateTime.now());
+
+        // Criando a entidade de endereço com os dados do Front-end
+        Endereco endereco = new Endereco();
+        endereco.setCep(dto.getEnderecoEntrega().getCep());
+        endereco.setLogradouro(dto.getEnderecoEntrega().getLogradouro());
+        endereco.setNumero(dto.getEnderecoEntrega().getNumero());
+        endereco.setComplemento(dto.getEnderecoEntrega().getComplemento());
+        endereco.setBairro(dto.getEnderecoEntrega().getBairro());
+        endereco.setCidade(dto.getEnderecoEntrega().getCidade());
+        endereco.setEstado(dto.getEnderecoEntrega().getEstado());
+
+        // Associa o endereço ao cliente e ao pedido
+        endereco.setCliente(cliente);
+        pedido.setEnderecoEntrega(endereco);
+
+
+        // =========================================================
+        // 3. PROCESSA ITENS E ABATE O ESTOQUE
+        // =========================================================
         BigDecimal valorTotalCarrinho = BigDecimal.ZERO;
 
+        for (ItemPedidoSalvarRequestDTO itemDto : dto.getItens()) {
 
-        for (ItemPedido i: pedido.getItens()){
+            // Checa se a variação existe
+            VariacaoProduto variacaoProduto = variacaoProdutoRepository.findByLookupId(itemDto.getVariacaoProdutoId())
+                    .orElseThrow(() -> new RegraNegocioException("Variação de produto não encontrada."));
 
-
-            //checa se o produto existe e se tem quantidade no estoque
-            VariacaoProduto variacaoProduto = variacaoProdutoRepository.findByLookupId(i.getProduto().getLookupId())
-                    .orElseThrow(() -> new RegraNegocioException("Produto não encontrado no catálogo da loja"));
-
-            if (variacaoProduto.getQuantidadeEstoque() < i.getQuantidade()) {
+            // Checa o estoque
+            if (variacaoProduto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
                 throw new RegraNegocioException("Estoque insuficiente para o produto: " + variacaoProduto.getProduto().getNome());
             }
 
             //tira do estoque
-            variacaoProduto.setQuantidadeEstoque(variacaoProduto.getQuantidadeEstoque() - i.getQuantidade());
+            variacaoProduto.setQuantidadeEstoque(variacaoProduto.getQuantidadeEstoque() - itemDto.getQuantidade());
 
+            //cria o item do pedido
+            ItemPedido novoItem = new ItemPedido();
+            novoItem.setProduto(variacaoProduto);
+            novoItem.setQuantidade(itemDto.getQuantidade());
 
-            //pega o preço real (salvo no banco) e seta no item
+            //pega o preço real do banco por segurança (ignora o preço do front)
             BigDecimal precoReal = variacaoProduto.getProduto().getPreco();
-            i.setPrecoUnitario(precoReal);
+            novoItem.setPrecoUnitario(precoReal);
 
-
-            BigDecimal subtotalItem = precoReal.multiply(BigDecimal.valueOf(i.getQuantidade()));
-
-            //adiciona o valor ao carrinho no total
+            BigDecimal subtotalItem = precoReal.multiply(BigDecimal.valueOf(novoItem.getQuantidade()));
             valorTotalCarrinho = valorTotalCarrinho.add(subtotalItem);
 
-            //faz a relação (o item precisa saber a qual pedido ele se refere no caso)
-            i.setPedido(pedido);
-            i.setProduto(variacaoProduto);
-
+            //faz a relação bidirecional
+            novoItem.setPedido(pedido);
+            pedido.getItens().add(novoItem);
         }
 
         pedido.setValorTotal(valorTotalCarrinho);
-        return pedidoRepository.save(pedido);
 
+
+        return pedidoRepository.save(pedido);
     }
 
 

@@ -1,47 +1,217 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { api } from "@/lib/api"; // Importa a nossa api configurada!
+import { api } from "@/lib/api";
+// 👇 IMPORTAÇÃO DO NOVO MODAL
+import ModalDetalhesPedido, { Pedido } from "@/app/components/ModalDetalhesPedido";
 
 export default function PedidosAdminPage() {
-  const [pedidos, setPedidos] = useState([]);
+  const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState("");
+
+  // ESTADOS DE PAGINAÇÃO
+  const [paginaAtual, setPaginaAtual] = useState(0);
+  const [totalPaginas, setTotalPaginas] = useState(0);
+  const tamanhoPagina = 10;
+
+  // ESTADOS DO MODAL DE DETALHES
+  const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
+  const [isModalAberto, setIsModalAberto] = useState(false);
+
+  // ==========================================
+  // BUSCA DE DADOS NA API
+  // ==========================================
+  const carregarPedidos = async (pagina: number) => {
+    setCarregando(true);
+    setErro("");
+    try {
+      const response = await api.get(`/pedidos?page=${pagina}&size=${tamanhoPagina}&sort=dataHora,desc`);
+
+      const pageData = response.data;
+      setPedidos(pageData.content || pageData || []);
+
+      if (pageData.totalPages !== undefined) {
+        setTotalPaginas(pageData.totalPages);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar pedidos:", error);
+      setErro("Não foi possível carregar os pedidos. Verifique a conexão.");
+    } finally {
+      setCarregando(false);
+    }
+  };
 
   useEffect(() => {
-    // Busca os pedidos. O Axios já vai colocar o "Bearer Token..." sozinho!
-    api.get("/pedidos")
-      .then((response) => {
-        // O Spring Boot devolve paginação, então os dados ficam dentro de response.data.content
-        setPedidos(response.data.content);
-      })
-      .catch((error) => {
-        console.error("Erro ao buscar pedidos:", error);
-      })
-      .finally(() => {
-        setCarregando(false);
-      });
-  }, []);
+    carregarPedidos(paginaAtual);
+  }, [paginaAtual]);
 
-  if (carregando) return <p className="p-8">Carregando pedidos...</p>;
+  // ==========================================
+  // FUNÇÕES AUXILIARES E FORMATADORES
+  // ==========================================
+  const abrirDetalhes = (pedido: Pedido) => {
+    setPedidoSelecionado(pedido);
+    setIsModalAberto(true);
+  };
 
+  const fecharModal = () => {
+    setIsModalAberto(false);
+    setPedidoSelecionado(null);
+  };
+
+  const formatarMoeda = (valor: number) => {
+    return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor || 0);
+  };
+
+  const formatarData = (dataIso: string) => {
+    if (!dataIso) return "Data não informada";
+    return new Date(dataIso).toLocaleDateString("pt-BR", {
+      day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit"
+    });
+  };
+
+  const getStatusBadge = (status: string) => {
+    const s = (status || "").toUpperCase();
+    switch (s) {
+      case "PENDENTE": return "bg-yellow-900/30 text-yellow-500 border-yellow-900/50";
+      case "PAGO": return "bg-green-900/30 text-green-400 border-green-900/50";
+      case "ENVIADO": return "bg-blue-900/30 text-blue-400 border-blue-900/50";
+      case "ENTREGUE": return "bg-emerald-900/30 text-emerald-400 border-emerald-900/50";
+      case "CANCELADO": return "bg-red-900/30 text-red-500 border-red-900/50";
+      default: return "bg-neutral-800 text-gray-400 border-neutral-700";
+    }
+  };
+
+  // ==========================================
+  // RENDERIZAÇÃO
+  // ==========================================
   return (
-    <div className="p-8">
-      <h1 className="text-2xl font-bold mb-6">Painel de Pedidos</h1>
+    <div className="space-y-6 relative pb-10 max-w-7xl mx-auto">
 
-      <div className="bg-white shadow rounded-lg overflow-hidden border border-gray-200">
-        {pedidos.length === 0 ? (
-          <p className="p-4 text-gray-500">Nenhum pedido encontrado.</p>
+      {/* CABEÇALHO */}
+      <div>
+        <h2 className="text-3xl font-extrabold text-white tracking-tight">Painel de Pedidos</h2>
+        <p className="text-sm text-gray-400 mt-1">Acompanhe as vendas e gerencie os status de entrega.</p>
+      </div>
+
+      {erro && (
+        <div className="bg-red-950/50 border-l-4 border-red-500 p-4 rounded-md">
+          <p className="text-sm text-red-200 font-semibold">{erro}</p>
+        </div>
+      )}
+
+      {/* TABELA DE PEDIDOS */}
+      <div className="bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden">
+
+        {carregando ? (
+          <div className="py-20 flex justify-center items-center gap-3 text-[#C2AE82] font-bold tracking-widest uppercase">
+            <div className="w-8 h-8 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
+            Carregando pedidos...
+          </div>
+        ) : pedidos.length === 0 ? (
+          <div className="py-20 text-center">
+            <span className="text-4xl mb-4 block">📦</span>
+            <p className="text-gray-300 font-bold text-lg mt-4">Nenhum pedido encontrado</p>
+            <p className="text-gray-500 text-sm mt-1">As vendas aparecerão aqui assim que os clientes finalizarem o checkout.</p>
+          </div>
         ) : (
-          <ul className="divide-y divide-gray-200">
-            {pedidos.map((pedido: any) => (
-              <li key={pedido.lookupId} className="p-4 hover:bg-gray-50">
-                <p className="font-semibold text-gray-900">Pedido: {pedido.lookupId}</p>
-                {/* Renderize os outros dados do pedido aqui */}
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-gray-400">
+              <thead className="bg-black/50 text-xs uppercase text-gray-500 border-b border-neutral-800">
+                <tr>
+                  <th className="px-6 py-4 font-bold">Data / Pedido</th>
+                  <th className="px-6 py-4 font-bold">Cliente</th>
+                  <th className="px-6 py-4 font-bold">Contato</th>
+                  <th className="px-6 py-4 font-bold text-center">Status</th>
+                  <th className="px-6 py-4 font-bold text-right">Valor Total</th>
+                  <th className="px-6 py-4 font-bold text-center">Ações</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-800">
+                {pedidos.map((pedido) => (
+                  <tr key={pedido.lookupId} className="hover:bg-neutral-800/50 transition-colors group">
+
+                    {/* Data (Maior) e ID (Menor) */}
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-gray-200">{formatarData(pedido.dataHora)}</div>
+                      <div className="text-[10px] text-gray-500 mt-1 font-mono">#{pedido.lookupId.split("-")[0]}</div>
+                    </td>
+
+                    {/* Cliente */}
+                    <td className="px-6 py-4 font-bold text-white">
+                      {pedido.cliente?.nome || "Cliente Removido"}
+                    </td>
+
+                    {/* Contato (Telefone) */}
+                    <td className="px-6 py-4 text-gray-300">
+                      {pedido.cliente?.telefone || "Nenhum telefone"}
+                    </td>
+
+                    {/* Status (Badge Colorido) */}
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full border ${getStatusBadge(pedido.status)}`}>
+                        {pedido.status || "Desconhecido"}
+                      </span>
+                    </td>
+
+                    {/* Valor Total */}
+                    <td className="px-6 py-4 text-right font-extrabold text-[#C2AE82]">
+                      {formatarMoeda(pedido.valorTotal)}
+                    </td>
+
+                    {/* Botão de Ver Detalhes (A "Seta") */}
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => abrirDetalhes(pedido)}
+                        className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:text-white hover:bg-neutral-700 transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
+                        title="Ver Detalhes do Pedido"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      {/* CONTROLES DE PAGINAÇÃO */}
+      {totalPaginas > 1 && (
+        <div className="mt-8 flex items-center justify-center gap-4 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-lg">
+          <button
+            onClick={() => setPaginaAtual(prev => Math.max(0, prev - 1))}
+            disabled={paginaAtual === 0 || carregando}
+            className="px-4 py-2 text-sm font-bold bg-black text-[#C2AE82] border border-[#C2AE82]/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#C2AE82]/10 transition-colors"
+          >
+            &larr; Anterior
+          </button>
+          <span className="text-gray-400 font-bold text-sm">
+            Página <span className="text-white">{paginaAtual + 1}</span> de <span className="text-white">{totalPaginas}</span>
+          </span>
+          <button
+            onClick={() => setPaginaAtual(prev => Math.min(totalPaginas - 1, prev + 1))}
+            disabled={paginaAtual >= totalPaginas - 1 || carregando}
+            className="px-4 py-2 text-sm font-bold bg-black text-[#C2AE82] border border-[#C2AE82]/30 rounded-lg disabled:opacity-30 disabled:cursor-not-allowed hover:bg-[#C2AE82]/10 transition-colors"
+          >
+            Próxima &rarr;
+          </button>
+        </div>
+      )}
+
+      {/* modal de detalhes de pedido */}
+      <ModalDetalhesPedido
+        isOpen={isModalAberto}
+        pedidoSelecionado={pedidoSelecionado}
+        onClose={fecharModal}
+        formatarData={formatarData}
+        formatarMoeda={formatarMoeda}
+        getStatusBadge={getStatusBadge}
+      />
+
     </div>
   );
 }

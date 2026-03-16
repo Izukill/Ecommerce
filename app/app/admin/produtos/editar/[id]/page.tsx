@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 
 import CapaProdutoUpload from "@/app/components/CapaProdutoUpload";
 import GerenciadorVariacoes, { Variacao } from "@/app/components/GerenciadorVariacoes";
+import ModalExclusao from "@/app/components/ModalExclusao";
 
 interface Categoria {
   lookupId: string;
@@ -261,35 +262,22 @@ export default function EditarProdutoPage() {
       </div>
 
       {/* ================= MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ================= */}
-      {modalExcluirAberto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
-          <div className="bg-neutral-900 border-t-4 border-red-600 rounded-xl shadow-2xl p-6 w-full max-w-md animate-in fade-in zoom-in duration-200">
-            <h3 className="text-xl font-extrabold text-white mb-2">Excluir Produto?</h3>
-            <p className="text-gray-400 text-sm mb-6">
-              Tem certeza que deseja excluir <span className="text-white font-bold">"{nome}"</span>? Esta ação apagará todo o estoque e não poderá ser desfeita.
+      <ModalExclusao
+        isOpen={modalExcluirAberto}
+        onClose={() => setModalExcluirAberto(false)}
+        onConfirm={confirmarExclusao}
+        titulo="Excluir Produto?"
+        mensagem={
+          <div className="space-y-3">
+            <p>
+              Tem certeza que deseja excluir <span className="text-white font-bold">"{nome}"</span>?
             </p>
-            <div className="flex justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setModalExcluirAberto(false)}
-                className="px-4 py-2 text-sm font-bold text-gray-300 bg-neutral-800 rounded-lg hover:bg-neutral-700 hover:text-white transition-colors border border-neutral-700"
-                disabled={excluindo}
-              >
-                Cancelar
-              </button>
-              <button
-                type="button"
-                onClick={confirmarExclusao}
-                disabled={excluindo}
-                className="px-4 py-2 text-sm font-bold text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors shadow-lg disabled:opacity-50"
-              >
-                {excluindo ? "Excluindo..." : "Sim, Excluir"}
-              </button>
-            </div>
+            <p className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20">
+              ⚠️ Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.
+            </p>
           </div>
-        </div>
-      )}
-
+        }
+      />
     </div>
   );
 }

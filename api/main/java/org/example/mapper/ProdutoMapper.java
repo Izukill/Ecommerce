@@ -36,6 +36,7 @@ public class ProdutoMapper {
                         variacao.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
                         variacao.setImagemUrl(varDto.getImagemUrl());
                         variacao.setProduto(produto);
+                        variacao.setAtivo(true);
 
                         return variacao;
                     })
@@ -65,6 +66,7 @@ public class ProdutoMapper {
         //convertendo a lista de entidades para VariaçãoProdutoResponseDTO
         if (entity.getVariacaoProduto() != null) {
             List<VariacaoProdutoResponseDTO> variacoesDto = entity.getVariacaoProduto().stream()
+                    .filter(VariacaoProduto::isAtivo)
                     .map(varEntidade -> {
                         VariacaoProdutoResponseDTO varDto = new VariacaoProdutoResponseDTO();
 

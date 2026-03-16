@@ -8,26 +8,22 @@ import lombok.Data;
 import org.example.rest.dto.ItemPedido.ItemPedidoSalvarRequestDTO;
 
 import java.util.List;
-import java.util.UUID;
 
 @Data
 public class PedidoCheckoutRequestDTO {
 
+    @Schema(description = "Dados do cliente (novo ou existente)")
+    @NotNull(message = "Os dados do cliente são obrigatórios")
+    @Valid
+    private ClienteCheckoutDTO cliente;
 
-    @Schema(description = "Id do endereço escolhido para entrega")
-    @NotNull(message = "O endereço é obrigatório")
-    private UUID enderecoEntregaId;
+    @Schema(description = "Dados do endereço para a entrega")
+    @NotNull(message = "O endereço de entrega é obrigatório")
+    @Valid
+    private EnderecoCheckoutDTO enderecoEntrega;
 
     @Schema(description = "Lista com os itens selecionados no carrinho")
     @NotEmpty(message = "O carrinho não pode estar vazio")
     @Valid
     private List<ItemPedidoSalvarRequestDTO> itens;
-
-
-
-
-
-
-
-
 }

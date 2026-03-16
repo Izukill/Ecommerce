@@ -23,14 +23,23 @@ public class EnderecoSalvarRequestDTO {
     private String bairro;
 
     @Schema(description = "Número da residência ou prédio", example = "1045")
-    @NotBlank(message = "O número é obrigatório")
-    private String numero;
+    @NotNull(message = "O número é obrigatório")
+    private Integer numero;
 
-    @Schema(description = "Complemento do Endereço (perto do posto, bloco, casa 2, etc.)", example = "Apto 202, Bloco A")
+    @Schema(description = "Complemento do endereço (perto do posto, bloco, casa 2, etc.)", example = "Apto 202, Bloco A")
     private String complemento;
 
-    @Schema(description = "Indica se o cliente escolheu a opção de pagar apenas no momento em que receber a encomenda", example = "true")
-    @NotNull(message = "A opção de pagamento na entrega deve ser informada")
-    private Boolean pagarNaEntrega;
+    @Schema(description = "Logradouro do endereço")
+    @NotBlank(message = "o logradouro é obrigatório")
+    private String logradouro;
+
+    @Schema(description = "Cidade do endereço", example = "CG")
+    @NotBlank(message = "a cidade é obrigatória")
+    private String cidade;
+
+    @Schema(description = "Estado do endereço", example = "PB")
+    @NotBlank(message = "o estado é obrigatório")
+    private String estado;
+
 
 }

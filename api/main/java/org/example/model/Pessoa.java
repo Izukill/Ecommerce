@@ -38,6 +38,9 @@ public abstract class Pessoa implements UserDetails {
     @Column(unique = true)
     private String email;
 
+    @Column(unique = true)
+    private String cpf;
+
     private String senha;
 
     @Enumerated(EnumType.STRING)

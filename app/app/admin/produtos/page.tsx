@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import ProdutoCard from "@/app/components/ProdutoCard";
 import ModalExclusao from "@/app/components/ModalExclusao";
+import ModalAtivacao from "@/app/components/ModalAtivacao";
 
 interface Categoria {
   lookupId: string;
@@ -39,6 +40,19 @@ export default function ListaProdutosPage() {
 
   const [produtoParaExcluir, setProdutoParaExcluir] = useState<Produto | null>(null);
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
+
+  const [produtoParaAtivar, setProdutoParaAtivar] = useState<Produto | null>(null);
+  const [isModalAtivacaoAberto, setIsModalAtivacaoAberto] = useState(false);
+
+  const abrirModalAtivacao = (produto: Produto) => {
+    setProdutoParaAtivar(produto);
+    setIsModalAtivacaoAberto(true);
+  };
+
+  const fecharModalAtivacao = () => {
+    setIsModalAtivacaoAberto(false);
+    setProdutoParaAtivar(null);
+  };
 
   // ESTADOS DE PAGINAÇÃO
   const [paginaAtual, setPaginaAtual] = useState(0);
@@ -113,6 +127,20 @@ export default function ListaProdutosPage() {
       alert("Erro ao excluir o produto. Ele pode estar atrelado a algum pedido.");
       fecharModalExclusao();
     }
+  };
+
+  const confirmarAtivacao = async () => {
+      if (!produtoParaAtivar) return;
+
+      try {
+        await api.patch(`/produtos/${produtoParaAtivar.lookupId}/ativar`);
+        carregarDados(paginaAtual);
+        fecharModalAtivacao();
+      } catch (error: any) {
+          console.error("Erro completo:", error.response?.data || error.message);
+          alert(`Erro: ${error.response?.status} - ${error.response?.data?.message || "Erro de conexão"}`);
+          fecharModalAtivacao();
+      }
   };
 
   // ==========================================
@@ -215,26 +243,37 @@ export default function ListaProdutosPage() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {produtosFiltradosEOrdenados.map((produto) => (
-              <div key={produto.lookupId} className="flex flex-col gap-3">
 
+                <div key={produto.lookupId} className="flex flex-col gap-3">
                 <ProdutoCard produto={produto} isAdmin={true} />
 
-                <div className="flex gap-2">
+<div className="flex gap-2">
                   <Link
                     href={`/admin/produtos/editar/${produto.lookupId}`}
-                    className="flex-1 flex justify-center items-center gap-2 px-4 py-2 bg-neutral-800 text-gray-300 font-bold text-sm rounded-lg border border-neutral-700 hover:text-white hover:bg-neutral-700 transition-all shadow-md"
+                    // 👇 Mudamos de flex-1 para w-[70%]
+                    className="w-[70%] flex justify-center items-center gap-2 px-4 py-2 bg-neutral-800 text-gray-300 font-bold text-sm rounded-lg border border-neutral-700 hover:text-white hover:bg-neutral-700 transition-all shadow-md"
                   >
                     Editar
                   </Link>
 
-                  <button
-                    onClick={() => abrirModalExclusao(produto)}
-                    className="flex justify-center items-center px-4 py-2 bg-red-950/30 text-red-500 font-bold text-sm rounded-lg border border-red-900/50 hover:bg-red-900/50 transition-all shadow-md"
-                  >
-                    Excluir
-                  </button>
+                  {/* 👇 A MÁGICA VISUAL ACONTECE AQUI */}
+                  {produto.ativo ? (
+                    <button
+                      onClick={() => abrirModalExclusao(produto)}
+                      // 👇 Mudamos de flex-1 para w-[30%]
+                      className="w-[30%] flex justify-center items-center px-4 py-2 bg-red-950/30 text-red-500 font-bold text-sm rounded-lg border border-red-900/50 hover:bg-red-900/50 transition-all shadow-md"
+                    >
+                      Excluir
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => abrirModalAtivacao(produto)}
+                      className="w-[30%] flex justify-center items-center px-4 py-2 bg-green-950/30 text-green-500 font-bold text-sm rounded-lg border border-green-900/50 hover:bg-green-900/50 transition-all shadow-md"
+                    >
+                      Ativar
+                    </button>
+                  )}
                 </div>
-
               </div>
             ))}
           </div>
@@ -265,15 +304,33 @@ export default function ListaProdutosPage() {
         </>
       )}
 
-      {/* USO DO COMPONENTE EXTERNALIZADO AQUI TAMBÉM */}
+        {/* MODAL DE EXCLUSÃO */}
       <ModalExclusao
         isOpen={isModalExclusaoAberto}
         onClose={fecharModalExclusao}
         onConfirm={confirmarExclusao}
         titulo="Excluir Produto?"
         mensagem={
+          <div className="space-y-3">
+            <p>
+              Tem certeza que deseja excluir <span className="text-white font-bold">"{produtoParaExcluir?.nome}"</span>?
+            </p>
+            <p className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20">
+              ⚠️ Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.
+            </p>
+          </div>
+        }
+      />
+
+      {/* 👇 NOVO COMPONENTE EXTERNALIZADO DO MODAL DE ATIVAÇÃO */}
+      <ModalAtivacao
+        isOpen={isModalAtivacaoAberto}
+        onClose={fecharModalAtivacao}
+        onConfirm={confirmarAtivacao}
+        titulo="Reativar Produto?"
+        mensagem={
           <>
-            Tem certeza que deseja excluir <span className="text-white font-bold">"{produtoParaExcluir?.nome}"</span>? Esta ação não poderá ser desfeita.
+            Tem certeza que deseja ativar <span className="text-white font-bold">"{produtoParaAtivar?.nome}"</span>? Ele voltará a aparecer na vitrine da loja para os clientes comprarem.
           </>
         }
       />

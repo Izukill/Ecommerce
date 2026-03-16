@@ -14,11 +14,15 @@ public class EnderecoResponseDTO {
 
     private String bairro;
 
-    private String numero;
+    private Integer numero;
 
     private String complemento;
 
-    private boolean pagarNaEntrega;
+    private String logradouro;
+
+    private String cidade;
+
+    private String estado;
 
 
 

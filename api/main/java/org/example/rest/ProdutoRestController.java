@@ -38,7 +38,7 @@ public class ProdutoRestController implements ProdutoRestControllerAPI{
     }
 
     @Override
-    @GetMapping("/{lookupId}")
+    @GetMapping(value = "/{lookupId}")
     public ResponseEntity<ProdutoResponseDTO> recuperarPor(@PathVariable UUID lookupId) throws MirlleException {
 
         Produto produto = service.recuperarPor(lookupId);
@@ -48,17 +48,16 @@ public class ProdutoRestController implements ProdutoRestControllerAPI{
     }
 
     @Override
-    @PutMapping("/{lookupId}")
+    @PutMapping(value = "/{lookupId}")
     public ResponseEntity<ProdutoResponseDTO> atualizar(@PathVariable UUID lookupId,@RequestBody ProdutoSalvarRequestDTO dto) throws MirlleException {
 
-        Produto produtoNovosDados = mapper.from(dto);
-        Produto produtoAtualizado = service.atualizar(lookupId, produtoNovosDados);
+        Produto produtoAtualizado = service.atualizar(lookupId, dto);
         return ResponseEntity.ok(mapper.from(produtoAtualizado));
 
     }
 
     @Override
-    @DeleteMapping("/{lookupId}")
+    @DeleteMapping(value = "/{lookupId}")
     public ResponseEntity<Void> remover(@PathVariable UUID lookupId) throws MirlleException {
         service.remover(lookupId);
         return ResponseEntity.noContent().build();
@@ -71,4 +70,13 @@ public class ProdutoRestController implements ProdutoRestControllerAPI{
         Page<Produto> pagina = service.buscar(dto, pageable);
         return ResponseEntity.ok(pagina.map(mapper::from));
     }
+
+    @Override
+    @PatchMapping("/{lookupId}/ativar")
+    public ResponseEntity<Void> ativar(@PathVariable("lookupId") UUID lookupId) throws MirlleException {
+        service.ativar(lookupId);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

@@ -31,9 +31,7 @@ public class PedidoRestController implements PedidoRestControllerAPI{
     @Override
     @PostMapping
     public ResponseEntity<PedidoResponseDTO> processarCheckout(@RequestBody PedidoCheckoutRequestDTO dto) throws MirlleException {
-        Pedido pedido = mapper.from(dto);
-        Pedido pedidoCheckout = service.processarCheckout(pedido);
-
+        Pedido pedidoCheckout = service.processarCheckout(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.from(pedidoCheckout));
     }
 

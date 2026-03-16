@@ -47,6 +47,7 @@ public class SecurityConfiguration {
                         //rotas públicas (qualquer um acessa, sem token)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/pedidos").permitAll() //fazer pedido
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta
                         .requestMatchers(HttpMethod.GET, "/produtos/**").permitAll() //ver a vitrine
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll() //ver categorias
@@ -55,6 +56,7 @@ public class SecurityConfiguration {
                         //rotas pra ADM
                         .requestMatchers(HttpMethod.POST, "/produtos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/admin").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/upload/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categorias").hasRole("ADMIN")
@@ -62,7 +64,6 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.DELETE, "/categorias/**").hasRole("ADMIN")
 
                         //rotas pra CLIENTE
-                        .requestMatchers(HttpMethod.POST, "/pedidos/checkout").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.POST, "/enderecos").hasRole("CLIENTE")
 
                         //qualquer outro endpoint que não foi setado acima faz com que no mínimo precise estar autenticado por segurança
@@ -81,7 +82,7 @@ public class SecurityConfiguration {
         configuration.setAllowedOrigins(List.of("http://localhost:3000"));
 
         //libera os métodos HTTP que o Front-end vai usar
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD","PATCH"));
 
         //libera todos os cabeçalhos (inclusive o Authorization com o Token)
         configuration.setAllowedHeaders(List.of("*"));

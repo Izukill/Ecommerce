@@ -37,10 +37,15 @@ public class Endereco {
 
     private String bairro;
 
-    private String numero;
+    private Integer numero;
 
     private String complemento;
 
-    //Essa linha está sujeita a mudanças caso o pagamento seja apenas de um modo
-    private boolean pagarNaEntrega;
+    private String logradouro;
+
+    private String cidade;
+
+    private String estado;
+
+
 }

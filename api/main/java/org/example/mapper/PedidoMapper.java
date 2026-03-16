@@ -14,40 +14,6 @@ import java.util.List;
 @Component
 public class PedidoMapper {
 
-    public Pedido from(PedidoCheckoutRequestDTO dto){
-
-       //conversao da lista do DTO de PedidoCheckout (para não passar ItemPedido direto e não possa se alterar o preçoUnitário presente nele)
-        List<ItemPedido> itensEntidade = dto.getItens().stream()
-                .map(itemDto -> {
-                    ItemPedido item = new ItemPedido();
-                    item.setQuantidade(itemDto.getQuantidade());
-
-                    VariacaoProduto variacao = new VariacaoProduto();
-                    variacao.setLookupId(itemDto.getVariacaoProdutoId());
-                    item.setProduto(variacao);
-
-
-                    //os preços continuam nulls pois eles não vem do dto, serão tratados no service de pedido
-                    return item;
-                })
-                .toList();
-
-
-        //precisa criar porque o DTO apenas passa o UUID de endereço ao inves do objeto, isso é tratado no service de pedido
-        Endereco endereco= new Endereco();
-        endereco.setLookupId(dto.getEnderecoEntregaId());
-
-
-
-        return Pedido.builder()
-                .itens(itensEntidade)
-                .enderecoEntrega(endereco)
-                .build();
-
-
-    }
-
-
     public PedidoResponseDTO from(Pedido entity){
 
         PedidoResponseDTO dto= new PedidoResponseDTO();

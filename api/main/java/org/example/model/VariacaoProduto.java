@@ -39,5 +39,8 @@ public class VariacaoProduto {
 
     private Integer quantidadeEstoque;
 
+    @Column(nullable = false)
+    private boolean ativo = true;
+
 
 }

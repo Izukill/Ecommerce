@@ -13,11 +13,13 @@ public class EnderecoMapper {
 
         return Endereco.builder()
                 .cep(dto.getCep())
+                .cidade(dto.getCidade())
+                .estado(dto.getEstado())
                 .rua(dto.getRua())
                 .bairro(dto.getBairro())
                 .numero(dto.getNumero())
                 .complemento(dto.getComplemento())
-                .pagarNaEntrega(dto.getPagarNaEntrega())
+                .logradouro(dto.getLogradouro())
                 .build();
 
     }
@@ -29,11 +31,13 @@ public class EnderecoMapper {
 
         dto.setLookupID(entity.getLookupId());
         dto.setCep(entity.getCep());
+        dto.setCidade(entity.getCidade());
+        dto.setEstado(entity.getEstado());
         dto.setRua(entity.getRua());
         dto.setBairro(entity.getBairro());
         dto.setNumero(entity.getNumero());
         dto.setComplemento(entity.getComplemento());
-        dto.setPagarNaEntrega(entity.isPagarNaEntrega());
+        dto.setLogradouro(entity.getLogradouro());
 
         return dto;
 
