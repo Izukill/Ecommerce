@@ -1,11 +1,14 @@
 package org.example.rest;
 
+import jakarta.validation.Valid;
 import org.example.exception.MirlleException;
+import org.example.exception.RegraNegocioException;
 import org.example.mapper.PedidoMapper;
 import org.example.model.Pedido;
 import org.example.rest.dto.Pedido.PedidoBuscarDTO;
 import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
 import org.example.rest.dto.Pedido.PedidoResponseDTO;
+import org.example.rest.dto.Pedido.PedidoStatusUpdateRequestDTO;
 import org.example.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,6 +59,12 @@ public class PedidoRestController implements PedidoRestControllerAPI{
         return ResponseEntity.ok(pagina.map(mapper::from));
     }
 
+    @Override
+    public ResponseEntity<Void> atualizarStatus(@PathVariable("lookupId") UUID lookupId, @RequestBody @Valid PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException {
+        service.atualizarStatus(lookupId, dto);
+
+        return ResponseEntity.noContent().build();
+    }
 
 
 }

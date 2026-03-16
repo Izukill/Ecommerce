@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-// 👇 IMPORTAÇÃO DO NOVO MODAL
 import ModalDetalhesPedido, { Pedido } from "@/app/components/ModalDetalhesPedido";
 
 export default function PedidosAdminPage() {
@@ -10,18 +9,21 @@ export default function PedidosAdminPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  // ESTADOS DE PAGINAÇÃO
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const tamanhoPagina = 10;
 
-  // ESTADOS DO MODAL DE DETALHES
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
   const [isModalAberto, setIsModalAberto] = useState(false);
 
   // ==========================================
-  // BUSCA DE DADOS NA API
+  // ESTADOS DE FILTRO
   // ==========================================
+  const [filtroCliente, setFiltroCliente] = useState("");
+  const [filtroStatus, setFiltroStatus] = useState("todos");
+  const [filtroData, setFiltroData] = useState(""); // Formato YYYY-MM-DD do input type="date"
+  const [filtroPrecoMin, setFiltroPrecoMin] = useState("");
+
   const carregarPedidos = async (pagina: number) => {
     setCarregando(true);
     setErro("");
@@ -29,7 +31,8 @@ export default function PedidosAdminPage() {
       const response = await api.get(`/pedidos?page=${pagina}&size=${tamanhoPagina}&sort=dataHora,desc`);
 
       const pageData = response.data;
-      setPedidos(pageData.content || pageData || []);
+      const listaExtraida = pageData.content || pageData;
+      setPedidos(Array.isArray(listaExtraida) ? listaExtraida : []);
 
       if (pageData.totalPages !== undefined) {
         setTotalPaginas(pageData.totalPages);
@@ -46,9 +49,6 @@ export default function PedidosAdminPage() {
     carregarPedidos(paginaAtual);
   }, [paginaAtual]);
 
-  // ==========================================
-  // FUNÇÕES AUXILIARES E FORMATADORES
-  // ==========================================
   const abrirDetalhes = (pedido: Pedido) => {
     setPedidoSelecionado(pedido);
     setIsModalAberto(true);
@@ -58,6 +58,20 @@ export default function PedidosAdminPage() {
     setIsModalAberto(false);
     setPedidoSelecionado(null);
   };
+
+  const handleAtualizarStatus = async (pedidoId: string, novoStatus: string) => {
+      try {
+        // Supondo que a sua rota no Spring Boot seja PATCH /pedidos/{id}/status com o novo status no body ou parâmetro
+        await api.patch(`/pedidos/${pedidoId}/status`, { status: novoStatus });
+
+
+        fecharModal();
+        carregarPedidos(paginaAtual);
+      } catch (error) {
+        console.error("Erro ao atualizar status:", error);
+        alert("Não foi possível atualizar o status do pedido.");
+      }
+    };
 
   const formatarMoeda = (valor: number) => {
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(valor || 0);
@@ -73,14 +87,43 @@ export default function PedidosAdminPage() {
   const getStatusBadge = (status: string) => {
     const s = (status || "").toUpperCase();
     switch (s) {
-      case "PENDENTE": return "bg-yellow-900/30 text-yellow-500 border-yellow-900/50";
       case "PAGO": return "bg-green-900/30 text-green-400 border-green-900/50";
       case "ENVIADO": return "bg-blue-900/30 text-blue-400 border-blue-900/50";
-      case "ENTREGUE": return "bg-emerald-900/30 text-emerald-400 border-emerald-900/50";
       case "CANCELADO": return "bg-red-900/30 text-red-500 border-red-900/50";
       default: return "bg-neutral-800 text-gray-400 border-neutral-700";
     }
   };
+
+  // ==========================================
+  // LÓGICA DE FILTRAGEM (Front-end)
+  // ==========================================
+  const pedidosFiltrados = pedidos.filter(pedido => {
+    // Filtro por Nome do Cliente (Case Insensitive)
+    if (filtroCliente && !pedido.cliente?.nome?.toLowerCase().includes(filtroCliente.toLowerCase())) {
+      return false;
+    }
+
+    // Filtro por Status
+    if (filtroStatus !== "todos" && pedido.status !== filtroStatus) {
+      return false;
+    }
+
+    // Filtro por Preço Mínimo
+    if (filtroPrecoMin && pedido.valorTotal < parseFloat(filtroPrecoMin)) {
+      return false;
+    }
+
+    // Filtro por Data Específica
+    if (filtroData) {
+      // O input type="date" retorna "YYYY-MM-DD". Vamos comparar apenas a parte da data do pedido.
+      const dataDoPedido = pedido.dataHora.split("T")[0]; // Pega só a parte da data "YYYY-MM-DD"
+      if (dataDoPedido !== filtroData) {
+        return false;
+      }
+    }
+
+    return true;
+  });
 
   // ==========================================
   // RENDERIZAÇÃO
@@ -100,6 +143,51 @@ export default function PedidosAdminPage() {
         </div>
       )}
 
+      {/* ========================================== */}
+      {/* BARRA DE FILTROS */}
+      {/* ========================================== */}
+      <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Cliente</label>
+          <input
+            type="text" placeholder="Ex: Maria..."
+            className="w-full px-3 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-gray-100 focus:ring-1 focus:ring-[#C2AE82] outline-none"
+            value={filtroCliente} onChange={(e) => setFiltroCliente(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Status</label>
+          <select
+            className="w-full px-3 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-gray-100 focus:ring-1 focus:ring-[#C2AE82] outline-none appearance-none"
+            value={filtroStatus} onChange={(e) => setFiltroStatus(e.target.value)}
+          >
+            <option value="todos">Todos</option>
+            <option value="PAGO">Pago</option>
+            <option value="ENVIADO">Enviado</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Data do Pedido</label>
+          <input
+            type="date"
+            className="w-full px-3 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-gray-100 focus:ring-1 focus:ring-[#C2AE82] outline-none [color-scheme:dark]"
+            value={filtroData} onChange={(e) => setFiltroData(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Preço Mínimo (R$)</label>
+          <input
+            type="number" min="0" step="10" placeholder="Ex: 100"
+            className="w-full px-3 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-gray-100 focus:ring-1 focus:ring-[#C2AE82] outline-none"
+            value={filtroPrecoMin} onChange={(e) => setFiltroPrecoMin(e.target.value)}
+          />
+        </div>
+      </div>
+
       {/* TABELA DE PEDIDOS */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden">
 
@@ -108,11 +196,11 @@ export default function PedidosAdminPage() {
             <div className="w-8 h-8 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
             Carregando pedidos...
           </div>
-        ) : pedidos.length === 0 ? (
+        ) : pedidosFiltrados.length === 0 ? (
           <div className="py-20 text-center">
             <span className="text-4xl mb-4 block">📦</span>
             <p className="text-gray-300 font-bold text-lg mt-4">Nenhum pedido encontrado</p>
-            <p className="text-gray-500 text-sm mt-1">As vendas aparecerão aqui assim que os clientes finalizarem o checkout.</p>
+            <p className="text-gray-500 text-sm mt-1">Nenhum pedido corresponde aos filtros aplicados.</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -128,7 +216,7 @@ export default function PedidosAdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-800">
-                {pedidos.map((pedido) => (
+                {pedidosFiltrados.map((pedido) => (
                   <tr key={pedido.lookupId} className="hover:bg-neutral-800/50 transition-colors group">
 
                     {/* Data (Maior) e ID (Menor) */}
@@ -210,6 +298,7 @@ export default function PedidosAdminPage() {
         formatarData={formatarData}
         formatarMoeda={formatarMoeda}
         getStatusBadge={getStatusBadge}
+        onAtualizarStatus={handleAtualizarStatus}
       />
 
     </div>

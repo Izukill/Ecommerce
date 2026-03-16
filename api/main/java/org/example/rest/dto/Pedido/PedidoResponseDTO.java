@@ -1,6 +1,8 @@
 package org.example.rest.dto.Pedido;
 
 import lombok.Data;
+import org.example.model.Cliente;
+import org.example.model.Endereco;
 import org.example.model.EnumStatusPedido;
 import org.example.rest.dto.ItemPedido.ItemPedidoResponseDTO;
 
@@ -20,10 +22,9 @@ public class PedidoResponseDTO {
 
     private BigDecimal valorTotal;
 
-    //dados para exibição resumida
-    private String nomeCliente;
+    private Cliente cliente;
 
-    private String cepEntrega;
+    private Endereco enderecoEntrega;
 
     private List<ItemPedidoResponseDTO> itens;
 

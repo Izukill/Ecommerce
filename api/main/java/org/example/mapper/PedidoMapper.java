@@ -21,8 +21,8 @@ public class PedidoMapper {
         dto.setLookupId(entity.getLookupId());
         dto.setStatus(entity.getStatus());
         dto.setDataHora(entity.getDataHora());
-        dto.setNomeCliente(entity.getCliente().getNome());
-        dto.setCepEntrega(entity.getEnderecoEntrega().getCep());
+        dto.setCliente(entity.getCliente());
+        dto.setEnderecoEntrega(entity.getEnderecoEntrega());
         dto.setValorTotal(entity.getValorTotal());
 
         //Convertendo a lista de Entidades para a lista de DTOs

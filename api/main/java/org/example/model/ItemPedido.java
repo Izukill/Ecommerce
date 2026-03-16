@@ -1,5 +1,6 @@
 package org.example.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,7 +28,7 @@ public class ItemPedido {
         this.lookupId = UUID.randomUUID();
     }
 
-
+    @JsonIgnore
     @ManyToOne()
     @JoinColumn(name = "pedido_id")
     private Pedido pedido;

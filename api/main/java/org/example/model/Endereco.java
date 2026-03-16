@@ -1,6 +1,7 @@
 package org.example.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +28,7 @@ public class Endereco {
         this.lookupId = UUID.randomUUID();
     }
 
+    @JsonIgnore
     @ManyToOne()
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;

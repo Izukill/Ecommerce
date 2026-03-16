@@ -9,6 +9,7 @@ import org.example.repository.VariacaoProdutoRepository;
 import org.example.rest.dto.ItemPedido.ItemPedidoSalvarRequestDTO;
 import org.example.rest.dto.Pedido.PedidoBuscarDTO;
 import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
+import org.example.rest.dto.Pedido.PedidoStatusUpdateRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -61,7 +62,7 @@ public class PedidoService {
         Pedido pedido = new Pedido();
         pedido.setItens(new ArrayList<>());
         pedido.setCliente(cliente);
-        pedido.setStatus(EnumStatusPedido.EM_PROCESSO);
+        pedido.setStatus(EnumStatusPedido.PAGO);
         pedido.setDataHora(LocalDateTime.now());
 
         // Criando a entidade de endereço com os dados do Front-end
@@ -164,6 +165,15 @@ public class PedidoService {
 
         return pedidoRepository.findAll(pageable);
 
+    }
+
+    @Transactional
+    public void atualizarStatus(UUID lookupId, PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException {
+        Pedido pedido = recuperarPor(lookupId);
+        pedido.setStatus(dto.getStatus());
+
+
+        pedidoRepository.save(pedido);
     }
 
 

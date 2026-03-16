@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 
 import ProdutoCard, { Produto } from "./components/ProdutoCard";
 import ModalProduto from "./components/ModalProduto";
-import Header from "./components/Header"; // 👇 IMPORTA O NOVO HEADER
+import Header from "./components/Header";
 
 export default function HomePage() {
   const [lancamentos, setLancamentos] = useState<Produto[]>([]);

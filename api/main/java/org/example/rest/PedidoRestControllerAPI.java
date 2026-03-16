@@ -3,10 +3,13 @@ package org.example.rest;
 import java.util.UUID;
 
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.validation.Valid;
 import org.example.exception.MirlleException;
+import org.example.exception.RegraNegocioException;
 import org.example.rest.dto.Pedido.PedidoBuscarDTO;
 import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
 import org.example.rest.dto.Pedido.PedidoResponseDTO;
+import org.example.rest.dto.Pedido.PedidoStatusUpdateRequestDTO;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +24,8 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @Tag(name = "Pedidos", description = "Gerenciamento de Pedidos")
 @SecurityRequirement(name = "bearerAuth")
@@ -92,5 +97,20 @@ public interface PedidoRestControllerAPI {
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
     ResponseEntity<Page<PedidoResponseDTO>> listarPedidosAdmin(@ParameterObject PedidoBuscarDTO dto, @ParameterObject Pageable pageable) throws MirlleException;
+
+    @Operation(summary = "Atualizar o status de um pedido (Visão do Admin).",
+            description = "função que atualiza o status de um pedido.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204",
+                    description = "Operação realizada com sucesso."),
+            @ApiResponse(responseCode = "404",
+                    description = "Pedido não encontrado."),
+            @ApiResponse(responseCode = "500",
+                    description = "Erro inesperado.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @PatchMapping("/{lookupId}/status")
+    ResponseEntity<Void> atualizarStatus(@PathVariable("lookupId") UUID lookupId, @RequestBody @Valid PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException;
 
 }

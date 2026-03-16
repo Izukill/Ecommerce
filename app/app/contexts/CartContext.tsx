@@ -10,7 +10,7 @@ interface ItemCarrinho {
   preco: number;
   cor: string;
   tamanho: string;
-  quantidade: string | number;
+  quantidade: number;
   quantidadeEstoqueMaxima: number;
   imagemUrl: string;
 }
@@ -49,17 +49,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const adicionarAoCarrinho = (novoItem: ItemCarrinho) => {
     setCarrinho((carrinhoAtual) => {
-      // Verifica se a mesma cor e tamanho já estão no carrinho
-      const itemExistente = carrinhoAtual.find(item => item.variacaoId === novoItem.variacaoId);
-
-      if (itemExistente) {
-        //se já tem, só soma a quantidade (respeitando o limite do estoque)
-        return carrinhoAtual.map(item =>
-          item.variacaoId === novoItem.variacaoId
-            ? { ...item, quantidade: Math.min(Number(item.quantidade) + Number(novoItem.quantidade), item.quantidadeEstoqueMaxima) }
-            : item
+        const itemExistente = carrinhoAtual.find(item =>
+          item.produtoId === novoItem.produtoId &&
+          item.cor === novoItem.cor &&
+          item.tamanho === novoItem.tamanho
         );
-      }
+
+        if (itemExistente) {
+          return carrinhoAtual.map(item =>
+            item.produtoId === novoItem.produtoId &&
+            item.cor === novoItem.cor &&
+            item.tamanho === novoItem.tamanho
+              ? {
+                  ...item,
+                  quantidade: Math.min(
+                    Number(item.quantidade) + Number(novoItem.quantidade),
+                    item.quantidadeEstoqueMaxima
+                  )
+                }
+              : item
+          );
+        }
 
       //se não tem, adiciona como item novo
       return [...carrinhoAtual, novoItem];

@@ -133,4 +133,5 @@ public interface ProdutoRestControllerAPI {
     @PatchMapping("/{lookupId}/ativar")
     ResponseEntity<Void> ativar(@PathVariable("lookupId") UUID lookupId) throws MirlleException;
 
+
 }

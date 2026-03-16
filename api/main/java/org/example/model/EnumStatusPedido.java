@@ -1,8 +1,7 @@
 package org.example.model;
 
 public enum EnumStatusPedido {
+    PAGO,
     ENVIADO,
-    ENTREGE,
-    CANCELADO,
-    EM_PROCESSO;
+    CANCELADO;
 }

@@ -1,6 +1,7 @@
 package org.example.model;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -28,6 +29,7 @@ public class Cliente extends Pessoa {
     @OneToMany(mappedBy = "cliente", orphanRemoval = true, cascade = CascadeType.PERSIST)
     private List<Endereco> enderecos;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.PERSIST)
     private List<Pedido> pedidos;
 
