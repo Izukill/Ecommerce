@@ -27,5 +27,12 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     @Query("SELECT CASE WHEN COUNT(ip) > 0 THEN true ELSE false END FROM ItemPedido ip WHERE ip.produto.produto = :produto")
     boolean isProdutoVendido(@Param("produto") Produto produto);
 
+    @Query("""
+    SELECT COUNT(p)
+    FROM Produto p
+    WHERE p.ativo = true
+    """)
+    Long contarProdutosAtivos();
+
 
 }
