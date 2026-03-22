@@ -25,6 +25,9 @@ public class Pedido {
     @Column(nullable = false)
     private UUID lookupId;
 
+    @Column(name = "pagamento_mercado_pago_id")
+    private Long pagamentoMercadoPagoId;
+
     @PrePersist
     private void init() {
         this.lookupId = UUID.randomUUID();

@@ -9,7 +9,7 @@ import Header from "@/app/components/Header";
 import DadosCliente from "../components/DadosCliente";
 import EnderecoEntrega from "../components/EnderecoEntrega";
 import ResumoPedido from "../components/ResumoPedido";
-import ModalSucesso from "../components/ModalSucesso";
+import ModalPagamentoPix from "../components/ModalPagamentoPix"; // 👇 Importamos o Modal do PIX
 
 export default function CheckoutPage() {
   const router = useRouter();
@@ -23,15 +23,18 @@ export default function CheckoutPage() {
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
 
-
   const [pedidoRealizadoId, setPedidoRealizadoId] = useState<string | null>(null);
 
+  const [pixData, setPixData] = useState<any>(null);
+  const [isModalPixAberto, setIsModalPixAberto] = useState(false);
+  const [valorFinalCongelado, setValorFinalCongelado] = useState(0);
 
   useEffect(() => {
-    if (carrinho.length === 0 && !processando && !pedidoRealizadoId) {
+    // Adicionamos o isModalPixAberto aqui para não redirecionar enquanto o cara paga
+    if (carrinho.length === 0 && !processando && !pedidoRealizadoId && !isModalPixAberto) {
       router.push("/");
     }
-  }, [carrinho, router, processando, pedidoRealizadoId]);
+  }, [carrinho, router, processando, pedidoRealizadoId, isModalPixAberto]);
 
   const handleFinalizarPedido = async (e: FormEvent) => {
     e.preventDefault();
@@ -52,15 +55,20 @@ export default function CheckoutPage() {
           produtoId: item.produtoId,
           quantidade: Number(item.quantidade),
           precoUnitario: item.preco
-        })),
-        valorTotal: valorTotal
+        }))
       };
 
       const response = await api.post("/pedidos", payloadPedido);
 
-      // Abre o modal de sucesso com o ID que veio do Java!
-      setPedidoRealizadoId(response.data.lookupId || response.data.id || "123456");
-      limparCarrinho(); // Esvazia o carrinho por trás dos panos
+      //pega o pacote do pix lá do backend
+      const { pedido, pix } = response.data;
+
+      setPedidoRealizadoId(pedido.lookupId);
+      setPixData(pix); //Guarda o QR Code
+      setValorFinalCongelado(pedido.valorTotal);
+      setIsModalPixAberto(true);
+
+      limparCarrinho();
 
     } catch (error: any) {
       setErro(error.response?.data?.message || "Erro ao processar seu pedido.");
@@ -69,7 +77,13 @@ export default function CheckoutPage() {
     }
   };
 
-  if (carrinho.length === 0 && !pedidoRealizadoId) return null;
+  const handleFecharModalPix = () => {
+    setIsModalPixAberto(false);
+    // Quando ele fechar o modal, podemos mandar ele para a tela inicial ou para uma tela de "Meus Pedidos"
+    router.push("/");
+  };
+
+  if (carrinho.length === 0 && !pedidoRealizadoId && !isModalPixAberto) return null;
 
   return (
     <div className="min-h-screen bg-neutral-950 flex flex-col relative">
@@ -96,13 +110,20 @@ export default function CheckoutPage() {
             </div>
 
             <div className="lg:col-span-5 xl:col-span-4">
-              {/* Deixamos o componente muito mais limpo na chamada */}
               <ResumoPedido processando={processando} />
             </div>
           </div>
         </div>
       </main>
-      {pedidoRealizadoId && <ModalSucesso pedidoId={pedidoRealizadoId} />}
+
+      {/* 👇 Substituímos o ModalSucesso antigo pelo novo ModalPagamentoPix */}
+      <ModalPagamentoPix
+        isOpen={isModalPixAberto}
+        pixData={pixData}
+        valorTotal={valorFinalCongelado}
+        onClose={handleFecharModalPix}
+      />
+
     </div>
   );
 }

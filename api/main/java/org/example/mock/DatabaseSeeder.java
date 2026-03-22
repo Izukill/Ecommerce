@@ -37,7 +37,25 @@ public class DatabaseSeeder implements CommandLineRunner {
 
             repository.save(adm);
 
+
             System.out.println(">>> Admin padrão criado: jaqueline@gmail.com / batata");
+        }
+
+        if (repository.findByEmail("luan@gmail.com").isEmpty()) {
+
+
+            Administrador adm = Administrador.builder()
+                    .nome("Luan Lorêto")
+                    .permissaoTotal(true)
+                    .email("luan@gmail.com")
+                    .tipoPerfil(EnumPerfil.ADM)
+                    .cargo(EnumCargo.DONO)
+                    .senha(passwordEncoder.encode("senha"))
+                    .lookupId(UUID.randomUUID())
+                    .build();
+
+            repository.save(adm);
+
         }
     }
 }

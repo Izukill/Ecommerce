@@ -5,10 +5,9 @@ import org.example.exception.MirlleException;
 import org.example.exception.RegraNegocioException;
 import org.example.mapper.PedidoMapper;
 import org.example.model.Pedido;
-import org.example.rest.dto.Pedido.PedidoBuscarDTO;
-import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
-import org.example.rest.dto.Pedido.PedidoResponseDTO;
-import org.example.rest.dto.Pedido.PedidoStatusUpdateRequestDTO;
+import org.example.payment.PixService;
+import org.example.rest.dto.Pedido.*;
+import org.example.rest.dto.Pix.WebhookMercadoPagoDTO;
 import org.example.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,13 +28,13 @@ public class PedidoRestController implements PedidoRestControllerAPI{
     @Autowired
     private PedidoMapper mapper;
 
-
-
     @Override
     @PostMapping
-    public ResponseEntity<PedidoResponseDTO> processarCheckout(@RequestBody PedidoCheckoutRequestDTO dto) throws MirlleException {
-        Pedido pedidoCheckout = service.processarCheckout(dto);
-        return ResponseEntity.status(HttpStatus.CREATED).body(mapper.from(pedidoCheckout));
+    public ResponseEntity<CheckoutResponseDTO> processarCheckout(@RequestBody PedidoCheckoutRequestDTO dto) throws MirlleException {
+        CheckoutResponseDTO pacotePronto = service.processarCheckout(dto);
+
+        //devolve o pix + pedido para o front mandar as requisicões corretas
+        return ResponseEntity.status(HttpStatus.CREATED).body(pacotePronto);
     }
 
     @Override
@@ -65,6 +64,8 @@ public class PedidoRestController implements PedidoRestControllerAPI{
 
         return ResponseEntity.noContent().build();
     }
+
+
 
 
 }

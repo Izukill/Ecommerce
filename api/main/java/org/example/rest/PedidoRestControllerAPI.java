@@ -6,10 +6,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.example.exception.MirlleException;
 import org.example.exception.RegraNegocioException;
-import org.example.rest.dto.Pedido.PedidoBuscarDTO;
-import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
-import org.example.rest.dto.Pedido.PedidoResponseDTO;
-import org.example.rest.dto.Pedido.PedidoStatusUpdateRequestDTO;
+import org.example.rest.dto.Pedido.*;
+import org.example.rest.dto.Pix.WebhookMercadoPagoDTO;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +24,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 
 @Tag(name = "Pedidos", description = "Gerenciamento de Pedidos")
 @SecurityRequirement(name = "bearerAuth")
@@ -51,7 +50,7 @@ public interface PedidoRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
-    ResponseEntity<PedidoResponseDTO> processarCheckout(@RequestBody(description = "Dados do carrinho de compras e endereço.")
+    ResponseEntity<CheckoutResponseDTO> processarCheckout(@RequestBody(description = "Dados do carrinho de compras e endereço.")
                                                         PedidoCheckoutRequestDTO dto) throws MirlleException;
 
     @Operation(summary = "Recuperar um pedido existente.",

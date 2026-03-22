@@ -2,14 +2,15 @@ package org.example.service;
 
 
 import org.example.exception.RegraNegocioException;
+import org.example.mapper.PedidoMapper;
 import org.example.model.*;
+import org.example.payment.PixService;
 import org.example.repository.ClienteRepository;
 import org.example.repository.PedidoRepository;
 import org.example.repository.VariacaoProdutoRepository;
 import org.example.rest.dto.ItemPedido.ItemPedidoSalvarRequestDTO;
-import org.example.rest.dto.Pedido.PedidoBuscarDTO;
-import org.example.rest.dto.Pedido.PedidoCheckoutRequestDTO;
-import org.example.rest.dto.Pedido.PedidoStatusUpdateRequestDTO;
+import org.example.rest.dto.Pedido.*;
+import org.example.rest.dto.Pix.PixResponseDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -35,37 +36,36 @@ public class PedidoService {
     @Autowired
     private VariacaoProdutoRepository variacaoProdutoRepository;
 
+    @Autowired
+    private PixService pixService;
+
+    @Autowired
+    private PedidoMapper pedidoMapper;
+
 
     @Transactional
-    public Pedido processarCheckout(PedidoCheckoutRequestDTO dto) throws RegraNegocioException {
+    public CheckoutResponseDTO processarCheckout(PedidoCheckoutRequestDTO dto) throws RegraNegocioException {
 
-        // =========================================================
-        // 1. BUSCA OU CRIA O CLIENTE (O "Cliente Fantasma")
-        // =========================================================
+        //busca ou cria o cliente
         Cliente cliente = clienteRepository.findByEmail(dto.getCliente().getEmail())
                 .orElseGet(() -> {
-                    // Se não achou, cria um novo cliente silenciosamente!
                     Cliente novoCliente = new Cliente();
                     novoCliente.setNome(dto.getCliente().getNome());
                     novoCliente.setEmail(dto.getCliente().getEmail());
                     novoCliente.setCpf(dto.getCliente().getCpf());
                     novoCliente.setTelefone(dto.getCliente().getTelefone());
-
-                    // Salva e retorna o novo cliente para usarmos no pedido
                     return clienteRepository.save(novoCliente);
                 });
 
-
-        // =========================================================
-        // 2. MONTA O PEDIDO E O ENDEREÇO
-        // =========================================================
+        //monta o pedido
         Pedido pedido = new Pedido();
         pedido.setItens(new ArrayList<>());
         pedido.setCliente(cliente);
-        pedido.setStatus(EnumStatusPedido.PAGO);
+
+        //seta status do pedido e o endereço
+        pedido.setStatus(EnumStatusPedido.AGUARDANDO_PAGAMENTO);
         pedido.setDataHora(LocalDateTime.now());
 
-        // Criando a entidade de endereço com os dados do Front-end
         Endereco endereco = new Endereco();
         endereco.setCep(dto.getEnderecoEntrega().getCep());
         endereco.setLogradouro(dto.getEnderecoEntrega().getLogradouro());
@@ -75,51 +75,48 @@ public class PedidoService {
         endereco.setCidade(dto.getEnderecoEntrega().getCidade());
         endereco.setEstado(dto.getEnderecoEntrega().getEstado());
 
-        // Associa o endereço ao cliente e ao pedido
         endereco.setCliente(cliente);
         pedido.setEnderecoEntrega(endereco);
 
-
-        // =========================================================
-        // 3. PROCESSA ITENS E ABATE O ESTOQUE
-        // =========================================================
+        //processa os itens e abaixo no estoque
         BigDecimal valorTotalCarrinho = BigDecimal.ZERO;
 
         for (ItemPedidoSalvarRequestDTO itemDto : dto.getItens()) {
-
-            // Checa se a variação existe
             VariacaoProduto variacaoProduto = variacaoProdutoRepository.findByLookupId(itemDto.getVariacaoProdutoId())
                     .orElseThrow(() -> new RegraNegocioException("Variação de produto não encontrada."));
 
-            // Checa o estoque
             if (variacaoProduto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
                 throw new RegraNegocioException("Estoque insuficiente para o produto: " + variacaoProduto.getProduto().getNome());
             }
 
-            //tira do estoque
             variacaoProduto.setQuantidadeEstoque(variacaoProduto.getQuantidadeEstoque() - itemDto.getQuantidade());
 
-            //cria o item do pedido
             ItemPedido novoItem = new ItemPedido();
             novoItem.setProduto(variacaoProduto);
             novoItem.setQuantidade(itemDto.getQuantidade());
 
-            //pega o preço real do banco por segurança (ignora o preço do front)
             BigDecimal precoReal = variacaoProduto.getProduto().getPreco();
             novoItem.setPrecoUnitario(precoReal);
 
             BigDecimal subtotalItem = precoReal.multiply(BigDecimal.valueOf(novoItem.getQuantidade()));
             valorTotalCarrinho = valorTotalCarrinho.add(subtotalItem);
 
-            //faz a relação bidirecional
             novoItem.setPedido(pedido);
             pedido.getItens().add(novoItem);
         }
 
         pedido.setValorTotal(valorTotalCarrinho);
 
+        //gera o pix e salva o id no pedido para o mercado pago
+        PixResponseDTO pixResponse = pixService.gerarPix(pedido.getValorTotal(), pedido.getCliente());
+        pedido.setPagamentoMercadoPagoId(pixResponse.getIdPagamentoMercadoPago());
 
-        return pedidoRepository.save(pedido);
+
+        Pedido pedidoSalvo = pedidoRepository.save(pedido);
+
+        PedidoResponseDTO pedidoDTO = pedidoMapper.from(pedidoSalvo);
+
+        return new CheckoutResponseDTO(pedidoDTO, pixResponse);
     }
 
 

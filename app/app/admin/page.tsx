@@ -97,7 +97,7 @@ export default function AdminDashboardPage() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-extrabold text-[#C2AE82]">
-                      R$ {(pedido.total ?? 0).toFixed(2).replace('.', ',')}
+                      R$ {(pedido.valorTotal ?? 0).toFixed(2).replace('.', ',')}
                     </td>
                   </tr>
                 ))}

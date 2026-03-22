@@ -3,6 +3,7 @@ package org.example.rest.dto.dashboard;
 import lombok.Data;
 import org.example.model.EnumStatusPedido;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -17,10 +18,13 @@ public class PedidoResumoDTO {
 
     private EnumStatusPedido status;
 
-    public PedidoResumoDTO(UUID lookupId, String clienteNome, LocalDateTime dataHora, EnumStatusPedido status) {
+    private BigDecimal valorTotal;
+
+    public PedidoResumoDTO(UUID lookupId, String clienteNome, LocalDateTime dataHora, EnumStatusPedido status, BigDecimal valorTotal) {
         this.clienteNome = clienteNome;
         this.dataHora = dataHora;
         this.lookupId = lookupId;
         this.status = status;
+        this.valorTotal = valorTotal;
     }
 }

@@ -22,6 +22,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     Optional<Pedido> findByLookupId(UUID lookupId);
 
+    Optional<Pedido> findByPagamentoMercadoPagoId(Long mercadoId);
+
     Page<Pedido> findByCliente(Cliente cliente, Pageable pageable);
 
     Page<Pedido> findByStatus(EnumStatusPedido status, Pageable pageable);
@@ -32,7 +34,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         SELECT COALESCE(SUM(i.precoUnitario * i.quantidade),0)
         FROM Pedido p
         JOIN p.itens i
-        WHERE p.status = 'PAGO'
+        WHERE p.status = 'PAGO' OR p.status = 'ENVIADO'
         AND p.dataHora BETWEEN :inicio AND :fim
     """)
     BigDecimal faturamentoMes(LocalDateTime inicio, LocalDateTime fim);
@@ -59,7 +61,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
             p.lookupId,
             p.cliente.nome,
             p.dataHora,
-            p.status
+            p.status,
+            p.valorTotal
         )
         FROM Pedido p
         ORDER BY p.dataHora DESC

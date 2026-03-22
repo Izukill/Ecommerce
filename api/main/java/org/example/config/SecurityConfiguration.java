@@ -51,6 +51,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta
                         .requestMatchers(HttpMethod.GET, "/produtos/**").permitAll() //ver a vitrine
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll() //ver categorias
+                        .requestMatchers(HttpMethod.POST, "/webhook/mercadopago").permitAll() //rota para o mercado pago (pix)
                         .requestMatchers("/error").permitAll() //rota de erro liberada para não mascara excessões
 
                         //rotas pra ADM
