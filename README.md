@@ -1,44 +1,54 @@
-E-commerce Loja de Roupas
+# E-commerce Loja de Roupas
 
-este será o meu primeiro projeto independete de um ecommerce, inicialmente focado em backend com Spring e futuramente um front com Angular e React.
+![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
+![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
+![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
+![Banco Relacional](https://img.shields.io/badge/Banco_de_Dados-Relacional-blue?style=for-the-badge&logo=databricks&logoColor=white)
 
-O principal objetivo desse projeto é o aprendizado dessas tecnologias aplicando elas na prática com tudo que aprendi até o momento,
-além de Fornecer uma API robusta, construída em Java com integração a um banco de dados relacional, capaz de gerenciar desde o catálogo de produtos 
-e variações de estoque até o fluxo completo de pedidos, suportando diferentes níveis de acesso.
+## 📖 Sobre o Projeto
 
+Este é o meu primeiro projeto independente de e-commerce, focado em criar uma solução completa de ponta a ponta. Inicialmente, o foco está na construção de um **Backend robusto utilizando Spring (Java)**, com planos futuros de integração com um **Frontend moderno construído em Next.js**.
 
+O principal objetivo deste repositório é aplicar na prática os meus conhecimentos de desenvolvimento, construindo uma API estruturada e integrada a um banco de dados relacional. 
 
-Os commits estão divididos em:
+## 🎯 Objetivos e Funcionalidades
 
-feat:Sempre que introduzir um recurso totalmente novo no sistema ou no código.
-Exemplo de uso: (feat: implementacao do endpoint de criar pedido)
+* **Gestão de Catálogo:** Gerenciamento completo de produtos e suas variações (ex: tamanho, cor).
+* **Controle de Estoque:** Atualização e rastreio de disponibilidade de itens.
+* **Fluxo de Pedidos:** Suporte ao ciclo de vida completo de uma compra.
+* **Controle de Acessos:** Diferentes níveis de permissão e acesso (ex: cliente, administrador).
+* **Aprendizado Prático:** Consolidar tecnologias modernas de mercado.
 
-fix: Quando estiver resolvendo um bug, consertando um erro ou ajustando um comportamento incorreto de algo que já havia sido "entregue" em commits anteriores.
-Exemplo de uso: (fix: correcao do calculo de valor total na classe Pedido)
+---
 
-add: Usado para inclusão de arquivos que não são exatamente uma regra de negócio ou funcionalidade, como arquivos de configuração, imagens, documentação ou novas dependências do projeto.
-Exemplo de uso: (add: inclusao do diagrama de classes e MER no README)
+## 🏗️ Arquitetura e Modelagem
 
-remove: Quando estiver deletando arquivos, limpando código que não é mais usado (código morto) ou removendo configurações antigas
-Exemplo de uso: (remove: exclusao da antiga classe Cor que foi substituida por propriedades na Variacao)
+Para entender melhor a estrutura de dados e as entidades do sistema, consulte os diagramas abaixo:
 
+* **Modelo MER (Modelo Entidade-Relacionamento):** [Visualizar Imagem MER](https://github.com/Izukill/Ecommerce/blob/480e3691930a56946d1b806e2ffb326f82192803/Modelo%20MER%20Ecommerce.png)
+* **Diagrama de Classes:** [Visualizar PDF do Diagrama](https://github.com/Izukill/Ecommerce/blob/480e3691930a56946d1b806e2ffb326f82192803/Diagrama%20de%20Classe%20Ecommerce.pdf)
 
-A estruturação do projeto:
+---
 
-Modelo MER:
-https://github.com/Izukill/Ecommerce/blob/480e3691930a56946d1b806e2ffb326f82192803/Modelo%20MER%20Ecommerce.png
+## 📝 Padrão de Commits
 
-Diagrama de Classe:
-https://github.com/Izukill/Ecommerce/blob/480e3691930a56946d1b806e2ffb326f82192803/Diagrama%20de%20Classe%20Ecommerce.pdf
+Para manter o histórico do projeto limpo e rastreável, este repositório segue uma convenção rigorosa de commits:
 
+| Tipo | Descrição | Exemplo de Uso |
+| :--- | :--- | :--- |
+| **`feat`** | Introdução de um recurso totalmente novo no sistema ou no código. | `feat: implementacao do endpoint de criar pedido` |
+| **`fix`** | Resolução de um bug, erro ou ajuste de comportamento incorreto de algo já entregue. | `fix: correcao do calculo de valor total na classe Pedido` |
+| **`add`** | Inclusão de arquivos auxiliares (configurações, imagens, docs ou dependências). | `add: inclusao do diagrama de classes e MER no README` |
+| **`remove`** | Exclusão de arquivos, limpeza de código morto ou remoção de configurações antigas. | `remove: exclusao da antiga classe Cor, substituida por Variacao` |
 
-Como Rodar o projeto?
+---
 
-para rodar o projeto basta dar os seguintes comandos abaixo:
+## 🚀 Como Executar o Projeto
 
--cd app
+Siga os passos abaixo para rodar a aplicação localmente (ambiente de desenvolvimento - Frontend):
 
--npm install axios
-
--npm run dev
-
+**1. Acesse a pasta da aplicação:**
+```bash
+cd app
+npm install axios
+npm run dev
