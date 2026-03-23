@@ -1,19 +1,65 @@
 'use client';
 
-const mascaraCEP = (valor: string) => {
-  return valor
-    .replace(/\D/g, '')
-    .replace(/(\d{5})(\d)/, '$1-$2')
-    .replace(/(-\d{3})\d+?$/, '$1'); // Bloqueia digitação após 8 números
-};
+import { useState } from "react";
 
-export default function EnderecoEntrega({ valores, setValores }: any) {
-  const handleChange = (campo: string, valor: string) => {
-    let valorFormatado = valor;
+interface EnderecoEntregaProps {
+  valores: any;
+  setValores: (valores: any) => void;
+}
 
-    if (campo === 'cep') valorFormatado = mascaraCEP(valor);
+export default function EnderecoEntrega({ valores, setValores }: EnderecoEntregaProps) {
 
-    setValores((prev: any) => ({ ...prev, [campo]: valorFormatado }));
+  //estado pra mostrar um carregando... enquanto a api do viacep busca
+  const [buscandoCep, setBuscandoCep] = useState(false);
+  const [erroCep, setErroCep] = useState("");
+
+  const mascaraCEP = (valor: string) => {
+      return valor
+        .replace(/\D/g, '')
+        .replace(/(\d{5})(\d)/, '$1-$2')
+        .replace(/(-\d{3})\d+?$/, '$1');
+  };
+
+  const buscarCep = async (cepDigitado: string) => {
+    //limpa os traços
+    const cepLimpo = cepDigitado.replace(/\D/g, '');
+
+
+    setValores({ ...valores, cep: cepDigitado });
+
+    //só busca quando completar 8 digitos do cep
+    if (cepLimpo.length === 8) {
+      setBuscandoCep(true);
+      setErroCep("");
+
+      try {
+        const response = await fetch(`https://viacep.com.br/ws/${cepLimpo}/json/`);
+        const data = await response.json();
+
+        if (data.erro) {
+          setErroCep("CEP não encontrado.");
+          return;
+        }
+
+        setValores((prev: any) => ({
+          ...prev,
+          logradouro: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade,
+          estado: data.uf
+        }));
+
+      } catch (error) {
+        setErroCep("Erro ao buscar o CEP.");
+      } finally {
+        setBuscandoCep(false);
+      }
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setValores({ ...valores, [name]: value });
   };
 
   return (
@@ -22,35 +68,99 @@ export default function EnderecoEntrega({ valores, setValores }: any) {
         <span className="w-8 h-8 rounded-full bg-[#C2AE82]/10 flex items-center justify-center text-sm">2</span>
         Endereço de Entrega
       </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-6 gap-5">
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-bold text-gray-400 mb-1">CEP *</label>
-          <input type="text" required value={valores.cep} onChange={(e) => handleChange("cep", e.target.value)} placeholder="00000-000" className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {/* CAMPO DO CEP */}
+        <div className="md:col-span-2 relative">
+          <label className="block text-sm font-bold text-gray-400 mb-1">CEP</label>
+          <input
+            type="text"
+            name="cep"
+            value={valores.cep}
+            onChange={(e) => buscarCep(e.target.value)}
+            maxLength={9}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82] transition-colors"
+            placeholder="00000-000"
+            required
+          />
+          {buscandoCep && <span className="absolute right-4 top-10 text-xs text-[#C2AE82]">Buscando...</span>}
+          {erroCep && <span className="text-xs text-red-500 mt-1 block">{erroCep}</span>}
         </div>
-        <div className="sm:col-span-4">
-          <label className="block text-sm font-bold text-gray-400 mb-1">Logradouro *</label>
-          <input type="text" required value={valores.logradouro} onChange={(e) => handleChange("logradouro", e.target.value)} className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+
+        <div>
+          <label className="block text-sm font-bold text-gray-400 mb-1">Rua</label>
+          <input
+            type="text"
+            name="logradouro"
+            value={valores.logradouro}
+            onChange={handleChange}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82]"
+            required
+          />
         </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-bold text-gray-400 mb-1">Número *</label>
-          <input type="text" required value={valores.numero} onChange={(e) => handleChange("numero", e.target.value)} className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+
+        <div>
+          <label className="block text-sm font-bold text-gray-400 mb-1">Número</label>
+          <input
+            type="text"
+            name="numero"
+            value={valores.numero}
+            onChange={handleChange}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82]"
+            required
+          />
         </div>
-        <div className="sm:col-span-4">
+
+        <div>
           <label className="block text-sm font-bold text-gray-400 mb-1">Complemento</label>
-          <input type="text" value={valores.complemento} onChange={(e) => handleChange("complemento", e.target.value)} className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+          <input
+            type="text"
+            name="complemento"
+            value={valores.complemento}
+            onChange={handleChange}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82]"
+            placeholder="Apto, Bloco, etc (Opcional)"
+          />
         </div>
-        <div className="sm:col-span-3">
-          <label className="block text-sm font-bold text-gray-400 mb-1">Bairro *</label>
-          <input type="text" required value={valores.bairro} onChange={(e) => handleChange("bairro", e.target.value)} className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+
+        <div>
+          <label className="block text-sm font-bold text-gray-400 mb-1">Bairro</label>
+          <input
+            type="text"
+            name="bairro"
+            value={valores.bairro}
+            onChange={handleChange}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82]"
+            required
+          />
         </div>
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-bold text-gray-400 mb-1">Cidade *</label>
-          <input type="text" required value={valores.cidade} onChange={(e) => handleChange("cidade", e.target.value)} className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+
+        <div>
+          <label className="block text-sm font-bold text-gray-400 mb-1">Cidade</label>
+          <input
+            type="text"
+            name="cidade"
+            value={valores.cidade}
+            onChange={handleChange}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82]"
+            required
+          />
         </div>
-        <div className="sm:col-span-1">
-          <label className="block text-sm font-bold text-gray-400 mb-1">UF *</label>
-          <input type="text" required maxLength={2} value={valores.estado} onChange={(e) => handleChange("estado", e.target.value.toUpperCase())} placeholder="PB" className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none" />
+
+        <div>
+          <label className="block text-sm font-bold text-gray-400 mb-1">Estado (UF)</label>
+          <input
+            type="text"
+            name="estado"
+            value={valores.estado}
+            onChange={handleChange}
+            maxLength={2}
+            className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82] uppercase"
+            required
+          />
         </div>
+
       </div>
     </div>
   );

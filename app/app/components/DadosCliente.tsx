@@ -1,28 +1,28 @@
 'use client';
 
-// Funções de formatação (Máscaras)
+//funções de formatação (Máscaras)
 const mascaraCPF = (valor: string) => {
   return valor
-    .replace(/\D/g, '') // Remove tudo que não for número
-    .replace(/(\d{3})(\d)/, '$1.$2') // Coloca ponto após os 3 primeiros
-    .replace(/(\d{3})(\d)/, '$1.$2') // Coloca ponto após os próximos 3
-    .replace(/(\d{3})(\d{1,2})/, '$1-$2') // Coloca o traço antes dos últimos 2
-    .replace(/(-\d{2})\d+?$/, '$1'); // Bloqueia digitação após 11 números
+    .replace(/\D/g, '')//remove tudo que não for número
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d)/, '$1.$2')
+    .replace(/(\d{3})(\d{1,2})/, '$1-$2')
+    .replace(/(-\d{2})\d+?$/, '$1');
 };
 
 const mascaraTelefone = (valor: string) => {
   return valor
     .replace(/\D/g, '')
-    .replace(/(\d{2})(\d)/, '($1) $2') // Coloca parênteses no DDD
-    .replace(/(\d{5})(\d)/, '$1-$2') // Coloca traço após o 5º dígito
-    .replace(/(-\d{4})\d+?$/, '$1'); // Bloqueia digitação após 11 números
+    .replace(/(\d{2})(\d)/, '($1) $2')
+    .replace(/(\d{5})(\d)/, '$1-$2')
+    .replace(/(-\d{4})\d+?$/, '$1');
 };
 
 export default function DadosCliente({ valores, setValores }: any) {
   const handleChange = (campo: string, valor: string) => {
     let valorFormatado = valor;
 
-    // Aplica a máscara dependendo do campo que está sendo digitado
+    //aplica a máscara dependendo do campo que está sendo digitado
     if (campo === 'cpf') valorFormatado = mascaraCPF(valor);
     if (campo === 'telefone') valorFormatado = mascaraTelefone(valor);
 
