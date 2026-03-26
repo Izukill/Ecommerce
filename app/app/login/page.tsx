@@ -4,7 +4,7 @@ import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import InputSenha from "@/app/components/InputSenha";
+import InputSenha from "@/app/components/login/InputSenha";
 
 // Função nativa para decodificar o token (sem instalar libs)
 const decodificarToken = (token: string) => {

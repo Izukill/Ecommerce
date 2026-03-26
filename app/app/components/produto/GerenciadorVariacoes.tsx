@@ -51,7 +51,7 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
     return corLimpa.charAt(0).toUpperCase() + corLimpa.slice(1).toLowerCase();
   };
 
-  // Função auxiliar para limpar tudo de uma vez
+  //função auxiliar para limpar tudo de uma vez
   const limparCamposVariacao = () => {
     setCorAtual("");
     setEstoqueAtual("");
@@ -62,16 +62,15 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
   const handleAdicionarOuAtualizarVariacao = () => {
      setErroVariacao("");
 
-     // Validação 1: Campos Vazios
+     //campos Vazios
      if (!corAtual.trim() || !estoqueAtual) {
        setErroVariacao("Preencha a cor e o estoque.");
-       // 👇 Removi o limparCampos() daqui para o usuário não perder os dados digitados
        return;
      }
 
      const corFormatada = formatarCor(corAtual);
 
-     // Validação 2: Variação exata já existe
+     //variação exata já existe
      const jaExiste = variacoes.some((v, index) =>
        v.cor === corFormatada && v.tamanho === tamanhoAtual && index !== editandoIndex
      );
@@ -96,8 +95,8 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
        novasVariacoes.push(novaVariacao);
      }
 
-     // 👇 O NOVO TRUQUE DE UX:
-     // Se você atualizou a foto dessa cor, nós replicamos ela para TODOS os tamanhos dessa mesma cor!
+
+     //verificação para caso atualiar a foto da cor, replica ela para todos os tamanhos
      if (imagemVariacaoAtual) {
        novasVariacoes = novasVariacoes.map(v => {
          if (v.cor === corFormatada) {

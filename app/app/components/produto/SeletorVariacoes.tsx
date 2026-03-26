@@ -19,13 +19,13 @@ export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: S
   const [corSelecionada, setCorSelecionada] = useState<string | null>(null);
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState<string | null>(null);
 
-  // Extrai as cores únicas para montar os botões de cor
+  //extrai as cores únicas para montar os botões de cor
   const coresDisponiveis = Array.from(new Set(variacoes.map(v => v.cor)));
 
-  // Filtra as variações baseado na cor que a usuária clicou
+  //filtra as variações baseado na cor que a usuária clicou
   const variacoesDaCor = variacoes.filter(v => v.cor === corSelecionada);
 
-  // Quando a usuária troca a cor, resetamos o tamanho
+  //quando a usuária troca a cor, resetamos o tamanho
   const handleSelecionarCor = (cor: string) => {
     if (corSelecionada === cor) return;
     setCorSelecionada(cor);
@@ -33,7 +33,7 @@ export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: S
     onVariacaoSelecionada(null); // Reseta a seleção final pro componente pai
   };
 
-  // Quando a usuária clica no tamanho, achamos a variação exata no array e mandamos pro Pai
+  //quando a usuária clica no tamanho, verifica a variação exata no array e manda para o pai
   const handleSelecionarTamanho = (tamanho: string) => {
     setTamanhoSelecionado(tamanho);
     const varExata = variacoesDaCor.find(v => v.tamanho === tamanho);
@@ -42,7 +42,7 @@ export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: S
 
   return (
     <div className="space-y-6">
-      {/* SELETOR DE COR */}
+      {/* seletor de cor */}
       <div>
         <h3 className="text-sm font-bold text-gray-300 uppercase tracking-widest mb-3">
           1. Escolha a Cor {corSelecionada && <span className="text-[#C2AE82] ml-2">{corSelecionada}</span>}
@@ -64,7 +64,7 @@ export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: S
         </div>
       </div>
 
-      {/* SELETOR DE TAMANHO (Só aparece depois que escolhe a cor) */}
+      {/* tamanho só vem depois de selecionar a cor por regra de negócio*/}
       {corSelecionada && (
         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
           <h3 className="text-sm font-bold text-gray-300 uppercase tracking-widest mb-3">

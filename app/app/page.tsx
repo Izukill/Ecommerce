@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-import ProdutoCard, { Produto } from "./components/ProdutoCard";
-import ModalProduto from "./components/ModalProduto";
-import Header from "./components/Header";
+import ProdutoCard, { Produto } from "./components/produto/ProdutoCard";
+import ModalProduto from "./components/produto/ModalProduto";
+import Header from "./components/layout/Header";
 
 export default function HomePage() {
   const [lancamentos, setLancamentos] = useState<Produto[]>([]);

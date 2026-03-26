@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -32,16 +33,29 @@ public class ClienteService {
     @Transactional
     public Cliente criar(Cliente cliente) throws RegraNegocioException {
 
-        if (clienteRepository.findByEmail(cliente.getEmail()).isPresent()) {
-            throw new RegraNegocioException("Este email já está em uso por uma conta");
+        Optional<Cliente> clienteExistente= clienteRepository.findByEmail(cliente.getEmail());
+
+        if (clienteExistente.isPresent()) {
+            Cliente clienteRef= clienteExistente.get();
+            if(clienteRef.getSenha() != null && !clienteRef.getSenha().isEmpty()){
+                throw new RegraNegocioException("Essa conta já possui um login, Por favor use outro Email.");
+            }
+
+            clienteRef.setSenha(passwordEncoder.encode(cliente.getSenha()));
+            clienteRef.setNome(cliente.getNome());
+            clienteRef.setTipoPerfil(EnumPerfil.CLIENTE);
+            clienteRef.setDataCadastro(LocalDate.now());
+            return clienteRepository.save(clienteRef);
+        }else {
+
+            Cliente clienteNovo= new Cliente();
+            clienteNovo.setSenha(passwordEncoder.encode(cliente.getSenha()));
+            clienteNovo.setDataCadastro(LocalDate.now());
+            clienteNovo.setTipoPerfil(EnumPerfil.CLIENTE);
+            clienteNovo.setNome(cliente.getNome());
+            clienteNovo.setEmail(cliente.getEmail());
+            return clienteRepository.save(clienteNovo);
         }
-
-        cliente.setSenha(passwordEncoder.encode(cliente.getSenha()));
-
-        cliente.setTipoPerfil(EnumPerfil.CLIENTE);
-        cliente.setDataCadastro(LocalDate.now());
-
-        return clienteRepository.save(cliente);
 
     }
 

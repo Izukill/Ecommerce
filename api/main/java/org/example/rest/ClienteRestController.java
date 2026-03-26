@@ -34,11 +34,10 @@ public class ClienteRestController implements ClienteRestControllerAPI {
         Cliente cliente = mapper.from(dto);
         Cliente clienteSalvo = service.criar(cliente);
 
-        // Retornando 201 Created como boa prática
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.from(clienteSalvo));
     }
 
-    // Criamos uma rota específica para alterar a senha
+    //rota específica para alterar a senha
     @Override
     @PutMapping("/{lookupId}/senha")
     public ResponseEntity<Void> alterarSenha(@PathVariable UUID lookupId, @RequestBody AlterarSenhaSalvarRequestDTO dto) throws MirlleException, EntidadeNaoEncontradaException {

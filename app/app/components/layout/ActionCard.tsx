@@ -18,7 +18,6 @@ export default function ActionCard({ icone, titulo, descricao, textoBotao, href 
       <h3 className="text-xl font-bold text-white mb-2">{titulo}</h3>
       <p className="text-gray-400 text-sm mb-6">{descricao}</p>
 
-      {/* Botão Padronizado Dourado */}
       <Link
         href={href}
         className="px-6 py-2 bg-[#C2AE82] text-black font-extrabold rounded-lg hover:bg-[#a8956b] transition-all shadow-lg hover:scale-105"

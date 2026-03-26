@@ -5,11 +5,11 @@ import { useRouter } from "next/navigation";
 import { useCart } from "@/app/contexts/CartContext";
 import { api } from "@/lib/api";
 
-import Header from "@/app/components/Header";
-import DadosCliente from "../components/DadosCliente";
-import EnderecoEntrega from "../components/EnderecoEntrega";
-import ResumoPedido from "../components/ResumoPedido";
-import ModalPagamentoPix from "../components/ModalPagamentoPix"; // 👇 Importamos o Modal do PIX
+import Header from "@/app/components/layout/Header";
+import DadosCliente from "../components/pedido/DadosCliente";
+import EnderecoEntrega from "../components/pedido/EnderecoEntrega";
+import ResumoPedido from "../components/pedido/ResumoPedido";
+import ModalPagamentoPix from "../components/pedido/ModalPagamentoPix";
 
 export default function CheckoutPage() {
   const router = useRouter();
