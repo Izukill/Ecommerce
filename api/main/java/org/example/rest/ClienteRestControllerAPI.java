@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
+import org.example.exception.RegraNegocioException;
 import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
 import org.example.rest.dto.Cliente.ClienteBuscarDTO;
 import org.example.rest.dto.Cliente.ClienteResponseDTO;
@@ -141,4 +142,7 @@ public interface ClienteRestControllerAPI {
     })
     @SecurityRequirement(name = "bearerAuth")
     ResponseEntity<Page<ClienteResponseDTO>> buscar(@ParameterObject ClienteBuscarDTO dto) throws MirlleException;
+
+
+    public ResponseEntity<ClienteResponseDTO> buscarPerfil() throws RegraNegocioException;
 }

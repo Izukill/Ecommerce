@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useCart } from "@/app/contexts/CartContext";
@@ -9,13 +11,32 @@ export default function Header() {
   const primeiroNome = usuario && usuario.nome ? usuario.nome.split(' ')[0] : "";
   const { quantidadeTotal } = useCart();
 
+  const [menuAberto, setMenuAberto] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleClickFora = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuAberto(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickFora);
+    return () => document.removeEventListener("mousedown", handleClickFora);
+  }, []);
+
+  const handleLogout = () => {
+    setMenuAberto(false);
+    logout();
+    router.push('/');
+  };
+
   return (
     <header className="w-full sticky top-0 z-50 bg-[#C2AE82] shadow-lg border-b border-black/20">
       <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-20">
 
           <div className="flex items-center gap-40">
-
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="flex items-center gap-2 cursor-pointer">
                 <img src="/logoMirle.png" alt="Logo MirlleFitness" className="h-20 w-auto object-contain" />
@@ -31,25 +52,83 @@ export default function Header() {
               <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Acessórios</Link>
               <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Ofertas</Link>
             </nav>
-
           </div>
 
-          {/* BLOCO DA DIREITA (Login e Carrinho) Fica intacto */}
           <div className="flex items-center space-x-5">
             {usuario ? (
-              <div className="flex items-center gap-4 border-r border-black/20 pr-4">
-                <span className="text-black font-bold capitalize">Olá, {primeiroNome}</span>
-                {usuario.perfil === "ADM" && (
-                  <Link href="/admin" className="text-xs font-bold bg-black text-[#C2AE82] px-3 py-1.5 rounded-md hover:bg-gray-800 transition">
-                    Painel Admin
-                  </Link>
+              <div className="relative border-r border-black/20 pr-5" ref={menuRef}>
+                <button
+                  onClick={() => setMenuAberto(!menuAberto)}
+                  className="flex items-center gap-2 text-black hover:text-white transition-colors focus:outline-none"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-black text-[#C2AE82]">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path fillRule="evenodd" d="M7.5 6a4.5 4.5 0 1 1 9 0 4.5 4.5 0 0 1-9 0ZM3.751 20.105a8.25 8.25 0 0 1 16.498 0 .75.75 0 0 1-.437.695A18.683 18.683 0 0 1 12 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 0 1-.437-.695Z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <span className="font-bold capitalize hidden sm:block">Olá, {primeiroNome}</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-4 h-4 transition-transform ${menuAberto ? 'rotate-180' : ''}`}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
+
+                {/* dropdown */}
+                {menuAberto && (
+                  <div className="absolute right-0 mt-4 w-56 bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl py-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
+
+                    <div className="px-4 py-3 border-b border-neutral-800 mb-2">
+                      <p className="text-sm text-white font-bold capitalize">{usuario.nome}</p>
+                      <p className="text-xs text-gray-400 truncate">{usuario.email}</p>
+                    </div>
+
+                    {/* links da conta */}
+                    <Link
+                      href="/cliente?aba=perfil"
+                      onClick={() => setMenuAberto(false)}
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                    >
+                      👤 Meu Perfil
+                    </Link>
+
+                    <Link
+                      href="/cliente?aba=pedidos"
+                      onClick={() => setMenuAberto(false)}
+                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                    >
+                      📦 Meus Pedidos
+                    </Link>
+
+                    {/* botão admin */}
+                    {usuario.perfil === "ADMIN" && (
+                      <div className="mt-2 pt-2 border-t border-neutral-800">
+                        <Link
+                          href="/admin"
+                          onClick={() => setMenuAberto(false)}
+                          className="block px-4 py-2 text-sm text-[#C2AE82] font-bold hover:bg-[#C2AE82]/10 transition-colors"
+                        >
+                          ⚙️ Painel Admin
+                        </Link>
+                      </div>
+                    )}
+
+                    <div className="mt-2 pt-2 border-t border-neutral-800">
+                      <button
+                        onClick={handleLogout}
+                        className="w-full text-left px-4 py-2 text-sm text-red-500 font-bold hover:bg-red-500/10 transition-colors"
+                      >
+                        Sair da conta
+                      </button>
+                    </div>
+                  </div>
                 )}
-                <button onClick={logout} className="text-black hover:text-white transition-colors text-sm font-bold">Sair</button>
               </div>
             ) : (
-              <Link href="/login" className="text-black hover:text-white transition-colors" title="Fazer Login">
-                <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-              </Link>
+              <div className="border-r border-black/20 pr-5">
+                <Link href="/login" className="flex items-center gap-2 text-black hover:text-white transition-colors" title="Fazer Login">
+                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                  <span className="text-sm font-bold hidden sm:block">Entrar</span>
+                </Link>
+              </div>
             )}
 
             <Link href="/checkout" className="text-black hover:text-white transition-colors relative flex items-center">

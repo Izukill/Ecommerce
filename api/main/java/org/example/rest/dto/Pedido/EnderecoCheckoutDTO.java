@@ -12,8 +12,8 @@ public class EnderecoCheckoutDTO {
     @NotBlank
     private String bairro;
 
-    @Schema(description = "Logradouro do endereço do cliente em pedido")
-    private String logradouro;
+    @Schema(description = "Rua do endereço do cliente em pedido")
+    private String rua;
 
     @Schema(description = "Cep do endereço do cliente em pedido")
     @NotBlank

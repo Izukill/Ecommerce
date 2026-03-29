@@ -1,6 +1,7 @@
 package org.example.repository;
 
 
+import org.example.model.Cliente;
 import org.example.model.Endereco;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -12,5 +13,7 @@ import java.util.UUID;
 public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
 
     Optional<Endereco> findByLookupId(UUID lookupId);
+
+    Optional<Endereco> findByClienteAndCepAndNumero(Cliente cliente, String cep, Integer numero);
 
 }

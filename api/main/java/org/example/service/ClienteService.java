@@ -14,9 +14,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,6 +118,15 @@ public class ClienteService {
 
         cliente.setSenha(passwordEncoder.encode(dto.getSenhaNova()));
         clienteRepository.save(cliente);
+    }
+
+
+    public Cliente buscarClienteLogado() throws RegraNegocioException {
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = ((UserDetails) principal).getUsername();
+
+        return clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new RegraNegocioException("Cliente não autorizado ou não encontrado."));
     }
 
 

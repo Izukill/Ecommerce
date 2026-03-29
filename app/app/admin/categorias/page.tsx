@@ -3,7 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import ModalExclusao from "@/app/components/ModalExclusao";
+import ModalExclusao from "@/app/components/layout/ModalExclusao";
 
 interface Categoria {
   lookupId: string;

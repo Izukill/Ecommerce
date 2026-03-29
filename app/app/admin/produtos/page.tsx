@@ -4,9 +4,9 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import ProdutoCard from "@/app/components/ProdutoCard";
-import ModalExclusao from "@/app/components/ModalExclusao";
-import ModalAtivacao from "@/app/components/ModalAtivacao";
+import ProdutoCard from "@/app/components/produto/ProdutoCard";
+import ModalExclusao from "@/app/components/layout/ModalExclusao";
+import ModalAtivacao from "@/app/components/layout/ModalAtivacao";
 
 interface Categoria {
   lookupId: string;

@@ -19,7 +19,6 @@ public class EnderecoMapper {
                 .bairro(dto.getBairro())
                 .numero(dto.getNumero())
                 .complemento(dto.getComplemento())
-                .logradouro(dto.getLogradouro())
                 .build();
 
     }
@@ -37,7 +36,6 @@ public class EnderecoMapper {
         dto.setBairro(entity.getBairro());
         dto.setNumero(entity.getNumero());
         dto.setComplemento(entity.getComplemento());
-        dto.setLogradouro(entity.getLogradouro());
 
         return dto;
 

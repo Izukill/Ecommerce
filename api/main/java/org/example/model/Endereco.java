@@ -43,8 +43,6 @@ public class Endereco {
 
     private String complemento;
 
-    private String logradouro;
-
     private String cidade;
 
     private String estado;

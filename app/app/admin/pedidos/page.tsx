@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import ModalDetalhesPedido, { Pedido } from "@/app/components/ModalDetalhesPedido";
+import ModalDetalhesPedido, { Pedido } from "@/app/components/pedido/ModalDetalhesPedido";
 
 export default function PedidosAdminPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);

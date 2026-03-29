@@ -6,6 +6,7 @@ import org.example.mapper.PedidoMapper;
 import org.example.model.*;
 import org.example.payment.PixService;
 import org.example.repository.ClienteRepository;
+import org.example.repository.EnderecoRepository;
 import org.example.repository.PedidoRepository;
 import org.example.repository.VariacaoProdutoRepository;
 import org.example.rest.dto.ItemPedido.ItemPedidoSalvarRequestDTO;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -66,9 +68,10 @@ public class PedidoService {
         pedido.setStatus(EnumStatusPedido.AGUARDANDO_PAGAMENTO);
         pedido.setDataHora(LocalDateTime.now());
 
+
         Endereco endereco = new Endereco();
         endereco.setCep(dto.getEnderecoEntrega().getCep());
-        endereco.setLogradouro(dto.getEnderecoEntrega().getLogradouro());
+        endereco.setRua(dto.getEnderecoEntrega().getRua());
         endereco.setNumero(dto.getEnderecoEntrega().getNumero());
         endereco.setComplemento(dto.getEnderecoEntrega().getComplemento());
         endereco.setBairro(dto.getEnderecoEntrega().getBairro());

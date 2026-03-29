@@ -2,7 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { api } from "@/lib/api";
-import ModalExclusao from "@/app/components/ModalExclusao";
+import ModalExclusao from "@/app/components/layout/ModalExclusao";
 
 export interface Cliente {
   lookupId: string;

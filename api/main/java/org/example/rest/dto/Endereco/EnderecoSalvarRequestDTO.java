@@ -29,10 +29,6 @@ public class EnderecoSalvarRequestDTO {
     @Schema(description = "Complemento do endereço (perto do posto, bloco, casa 2, etc.)", example = "Apto 202, Bloco A")
     private String complemento;
 
-    @Schema(description = "Logradouro do endereço")
-    @NotBlank(message = "o logradouro é obrigatório")
-    private String logradouro;
-
     @Schema(description = "Cidade do endereço", example = "CG")
     @NotBlank(message = "a cidade é obrigatória")
     private String cidade;

@@ -2,6 +2,7 @@ package org.example.rest;
 
 import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
+import org.example.exception.RegraNegocioException;
 import org.example.mapper.ClienteMapper;
 import org.example.model.Cliente;
 import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
@@ -74,4 +75,12 @@ public class ClienteRestController implements ClienteRestControllerAPI {
         Page<Cliente> pagina = service.buscar(dto);
         return ResponseEntity.ok(pagina.map(mapper::from));
     }
+
+    @GetMapping("/me")
+    public ResponseEntity<ClienteResponseDTO> buscarPerfil() throws RegraNegocioException {
+        Cliente cliente = service.buscarClienteLogado();
+        return ResponseEntity.ok(mapper.from(cliente));
+    }
+
+
 }

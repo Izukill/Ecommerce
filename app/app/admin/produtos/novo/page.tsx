@@ -4,8 +4,8 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import CapaProdutoUpload from "@/app/components/CapaProdutoUpload";
-import GerenciadorVariacoes, { Variacao } from "@/app/components/GerenciadorVariacoes";
+import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
+import GerenciadorVariacoes, { Variacao } from "@/app/components/produto/GerenciadorVariacoes";
 
 interface Categoria {
   lookupId: string;

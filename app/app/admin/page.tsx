@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useAuth } from "@/app/contexts/AuthContext";
-import ActionCard from "@/app/components/ActionCard";
+import ActionCard from "@/app/components/layout/ActionCard";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";

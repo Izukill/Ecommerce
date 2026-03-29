@@ -5,9 +5,9 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-import CapaProdutoUpload from "@/app/components/CapaProdutoUpload";
-import GerenciadorVariacoes, { Variacao } from "@/app/components/GerenciadorVariacoes";
-import ModalExclusao from "@/app/components/ModalExclusao";
+import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
+import GerenciadorVariacoes, { Variacao } from "@/app/components/produto/GerenciadorVariacoes";
+import ModalExclusao from "@/app/components/layout/ModalExclusao";
 
 interface Categoria {
   lookupId: string;
