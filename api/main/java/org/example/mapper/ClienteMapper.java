@@ -15,6 +15,7 @@ public class ClienteMapper {
         return Cliente.builder()
                 .nome(dto.getNome())
                 .email(dto.getEmail())
+                .cpf(dto.getCpf())
                 .senha(dto.getSenha())
                 .tipoPerfil(EnumPerfil.CLIENTE)
                 .telefone(dto.getTelefone())
@@ -31,6 +32,7 @@ public class ClienteMapper {
         dto.setLookupId(entity.getLookupId());
         dto.setNome(entity.getNome());
         dto.setEmail(entity.getEmail());
+        dto.setCpf(entity.getCpf());
         dto.setTelefone(entity.getTelefone());
 
         return dto;

@@ -6,41 +6,62 @@ import { api } from "@/lib/api";
 export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
   const [carregando, setCarregando] = useState(true);
-  const [lookupId, setLookupId] = useState(""); // Precisamos guardar o ID para o botão "Salvar" depois
+  const [lookupId, setLookupId] = useState("");
 
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [email, setEmail] = useState('');
 
-  // Por enquanto endereços fixos, depois faremos a rota deles
+  //TODO buscar endereços reais da api
   const [enderecos, setEnderecos] = useState([
     { id: 1, rua: 'Av. Paulista', numero: '1000', bairro: 'Bela Vista', cidade: 'São Paulo', estado: 'SP', cep: '01310-100' }
   ]);
+
+  const aplicarMascaraCpf = (valor: string) => {
+    let v = valor.replace(/\D/g, "");
+    if (v.length > 11) {
+      v = v.slice(0, 11);
+    }
+    v = v.replace(/(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/(\d{3})(\d)/, "$1.$2");
+    v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+    return v;
+  };
+
+  const aplicarMascaraTelefone = (valor: string) => {
+    let v = valor.replace(/\D/g, "");
+    if (v.length > 11) {
+      v = v.slice(0, 11);
+    }
+    //dd
+    v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
+
+    //hifens
+    if (v.length > 13) {
+      // Formato para celular (11 dígitos no total)
+      v = v.replace(/(\d{5})(\d)/, "$1-$2");
+    } else {
+      // Formato para fixo (10 dígitos no total)
+      v = v.replace(/(\d{4})(\d)/, "$1-$2");
+    }
+    return v;
+  };
 
   //Busca os dados assim que a aba abre
   useEffect(() => {
     const buscarMeusDados = async () => {
       try {
-        const token = localStorage.getItem('token'); // Pegando o JWT
-        if (!token) return;
+        const response = await api.get('/clientes/me');
+        const dadosDoBanco = response.data;
 
-        // Bate na nossa nova rota do Java
-        const response = await api.get('http://localhost:8080/clientes/me', {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const dadosDoBanco = await response.json();
-          // Preenche os inputs com o que veio do banco!
-          setNome(dadosDoBanco.nome || '');
-          setCpf(dadosDoBanco.cpf || '');
-          setTelefone(dadosDoBanco.telefone || '');
-          setLookupId(dadosDoBanco.lookupId);
-        }
+        setEmail(dadosDoBanco.email || '');
+        setNome(dadosDoBanco.nome || '');
+        setCpf(dadosDoBanco.cpf || '');
+        setTelefone(dadosDoBanco.telefone || '');
+        setLookupId(dadosDoBanco.lookupId);
       } catch (error) {
-        console.error("Erro ao buscar perfil:", error);
+        console.error("Erro na API:", error.response?.status, error.response?.data || error.message);
       } finally {
         setCarregando(false);
       }
@@ -50,9 +71,26 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
   }, []);
 
   //TODO implementar a rota put para atualizar os dados
-  const handleSalvarDados = (e: React.FormEvent) => {
+  const handleSalvarDados = async (e: React.FormEvent) => {
     e.preventDefault();
-    alert(`Pronto para enviar o PUT para /clientes/${lookupId}`);
+    try {
+       const dadosAtualizados = {
+
+           nome: nome,
+           cpf: cpf,
+           telefone: telefone,
+       };
+
+       const response = await api.put(`/clientes/${lookupId}`, dadosAtualizados);
+
+       if(response.status== 200 || response.status== 204){
+           alert("Perfil atualizado com sucesso ✅");
+       }
+
+    }catch(error: any){
+        console.error("Erro ao atualizar o perfil:", error.response?.data || error.message);
+        alert("Erro ao atualizar perfil ❌");
+    }
   };
 
   if (carregando) {
@@ -71,7 +109,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
             <label className="block text-sm font-bold text-gray-400 mb-1">E-mail (Não alterável)</label>
             <input
               type="email"
-              value={usuarioAuth?.email || ''}
+              value={email}
               disabled
               className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-gray-500 cursor-not-allowed outline-none"
             />
@@ -92,7 +130,9 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
             <input
               type="text"
               value={cpf}
-              onChange={(e) => setCpf(e.target.value)}
+              onChange={(e) => setCpf(aplicarMascaraCpf(e.target.value))}
+              maxLength={14}
+              placeholder="000.000.000-00"
               className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none transition"
             />
           </div>
@@ -102,7 +142,9 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
             <input
               type="text"
               value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
+              onChange={(e) => setTelefone(aplicarMascaraTelefone(e.target.value))}
+              maxLength={15}
+              placeholder="(00) 00000-0000"
               className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none transition"
             />
           </div>

@@ -76,6 +76,7 @@ public class ClienteRestController implements ClienteRestControllerAPI {
         return ResponseEntity.ok(pagina.map(mapper::from));
     }
 
+    @Override
     @GetMapping("/me")
     public ResponseEntity<ClienteResponseDTO> buscarPerfil() throws RegraNegocioException {
         Cliente cliente = service.buscarClienteLogado();

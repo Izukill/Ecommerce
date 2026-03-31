@@ -16,4 +16,6 @@ public class ClienteResponseDTO {
 
     private String telefone;
 
+    private String cpf;
+
 }

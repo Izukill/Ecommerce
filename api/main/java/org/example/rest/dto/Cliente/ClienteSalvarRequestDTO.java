@@ -25,5 +25,8 @@ public class ClienteSalvarRequestDTO {
     @NotBlank(message = "O telefone é obrigatório para contato")
     private String telefone;
 
+    @Schema(description = "Cpf do cliente", example = "345.346.124-80")
+    private String cpf;
+
 
 }

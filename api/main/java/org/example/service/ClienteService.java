@@ -71,6 +71,7 @@ public class ClienteService {
 
         clienteAtualizar.setNome(novosDadosCliente.getNome());
         clienteAtualizar.setTelefone(novosDadosCliente.getTelefone());
+        clienteAtualizar.setCpf(novosDadosCliente.getCpf());
 
         return clienteRepository.save(clienteAtualizar);
 

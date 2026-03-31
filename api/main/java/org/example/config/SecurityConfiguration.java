@@ -57,21 +57,21 @@ public class SecurityConfiguration {
                         .requestMatchers("/error").permitAll() //rota de erro liberada para não mascara excessões
 
                         //rotas pra ADM
-                        .requestMatchers(HttpMethod.POST, "/produtos").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/produtos/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/produtos/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/pedidos/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.GET,"/admin/dashboard").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/upload/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/categorias").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/categorias/**").hasAuthority("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE, "/categorias/**").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/produtos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/produtos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH,"/pedidos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET,"/admin/dashboard").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/upload/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/categorias").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT, "/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/categorias/**").hasRole("ADMIN")
 
                         //rotas pra CLIENTE
-                        .requestMatchers(HttpMethod.POST, "/enderecos").hasAuthority("CLIENTE")
-                        .requestMatchers(HttpMethod.GET, "/clientes/me").hasAuthority("CLIENTE")
-                        .requestMatchers(HttpMethod.PUT, "/clientes/me").hasAuthority("CLIENTE")
+                        .requestMatchers(HttpMethod.POST, "/enderecos").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/clientes/me").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.PUT, "/clientes/me").hasRole("CLIENTE")
 
                         //qualquer outro endpoint que não foi setado acima faz com que no mínimo precise estar autenticado por segurança
                         .anyRequest().authenticated()
