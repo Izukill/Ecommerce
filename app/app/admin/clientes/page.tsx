@@ -18,38 +18,27 @@ export default function ListaClientesPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  // ==========================================
-  // ESTADOS DOS FILTROS
-  // ==========================================
+
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
   const [filtroTelefone, setFiltroTelefone] = useState("");
 
-  // ==========================================
-  // ESTADOS DE PAGINAÇÃO
-  // ==========================================
+
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const tamanhoPagina = 10;
 
-  // ==========================================
-  // ESTADOS DE EDIÇÃO (MODAL)
-  // ==========================================
   const [clienteEditando, setClienteEditando] = useState<Cliente | null>(null);
   const [nomeEdicao, setNomeEdicao] = useState("");
   const [emailEdicao, setEmailEdicao] = useState("");
   const [telefoneEdicao, setTelefoneEdicao] = useState("");
   const [salvandoEdicao, setSalvandoEdicao] = useState(false);
 
-  // ==========================================
-  // ESTADOS DE EXCLUSÃO
-  // ==========================================
+
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
   const [clienteParaExcluir, setClienteParaExcluir] = useState<Cliente | null>(null);
 
-  // ==========================================
-  // CARREGAR DADOS
-  // ==========================================
+
   const carregarClientes = async (pagina: number = 0) => {
     setCarregando(true);
     setErro("");

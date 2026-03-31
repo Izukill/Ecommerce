@@ -2,21 +2,21 @@
 
 import { useState,useEffect } from 'react';
 import { api } from "@/lib/api";
+import ModalEditarEndereco, { Endereco } from "@/app/components/endereco/ModalEditarEndereco";
+import ModalExclusao from "@/app/components/layout/ModalExclusao";
 
 export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
   const [carregando, setCarregando] = useState(true);
-  const [lookupId, setLookupId] = useState("");
+  const [lookupID, setlookupID] = useState("");
 
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
   const [telefone, setTelefone] = useState('');
   const [email, setEmail] = useState('');
-
-  //TODO buscar endereços reais da api
-  const [enderecos, setEnderecos] = useState([
-    { id: 1, rua: 'Av. Paulista', numero: '1000', bairro: 'Bela Vista', cidade: 'São Paulo', estado: 'SP', cep: '01310-100' }
-  ]);
+  const [enderecos, setEnderecos] = useState<Endereco[]>([]);
+  const [enderecoEditando, setEnderecoEditando] = useState<Endereco | null>(null);
+  const [enderecoExcluindo, setEnderecoExcluindo] = useState<Endereco | null>(null);
 
   const aplicarMascaraCpf = (valor: string) => {
     let v = valor.replace(/\D/g, "");
@@ -50,7 +50,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
   //Busca os dados assim que a aba abre
   useEffect(() => {
-    const buscarMeusDados = async () => {
+    const buscarDados = async () => {
       try {
         const response = await api.get('/clientes/me');
         const dadosDoBanco = response.data;
@@ -59,7 +59,11 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
         setNome(dadosDoBanco.nome || '');
         setCpf(dadosDoBanco.cpf || '');
         setTelefone(dadosDoBanco.telefone || '');
-        setLookupId(dadosDoBanco.lookupId);
+        setlookupID(dadosDoBanco.lookupID);
+
+        const resEnderecos = await api.get('/enderecos/meus-enderecos');
+        setEnderecos(resEnderecos.data);
+
       } catch (error) {
         console.error("Erro na API:", error.response?.status, error.response?.data || error.message);
       } finally {
@@ -67,10 +71,24 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
       }
     };
 
-    buscarMeusDados();
+    buscarDados();
   }, []);
 
-  //TODO implementar a rota put para atualizar os dados
+  const excluirEndereco = async (e: React.FormEvent) => {
+    if (!enderecoExcluindo) return;
+
+    try {
+        await api.delete(`/enderecos/${enderecoExcluindo.lookupID}`);
+        setEnderecos(enderecos.filter(end => end.lookupID !== enderecoExcluindo.lookupID));
+
+
+        setEnderecoExcluindo(null);
+    } catch (error) {
+        console.error("Erro ao excluir:", error.response?.status, error.response?.data || error.message);
+        alert("Erro ao excluir endereço. :(");
+    }
+  };
+
   const handleSalvarDados = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -81,7 +99,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
            telefone: telefone,
        };
 
-       const response = await api.put(`/clientes/${lookupId}`, dadosAtualizados);
+       const response = await api.put(`/clientes/${lookupID}`, dadosAtualizados);
 
        if(response.status== 200 || response.status== 204){
            alert("Perfil atualizado com sucesso ✅");
@@ -157,7 +175,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
         </form>
       </div>
 
-      {/* SEÇÃO DE ENDEREÇOS (Permanece igual por enquanto) */}
+      {/* SEÇÃO DE ENDEREÇOS */}
       <div>
         <div className="flex justify-between items-center mb-6 border-b border-neutral-800 pb-4">
           <h2 className="text-2xl font-bold text-white">Meus Endereços</h2>
@@ -168,15 +186,43 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {enderecos.map((end) => (
-            <div key={end.id} className="bg-neutral-900 border border-neutral-700 rounded-xl p-5 hover:border-[#C2AE82] transition-colors relative group">
+            <div key={end.lookupID} className="bg-neutral-900 border border-neutral-700 rounded-xl p-5 hover:border-[#C2AE82] transition-colors relative group">
               <p className="font-bold text-white mb-1">{end.rua}, {end.numero}</p>
               <p className="text-sm text-gray-400">{end.bairro} - {end.cidade}/{end.estado}</p>
               <p className="text-sm text-gray-500 mt-2">CEP: {end.cep}</p>
 
               <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                <button className="text-[#C2AE82] hover:text-white text-sm font-bold">Editar</button>
-                <button className="text-red-500 hover:text-red-400 text-sm font-bold">Excluir</button>
+                <button
+                 onClick={() => setEnderecoEditando(end)}
+                 className="text-[#C2AE82] hover:text-white text-sm font-bold"
+                 >Editar
+                </button>
+                <button onClick={() => setEnderecoExcluindo(end)} className="text-red-500 hover:text-red-400 text-sm font-bold">Excluir</button>
               </div>
+              <ModalEditarEndereco
+                       enderecoEditando={enderecoEditando}
+                       setEnderecoEditando={setEnderecoEditando}
+                       aoSalvarComSucesso={(enderecoAtualizado) => {
+                          setEnderecos(enderecos.map(end =>
+                              end.lookupID === enderecoAtualizado.lookupID ? enderecoAtualizado : end
+                          ));
+                       }}
+              />
+
+              <ModalExclusao
+                      isOpen={!!enderecoExcluindo}
+                      onClose={() => setEnderecoExcluindo(null)}
+                      onConfirm={() => excluirEndereco()}
+                      titulo="Excluir Endereço"
+                      mensagem={
+                        <span>
+                          Tem certeza que deseja excluir o endereço <b>{enderecoExcluindo?.rua}, {enderecoExcluindo?.numero}</b>?<br/>
+                          Esta ação não poderá ser desfeita.
+                        </span>
+                      }
+              />
+
+
             </div>
           ))}
         </div>
