@@ -19,6 +19,7 @@ export interface Endereco {
 
 export interface ItemPedido {
   nomeProduto: string;
+  imagemUrl?: string;
   cor?: string;
   tamanho?: string;
   quantidade: number;
@@ -42,7 +43,6 @@ interface ModalDetalhesPedidoProps {
   formatarData: (dataIso: string) => string;
   formatarMoeda: (valor: number) => string;
   getStatusBadge: (status: string) => string;
-  // 👇 Nova função para o botão
   onAtualizarStatus: (pedidoId: string, novoStatus: string) => void;
 }
 
@@ -66,6 +66,7 @@ export default function ModalDetalhesPedido({
         <div className="p-6 border-b border-neutral-800 flex justify-between items-start">
           <div>
             <h3 className="text-2xl font-extrabold text-white">
+              <span className="text-gray-400 font-normal mr-2">Data:</span>
               {formatarData(pedidoSelecionado.dataHora)}
             </h3>
             <p className="text-sm text-gray-500 mt-1 uppercase tracking-wider font-mono">
@@ -122,15 +123,36 @@ export default function ModalDetalhesPedido({
             {pedidoSelecionado.itens && pedidoSelecionado.itens.length > 0 ? (
               <ul className="space-y-3">
                 {pedidoSelecionado.itens.map((item, idx) => (
-                  <li key={idx} className="flex justify-between items-center bg-neutral-800/50 p-4 rounded-lg border border-neutral-800">
-                    <div>
-                      <p className="font-bold text-lg text-gray-200">{item.nomeProduto}</p>
-                      <p className="text-sm text-gray-500">
-                        {item.cor} {item.tamanho ? `- Tam: ${item.tamanho}` : ''}
-                      </p>
-                    </div>
+                  <li key={idx} className="flex flex-col sm:flex-row sm:items-center justify-between bg-neutral-800/50 p-4 rounded-lg border border-neutral-800 gap-4">
+
+                    {/* 👇 Lado Esquerdo: Imagem + Textos */}
                     <div className="flex items-center gap-4">
-                      <span className="text-2xl font-black text-white bg-black px-3 py-1 rounded-md border border-neutral-700">
+
+                      {/* Container da Imagem */}
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 flex-shrink-0 bg-neutral-900 rounded-md border border-neutral-700 overflow-hidden flex items-center justify-center">
+                        {item.imagemUrl ? (
+                          <img
+                            src={item.imagemUrl}
+                            alt={item.nomeProduto}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-neutral-600 text-xs text-center px-1">Sem foto</span>
+                        )}
+                      </div>
+
+                      {/* Textos do Produto */}
+                      <div>
+                        <p className="font-bold text-base sm:text-lg text-gray-200 line-clamp-2">{item.nomeProduto}</p>
+                        <p className="text-sm text-gray-500 mt-0.5">
+                          {item.cor || "Cor Única"} {item.tamanho ? `- Tam: ${item.tamanho}` : ''}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Lado Direito: Quantidade e Preços */}
+                    <div className="flex items-center gap-4 self-end sm:self-auto flex-shrink-0">
+                      <span className="text-xl sm:text-2xl font-black text-white bg-black px-3 py-1 rounded-md border border-neutral-700">
                         {item.quantidade}x
                       </span>
                       <div className="text-right border-l border-neutral-700 pl-4">
@@ -138,6 +160,7 @@ export default function ModalDetalhesPedido({
                         <p className="font-bold text-lg text-[#C2AE82]">{formatarMoeda(item.quantidade * item.precoUnitario)}</p>
                       </div>
                     </div>
+
                   </li>
                 ))}
               </ul>
@@ -148,10 +171,9 @@ export default function ModalDetalhesPedido({
 
         </div>
 
-        {/*Footer do Modal - AGORA COM O BOTÃO DE AÇÃO */}
+        {/* Footer do Modal */}
         <div className="p-6 border-t border-neutral-800 bg-black/50 rounded-b-xl flex justify-between items-center">
 
-          {/* Só mostra o botão de Enviar se o pedido estiver PAGO */}
           {pedidoSelecionado.status === "PAGO" ? (
             <button
               onClick={() => onAtualizarStatus(pedidoSelecionado.lookupId, "ENVIADO")}
@@ -160,7 +182,7 @@ export default function ModalDetalhesPedido({
               Marcar como Enviado
             </button>
           ) : (
-            <div></div> // Espaçador para manter o total na direita
+            <div></div>
           )}
 
           <div className="text-right flex items-center gap-3">

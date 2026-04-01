@@ -74,6 +74,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/clientes/me").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.PUT, "/clientes/me").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.GET,"/enderecos/meus-enderecos").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "pedidos/meus-pedidos").hasRole("CLIENTE")
 
                         //qualquer outro endpoint que não foi setado acima faz com que no mínimo precise estar autenticado por segurança
                         .anyRequest().authenticated()

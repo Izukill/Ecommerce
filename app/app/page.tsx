@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import ProdutoCard, { Produto } from "./components/produto/ProdutoCard";
 import ModalProduto from "./components/produto/ModalProduto";
 import Header from "./components/layout/Header";
+import BackgroundAnimado from "./components/layout/BackgroundAnimado";
 
 export default function HomePage() {
   const [lancamentos, setLancamentos] = useState<Produto[]>([]);
@@ -37,6 +38,7 @@ export default function HomePage() {
       <main className="flex-grow">
         {/* HERO BANNER */}
         <div className="relative bg-black/70 h-[70vh] flex items-center justify-center border-b border-gray-900 shadow-2xl">
+          <BackgroundAnimado />
           <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-6">Chegou a Nova Coleção</h1>
             <p className="mt-4 text-lg sm:text-xl text-gray-400 mb-8">Roupas que acompanham o seu ritmo. Conforto e estilo para o seu treino ou para o seu dia a dia.</p>

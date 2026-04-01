@@ -58,7 +58,7 @@ export default function ModalEditarEndereco({
     return (
         <>
             <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
-                <div className="bg-neutral-900 border border-neutral-700 rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+                <div className="bg-neutral-900 border-t-4 border-t-[#C2AE82] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
                     <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
                         <h3 className="text-xl font-bold text-white">Editar Endereço</h3>
