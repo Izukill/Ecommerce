@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { api } from "@/lib/api";
 import ModalAtivacao from "@/app/components/layout/ModalAtivacao";
+import toast from 'react-hot-toast';
 
 export interface Endereco {
     lookupID: number;
@@ -46,10 +47,10 @@ export default function ModalEditarEndereco({
             setIsConfirmando(false);
             setEnderecoEditando(null);
 
-            alert("Endereço atualizado com sucesso! ✅");
+            toast("Endereço atualizado com sucesso! ✅");
         } catch (error: any) {
             console.error("Erro ao atualizar endereço:", error.response?.data || error.message);
-            alert("❌ Erro ao atualizar o endereço");
+            toast("❌ Erro ao atualizar o endereço");
             setIsConfirmando(false);
         }
     };
