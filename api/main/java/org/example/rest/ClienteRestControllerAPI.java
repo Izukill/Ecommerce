@@ -144,5 +144,22 @@ public interface ClienteRestControllerAPI {
     ResponseEntity<Page<ClienteResponseDTO>> buscar(@ParameterObject ClienteBuscarDTO dto) throws MirlleException;
 
 
-    public ResponseEntity<ClienteResponseDTO> buscarPerfil() throws RegraNegocioException;
+    @Operation(summary = "Buscar perfil do cliente logado.",
+            description = "Recupera as informações de perfil do cliente que está atualmente autenticado no sistema. O e-mail é extraído diretamente do token JWT.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Perfil recuperado com sucesso.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ClienteResponseDTO.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Cliente não autorizado ou não encontrado na base de dados.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500",
+                    description = "Erro inesperado no servidor.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    ResponseEntity<ClienteResponseDTO> buscarPerfil() throws RegraNegocioException;
 }

@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import InputSenha from "@/app/components/login/InputSenha";
+import ModalVerificacaoEmail from "@/app/components/login/ModalVerificacaoEmail";
+import toast from 'react-hot-toast';
 
 export default function RegistroPage() {
   const router = useRouter();
@@ -17,6 +19,7 @@ export default function RegistroPage() {
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
   const [carregando, setCarregando] = useState(false);
+  const [isModalVerificacaoAberto, setIsModalVerificacaoAberto] = useState(false);
 
   const handleRegistro = async (e: FormEvent) => {
     e.preventDefault();
@@ -32,16 +35,15 @@ export default function RegistroPage() {
     try {
       await api.post("/clientes", { nome, email, senha });
 
-      setSucesso(true);
-      setTimeout(() => {
-        router.push("/login");
-      }, 2000);
+      setIsModalVerificacaoAberto(true);
+      toast.success("Conta criada! Quase lá...");
 
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.detail) {
         setErro(error.response.data.detail);
       } else {
-        setErro("Erro ao criar conta. Tente novamente.");
+        console.error("Erro ao cadastrar:", error);
+        toast.error(error.response?.data?.message || "Erro ao criar sua conta.");
       }
     } finally {
       setCarregando(false);
@@ -130,7 +132,7 @@ export default function RegistroPage() {
             {/* Botão Principal: Fundo Preto, Texto Dourado */}
             <button
               type="submit" disabled={carregando || sucesso}
-              className="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-bold rounded-md text-[#C2AE82] bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 transition-all shadow-md"
+              className="group relative w-full flex justify-center py-3 px-4 border text-sm font-bold rounded-md text-[#C2AE82] bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 transition-all shadow-md"
             >
               {carregando ? "Criando conta..." : "Cadastrar"}
             </button>
@@ -144,6 +146,15 @@ export default function RegistroPage() {
           </div>
         </form>
       </div>
+      <ModalVerificacaoEmail
+              isOpen={isModalVerificacaoAberto}
+              emailDestino={email} // Passamos o e-mail que ele acabou de digitar no form
+              onClose={() => setIsModalVerificacaoAberto(false)}
+              aoVerificarComSucesso={() => {
+                toast.success("Tudo pronto! Agora você já pode fazer login.");
+                router.push("/login");
+              }}
+      />
     </div>
   );
 }

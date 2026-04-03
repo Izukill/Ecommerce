@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -32,6 +33,10 @@ public class Cliente extends Pessoa {
     @JsonIgnore
     @OneToMany(mappedBy = "cliente", cascade = CascadeType.PERSIST)
     private List<Pedido> pedidos;
+
+    private String codigoVerificacao;
+
+    private LocalDateTime expiracaoCodigo;
 
 
 

@@ -43,6 +43,8 @@ public abstract class Pessoa implements UserDetails {
 
     private String senha;
 
+    private boolean ativo= false;
+
     @Enumerated(EnumType.STRING)
     private EnumPerfil tipoPerfil;
 
@@ -79,7 +81,9 @@ public abstract class Pessoa implements UserDetails {
     public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() { return true; }
+    public boolean isEnabled() {
+        return this.ativo;
+    }
 
 
 }

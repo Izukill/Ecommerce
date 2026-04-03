@@ -110,13 +110,33 @@ export default function CheckoutPage() {
             </div>
 
             <div className="lg:col-span-5 xl:col-span-4">
-              <ResumoPedido processando={processando} />
+
+              {/* 👇 A MÁGICA ESTÁ AQUI: Essa div 'sticky' gruda no topo (com uma margem de top-24 para não bater no Header) e faz os dois descerem juntos! */}
+              <div className="sticky top-24 space-y-6">
+
+                <ResumoPedido processando={processando} />
+
+                {/* MENSAGEM DE AVISO: Pagamento Exclusivo via Pix */}
+                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 flex items-start gap-4 shadow-lg animate-in fade-in duration-500">
+                  <div className="flex-shrink-0 bg-[#C2AE82]/10 p-2.5 rounded-full">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C2AE82]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-white font-bold text-sm tracking-wide">Pagamento Exclusivo via Pix</h3>
+                    <p className="text-gray-400 text-sm mt-1.5 leading-relaxed">
+                      Para garantir a separação imediata e o envio mais rápido do seu pacote, atualmente processamos apenas pagamentos por Pix. <strong className="text-gray-300 font-medium">O QR Code será gerado ao finalizar o pedido.</strong>
+                    </p>
+                  </div>
+                </div>
+
+              </div>
             </div>
           </div>
         </div>
       </main>
 
-      {/* 👇 Substituímos o ModalSucesso antigo pelo novo ModalPagamentoPix */}
       <ModalPagamentoPix
         isOpen={isModalPixAberto}
         pixData={pixData}

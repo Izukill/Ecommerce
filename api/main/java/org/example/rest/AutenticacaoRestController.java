@@ -4,7 +4,9 @@ import jakarta.validation.Valid;
 import org.example.model.Pessoa;
 import org.example.rest.dto.Autenticacao.AutenticacaoRequestDTO;
 import org.example.rest.dto.Autenticacao.TokenResponseDTO;
+import org.example.rest.dto.Email.ValidarEmailRequestDTO;
 import org.example.security.TokenService;
+import org.example.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -15,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/login")
 public class AutenticacaoRestController implements AutenticacaoRestControllerAPI {
@@ -24,6 +28,9 @@ public class AutenticacaoRestController implements AutenticacaoRestControllerAPI
 
     @Autowired
     private TokenService tokenService;
+
+    @Autowired
+    private ClienteService clienteService;
 
     @Override
     @PostMapping
@@ -39,5 +46,28 @@ public class AutenticacaoRestController implements AutenticacaoRestControllerAPI
 
 
     }
+
+    @PostMapping("/validar-codigo")
+    public ResponseEntity<String> validarCodigo(@RequestBody @Valid ValidarEmailRequestDTO dados) {
+        try {
+            clienteService.validarCodigo(dados.getEmail(), dados.getCodigo());
+            return ResponseEntity.ok("Conta ativada com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/reenviar-codigo")
+    public ResponseEntity<String> reenviarCodigo(@RequestBody Map<String, String> body) {
+        try {
+            String email = body.get("email");
+            clienteService.reenviarCodigo(email);
+            return ResponseEntity.ok("Novo código enviado para o e-mail.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
 
 }
