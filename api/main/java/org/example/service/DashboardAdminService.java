@@ -11,6 +11,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -30,10 +31,20 @@ public class DashboardAdminService {
 
         LocalDate hoje = LocalDate.now();
 
+        //para pegar o faturamento
         LocalDateTime inicioMes = hoje.withDayOfMonth(1).atStartOfDay();
-        LocalDateTime fimMes = hoje.plusMonths(1).withDayOfMonth(1).atStartOfDay();
+        LocalDateTime fimMes = hoje.withDayOfMonth(hoje.lengthOfMonth()).atTime(23, 59, 59);
 
-        BigDecimal faturamento = pedidoRepository.faturamentoMes(inicioMes, fimMes);
+        //para pegar a % do mês anterior
+        LocalDate mesPassado = hoje.minusMonths(1);
+        LocalDateTime inicioMesPassado = mesPassado.withDayOfMonth(1).atStartOfDay();
+        LocalDateTime fimMesPassado = mesPassado.withDayOfMonth(mesPassado.lengthOfMonth()).atTime(23, 59, 59);
+
+        BigDecimal faturamentoAtual = pedidoRepository.faturamentoMes(inicioMes, fimMes);
+        if (faturamentoAtual == null) faturamentoAtual = BigDecimal.ZERO;
+
+        BigDecimal faturamentoAnterior = pedidoRepository.faturamentoMes(inicioMesPassado, fimMesPassado);
+        if (faturamentoAnterior == null) faturamentoAnterior = BigDecimal.ZERO;
 
         Long pedidosMes = pedidoRepository.pedidosMes(inicioMes, fimMes);
 
@@ -47,7 +58,19 @@ public class DashboardAdminService {
 
         DashboardAdminDTO dto = new DashboardAdminDTO();
 
-        dto.setFaturamentoMes(faturamento);
+        BigDecimal percentualCrescimento = BigDecimal.ZERO;
+
+        if (faturamentoAnterior.compareTo(BigDecimal.ZERO) > 0) {
+            //calcula o percentual pra mostrar no front
+            percentualCrescimento = faturamentoAtual.subtract(faturamentoAnterior)
+                    .divide(faturamentoAnterior, 4, RoundingMode.HALF_UP)
+                    .multiply(new BigDecimal("100"));
+        } else if (faturamentoAtual.compareTo(BigDecimal.ZERO) > 0) {
+            percentualCrescimento = new BigDecimal("100");
+        }
+
+        dto.setFaturamentoMes(faturamentoAtual);
+        dto.setPorcentagemPassada(percentualCrescimento);
         dto.setProdutosAtivos(produtosAtivos);
         dto.setAguardandoEnvio(aguardandoEnvio);
         dto.setPedidosMes(pedidosMes);

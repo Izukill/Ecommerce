@@ -11,6 +11,7 @@ export interface PedidoResumo {
 
 export interface DashboardAdmin {
   faturamentoMes: number;
+  porcentagemPassada: number;
   produtosAtivos: number;
   pedidosMes: number;
   aguardandoEnvio: number;

@@ -36,7 +36,7 @@ export default function AdminDashboardPage() {
           </h3>
           <p className="text-xs text-green-400 mt-2 font-bold flex items-center gap-1">
             <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-            +14% em relação ao mês passado
+            +{(dashboard?.porcentagemPassada ?? 0)}% em relação ao mês passado
           </p>
         </div>
 

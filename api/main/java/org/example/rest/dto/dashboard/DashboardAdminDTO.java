@@ -10,6 +10,8 @@ public class DashboardAdminDTO {
 
     private BigDecimal faturamentoMes;
 
+    private BigDecimal porcentagemPassada;
+
     private Long produtosAtivos;
 
     private Long pedidosMes;
