@@ -147,7 +147,7 @@ export default function CategoriasPage() {
       setCategorias(categorias.filter(c => c.lookupId !== categoriaParaExcluir.lookupId));
       fecharModalExclusao();
     } catch (error) {
-      alert("Erro ao excluir. Essa categoria já deve estar vinculada a algum produto.");
+      toast.error("Erro ao excluir. Essa categoria já deve estar vinculada a algum produto.");
       fecharModalExclusao();
     }
   };

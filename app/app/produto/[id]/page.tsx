@@ -58,7 +58,7 @@ export default function DetalhesProdutoPage() {
     };
 
     console.log("Adicionado ao carrinho:", itemCarrinho);
-    alert(`Oba! ${quantidade}x ${produto.nome} (${variacaoSelecionada.cor} - ${variacaoSelecionada.tamanho}) adicionado ao carrinho! 🛒`);
+    toast.success(`Oba! ${quantidade}x ${produto.nome} (${variacaoSelecionada.cor} - ${variacaoSelecionada.tamanho}) adicionado ao carrinho! 🛒`);
   };
 
   if (carregando) {

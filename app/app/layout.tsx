@@ -25,25 +25,28 @@ export const metadata: Metadata = {
 const configuracaoToast: DefaultToastOptions = {
   duration: 3000,
   style: {
-    background: '#88e788',
-    color: '#fff',
-    border: '1px solid #404040',
-    padding: '16px',
-    borderRadius: '12px',
-  },
-  success: {
-    iconTheme: {
-      primary: '#88e788',
-      secondary: '#88e788',
+      padding: '16px',
+      borderRadius: '12px',
+      fontWeight: 'bold',
+      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.5)',
     },
-  },
-  error: {
-    duration: 5000,
-    iconTheme: {
-      primary: '#ef4444',
-      secondary: '#fff',
+
+    success: {
+      style: {
+        background: '#4ade80',
+        color: '#000000',
+        border: '1px solid #22c55e',
+      },
     },
-  },
+
+    error: {
+      duration: 5000,
+      style: {
+        background: '#f87171',
+        color: '#000000',
+        border: '1px solid #ef4444',
+      },
+    },
 };
 
 export default function RootLayout({

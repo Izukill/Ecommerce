@@ -113,7 +113,7 @@ export default function ListaClientesPage() {
       fecharModalEdicao();
       carregarClientes(paginaAtual); // Atualiza a lista
     } catch (error) {
-      alert("Erro ao atualizar o cliente.");
+      toast.error("Erro ao atualizar o cliente.");
     } finally {
       setSalvandoEdicao(false);
     }
@@ -136,7 +136,7 @@ export default function ListaClientesPage() {
       setIsModalExclusaoAberto(false);
       setClienteParaExcluir(null);
     } catch (error) {
-      alert("Erro ao excluir o cliente. Ele pode ter pedidos atrelados ao seu cadastro.");
+      toast.error("Erro ao excluir o cliente. Ele pode ter pedidos atrelados ao seu cadastro.");
       setIsModalExclusaoAberto(false);
     }
   };

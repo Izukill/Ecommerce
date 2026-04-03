@@ -124,7 +124,7 @@ export default function ListaProdutosPage() {
       carregarDados(paginaAtual);
       fecharModalExclusao();
     } catch (error) {
-      alert("Erro ao excluir o produto. Ele pode estar atrelado a algum pedido.");
+      toast.error("Erro ao excluir o produto. Ele pode estar atrelado a algum pedido.");
       fecharModalExclusao();
     }
   };
@@ -138,7 +138,7 @@ export default function ListaProdutosPage() {
         fecharModalAtivacao();
       } catch (error: any) {
           console.error("Erro completo:", error.response?.data || error.message);
-          alert(`Erro: ${error.response?.status} - ${error.response?.data?.message || "Erro de conexão"}`);
+          toast.error(`Erro: ${error.response?.status} - ${error.response?.data?.message || "Erro de conexão"}`);
           fecharModalAtivacao();
       }
   };

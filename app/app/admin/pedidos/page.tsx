@@ -69,7 +69,7 @@ export default function PedidosAdminPage() {
         carregarPedidos(paginaAtual);
       } catch (error) {
         console.error("Erro ao atualizar status:", error);
-        alert("Não foi possível atualizar o status do pedido.");
+        toast.error("Não foi possível atualizar o status do pedido.");
       }
     };
 

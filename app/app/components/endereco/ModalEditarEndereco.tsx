@@ -47,10 +47,10 @@ export default function ModalEditarEndereco({
             setIsConfirmando(false);
             setEnderecoEditando(null);
 
-            toast("Endereço atualizado com sucesso! ✅");
+            toast.success("Endereço atualizado com sucesso!");
         } catch (error: any) {
             console.error("Erro ao atualizar endereço:", error.response?.data || error.message);
-            toast("❌ Erro ao atualizar o endereço");
+            toast.error("Erro ao atualizar o endereço");
             setIsConfirmando(false);
         }
     };

@@ -75,11 +75,11 @@ export default function ModalCriarEndereco({
             const response = await api.post('/enderecos', enderecoCriando);
             aoSalvarComSucesso(response.data);
             setEnderecoCriando(null);
-            toast("Endereço adicionado com sucesso! ✅");
+            toast.success("Endereço adicionado com sucesso!");
 
         } catch (error: any) {
             console.error("Erro ao criar endereço:", error.response?.data || error.message);
-            alert("❌ Erro ao salvar o novo endereço");
+            toast.error("Erro ao adicionar endereço");
         }
     };
 

@@ -67,12 +67,12 @@ export default function ModalEditarPerfil({
 
        if(response.status == 200 || response.status == 204){
            aoSalvarComSucesso(dadosAtualizados);
-           toast.success("Perfil atualizado com sucesso! ✅");
+           toast.success("Perfil atualizado com sucesso!");
            onClose();
        }
     } catch(error: any){
         console.error("Erro ao atualizar o perfil:", error.response?.data || error.message);
-        toast.error("Erro ao atualizar perfil ❌");
+        toast.error("Erro ao atualizar perfil");
     }
   };
 
