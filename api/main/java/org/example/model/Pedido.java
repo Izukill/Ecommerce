@@ -50,6 +50,9 @@ public class Pedido {
 
     private LocalDateTime dataHora;
 
+    @Column(name = "data_expiracao")
+    private LocalDateTime dataExpiracao;//pra devolver pro estoque caso não pague o pedido
+
     @OneToMany(mappedBy = "pedido", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<ItemPedido> itens;
 

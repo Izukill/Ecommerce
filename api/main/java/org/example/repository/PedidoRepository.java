@@ -30,6 +30,8 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     Page<Pedido> findByDataHoraBetween(LocalDateTime dataInicio, LocalDateTime dataFinal, Pageable pageable);
 
+    List<Pedido> findByStatusAndDataExpiracaoBefore(EnumStatusPedido status, LocalDateTime dataAtual);
+
     @Query("""
         SELECT COALESCE(SUM(i.precoUnitario * i.quantidade),0)
         FROM Pedido p

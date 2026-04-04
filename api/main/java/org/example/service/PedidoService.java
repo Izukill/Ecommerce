@@ -64,9 +64,10 @@ public class PedidoService {
         pedido.setItens(new ArrayList<>());
         pedido.setCliente(cliente);
 
-        //seta status do pedido e o endereço
+        //seta status do pedido, endereço e a data limite de pagamento
         pedido.setStatus(EnumStatusPedido.AGUARDANDO_PAGAMENTO);
         pedido.setDataHora(LocalDateTime.now());
+        pedido.setDataExpiracao(LocalDateTime.now().plusMinutes(30));
 
 
         Endereco endereco = new Endereco();

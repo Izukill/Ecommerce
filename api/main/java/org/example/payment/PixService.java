@@ -21,6 +21,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.OffsetDateTime;
 
 @Service
 public class PixService {
@@ -40,6 +41,8 @@ public class PixService {
     public PixResponseDTO gerarPix(BigDecimal valorTotal, Cliente cliente) {
         try {
             PaymentClient client = new PaymentClient();
+
+            OffsetDateTime dataExpiracaoMercadoPago = OffsetDateTime.now().plusMinutes(30); //data expiração do pagamento de 30 min
 
             String cpfLimpo = cliente.getCpf().replaceAll("[^0-9]", "");
 
@@ -61,6 +64,7 @@ public class PixService {
                     .transactionAmount(valorTotal)
                     .paymentMethodId("pix")
                     .payer(payer)
+                    .dateOfExpiration(dataExpiracaoMercadoPago)
                     .build();
 
             MPRequestOptions customOptions = MPRequestOptions.builder()
