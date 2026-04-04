@@ -3,6 +3,7 @@
 import { useState, FormEvent, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCart } from "@/app/contexts/CartContext";
+import { useAuth } from "@/app/contexts/AuthContext";
 import { api } from "@/lib/api";
 
 import Header from "@/app/components/layout/Header";
@@ -14,27 +15,95 @@ import ModalPagamentoPix from "../components/pedido/ModalPagamentoPix";
 export default function CheckoutPage() {
   const router = useRouter();
   const { carrinho, valorTotal, limparCarrinho } = useCart();
+  const { usuario } = useAuth();
 
   const [formData, setFormData] = useState({
     nome: "", email: "", cpf: "", telefone: "",
-    cep: "", logradouro: "", numero: "", complemento: "", bairro: "", cidade: "", estado: ""
+    cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: ""
   });
 
   const [processando, setProcessando] = useState(false);
   const [erro, setErro] = useState("");
 
   const [pedidoRealizadoId, setPedidoRealizadoId] = useState<string | null>(null);
-
   const [pixData, setPixData] = useState<any>(null);
   const [isModalPixAberto, setIsModalPixAberto] = useState(false);
   const [valorFinalCongelado, setValorFinalCongelado] = useState(0);
 
+  // Estados dos endereços do banco
+  const [enderecosSalvos, setEnderecosSalvos] = useState<any[]>([]);
+  const [enderecoSelecionado, setEnderecoSelecionado] = useState<string>('novo');
+
   useEffect(() => {
-    // Adicionamos o isModalPixAberto aqui para não redirecionar enquanto o cara paga
     if (carrinho.length === 0 && !processando && !pedidoRealizadoId && !isModalPixAberto) {
       router.push("/");
     }
   }, [carrinho, router, processando, pedidoRealizadoId, isModalPixAberto]);
+
+  // 👇 NOVA LÓGICA DE BUSCA: Batendo nos dois endpoints (Perfil e Endereços)
+  useEffect(() => {
+    if (usuario) {
+      const buscarDadosEEnderecos = async () => {
+        try {
+          // Promise.all faz as duas buscas ao mesmo tempo para a tela carregar mais rápido!
+          const [resPerfil, resEnderecos] = await Promise.all([
+            api.get('/clientes/me'),
+            api.get('/enderecos/meus-enderecos')
+          ]);
+
+          const perfil = resPerfil.data;
+          const listaEnderecos = resEnderecos.data;
+
+          // Preenche os dados pessoais
+          setFormData(prev => ({
+            ...prev,
+            nome: perfil.nome || "",
+            email: perfil.email || "",
+            cpf: perfil.cpf || "",
+            telefone: perfil.telefone || ""
+          }));
+
+          // Preenche a lista de endereços se existir algum
+          if (listaEnderecos && listaEnderecos.length > 0) {
+            setEnderecosSalvos(listaEnderecos);
+          }
+        } catch (error) {
+          console.error("Erro ao puxar dados do checkout:", error);
+        }
+      };
+      buscarDadosEEnderecos();
+    }
+  }, [usuario]);
+
+  const preencherEnderecoForm = (endereco: any) => {
+    setFormData(prev => ({
+      ...prev,
+      cep: endereco.cep || "",
+      rua: endereco.rua || "",
+      numero: endereco.numero || "",
+      complemento: endereco.complemento || "",
+      bairro: endereco.bairro || "",
+      cidade: endereco.cidade || "",
+      estado: endereco.estado || ""
+    }));
+  };
+
+  const handleSelectEnderecoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const valor = e.target.value;
+    setEnderecoSelecionado(valor);
+
+    if (valor === 'novo') {
+      setFormData(prev => ({
+        ...prev,
+        cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: ""
+      }));
+    } else {
+      const endEscolhido = enderecosSalvos.find(end => String(end.lookupID) === valor);
+      if (endEscolhido) {
+        preencherEnderecoForm(endEscolhido);
+      }
+    }
+  };
 
   const handleFinalizarPedido = async (e: FormEvent) => {
     e.preventDefault();
@@ -47,7 +116,7 @@ export default function CheckoutPage() {
           nome: formData.nome, email: formData.email, cpf: formData.cpf, telefone: formData.telefone
         },
         enderecoEntrega: {
-          cep: formData.cep, logradouro: formData.logradouro, numero: formData.numero,
+          cep: formData.cep, rua: formData.rua, numero: formData.numero,
           complemento: formData.complemento, bairro: formData.bairro, cidade: formData.cidade, estado: formData.estado
         },
         itens: carrinho.map(item => ({
@@ -60,11 +129,9 @@ export default function CheckoutPage() {
 
       const response = await api.post("/pedidos", payloadPedido);
 
-      //pega o pacote do pix lá do backend
       const { pedido, pix } = response.data;
-
       setPedidoRealizadoId(pedido.lookupId);
-      setPixData(pix); //Guarda o QR Code
+      setPixData(pix);
       setValorFinalCongelado(pedido.valorTotal);
       setIsModalPixAberto(true);
 
@@ -79,7 +146,6 @@ export default function CheckoutPage() {
 
   const handleFecharModalPix = () => {
     setIsModalPixAberto(false);
-    // Quando ele fechar o modal, podemos mandar ele para a tela inicial ou para uma tela de "Meus Pedidos"
     router.push("/");
   };
 
@@ -104,19 +170,38 @@ export default function CheckoutPage() {
                     {erro}
                   </div>
                 )}
+
                 <DadosCliente valores={formData} setValores={setFormData} />
+                {enderecosSalvos.length > 0 && (
+                  <div className="bg-black border border-neutral-800 rounded-2xl p-6 sm:p-8 shadow-xl">
+                    <label className="block font-bold text-[#C2AE82] mb-3 flex items-center gap-2">
+                      <span className="w-8 h-8 rounded-full bg-[#C2AE82]/10 flex items-center justify-center text-sm">+</span>
+                      Escolha um Endereço de Entrega
+                    </label>
+                    <select
+                      value={enderecoSelecionado}
+                      onChange={handleSelectEnderecoChange}
+                      className="w-full px-4 py-3 bg-black border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none transition cursor-pointer appearance-none"
+                    >
+                      <option value="novo">✨ Usar Endereço não Cadastrado</option>
+                      {enderecosSalvos.map((end) => (
+                        <option key={end.lookupID} value={String(end.lookupID)}>
+                          🏠 {end.rua}, {end.numero} - {end.bairro}, {end.cidade}/{end.estado}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                )}
+
                 <EnderecoEntrega valores={formData} setValores={setFormData} />
               </form>
             </div>
+            <div className="lg:col-span-5 xl:col-span-4 relative">
+              <div className="sticky top-24 flex flex-col gap-6">
 
-            <div className="lg:col-span-5 xl:col-span-4">
-
-              {/* 👇 A MÁGICA ESTÁ AQUI: Essa div 'sticky' gruda no topo (com uma margem de top-24 para não bater no Header) e faz os dois descerem juntos! */}
-              <div className="sticky top-24 space-y-6">
-
+                {/* não coloca fixed ou sticky dentro de resumopedido se n buga tudo */}
                 <ResumoPedido processando={processando} />
 
-                {/* MENSAGEM DE AVISO: Pagamento Exclusivo via Pix */}
                 <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 flex items-start gap-4 shadow-lg animate-in fade-in duration-500">
                   <div className="flex-shrink-0 bg-[#C2AE82]/10 p-2.5 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C2AE82]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -133,6 +218,7 @@ export default function CheckoutPage() {
 
               </div>
             </div>
+
           </div>
         </div>
       </main>
@@ -143,7 +229,6 @@ export default function CheckoutPage() {
         valorTotal={valorFinalCongelado}
         onClose={handleFecharModalPix}
       />
-
     </div>
   );
 }

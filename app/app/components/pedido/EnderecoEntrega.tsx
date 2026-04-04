@@ -43,10 +43,10 @@ export default function EnderecoEntrega({ valores, setValores }: EnderecoEntrega
 
         setValores((prev: any) => ({
           ...prev,
-          logradouro: data.logradouro,
-          bairro: data.bairro,
-          cidade: data.localidade,
-          estado: data.uf
+          rua: data.logradouro || "", //é passado assim por causa do que o viaCep retorna
+          bairro: data.bairro || "",
+          cidade: data.localidade || "", //aqui também
+          estado: data.uf || ""
         }));
 
       } catch (error) {
@@ -92,8 +92,8 @@ export default function EnderecoEntrega({ valores, setValores }: EnderecoEntrega
           <label className="block text-sm font-bold text-gray-400 mb-1">Rua</label>
           <input
             type="text"
-            name="logradouro"
-            value={valores.logradouro}
+            name="rua"
+            value={valores.rua}
             onChange={handleChange}
             className="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-[#C2AE82]"
             required
