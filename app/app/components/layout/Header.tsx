@@ -81,26 +81,28 @@ export default function Header() {
                       <p className="text-xs text-gray-400 truncate">{usuario.email}</p>
                     </div>
 
-                    {/* links da conta */}
-                    <Link
-                      href="/cliente?aba=perfil"
-                      onClick={() => setMenuAberto(false)}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
-                    >
-                      👤 Meu Perfil
-                    </Link>
+                    {/* checagem se usuario ou admin */}
+                    {usuario.perfil !== "ADM" && (
+                      <>
+                        <Link
+                          href="/cliente?aba=perfil"
+                          onClick={() => setMenuAberto(false)}
+                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                        >
+                          👤 Meu Perfil
+                        </Link>
 
-                    <Link
-                      href="/cliente?aba=pedidos"
-                      onClick={() => setMenuAberto(false)}
-                      className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
-                    >
-                      📦 Meus Pedidos
-                    </Link>
-
-                    {/* botão admin */}
-                    {usuario.perfil === "ADMIN" && (
-                      <div className="mt-2 pt-2 border-t border-neutral-800">
+                        <Link
+                          href="/cliente?aba=pedidos"
+                          onClick={() => setMenuAberto(false)}
+                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                        >
+                          📦 Meus Pedidos
+                        </Link>
+                      </>
+                    )}
+                    {usuario.perfil === "ADM" && (
+                      <div className="mb-2">
                         <Link
                           href="/admin"
                           onClick={() => setMenuAberto(false)}

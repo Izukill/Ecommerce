@@ -23,8 +23,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="min-h-screen flex">
       <aside className="w-72 bg-neutral-900 flex flex-col hidden md:flex z-20">
         <div className="h-20 flex items-center justify-center border-b border-neutral-800">
-          <Link href="/" className="text-2xl font-extrabold text-white tracking-tighter">
-            MIRLLE<span className="text-[#C2AE82]">FITNESS</span>
+          {/* 👇 LOGO ADICIONADA AQUI */}
+          <Link href="/" className="flex items-center gap-2 cursor-pointer">
+            <img src="/logoMirle.png" alt="Logo MirlleFitness" className="h-12 w-auto object-contain" />
+            <span className="text-2xl font-extrabold text-white tracking-tighter">
+              MIRLLE<span className="text-[#C2AE82]">FITNESS</span>
+            </span>
           </Link>
         </div>
 
@@ -65,8 +69,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
           <div className="flex items-center gap-4">
             <div className="flex flex-col items-end hidden sm:flex">
-              <span className="text-sm font-bold text-gray-200 capitalize">{nomeAdmin}</span>
-              <span className="text-xs font-semibold text-[#C2AE82]">MirlleFitness</span>
+              {/* 👇 TAMANHO DO NOME AUMENTADO PARA text-lg */}
+              <span className="text-md font-bold text-gray-200 capitalize">{nomeAdmin}</span>
+              <span className="text-sm font-semibold text-[#C2AE82]">MirlleFitness</span>
             </div>
             <div className="h-11 w-11 bg-black rounded-full flex items-center justify-center border-2 border-[#C2AE82] shadow-md">
               <span className="text-[#C2AE82] font-black text-lg">{inicial}</span>
