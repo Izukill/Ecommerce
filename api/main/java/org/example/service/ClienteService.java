@@ -127,19 +127,40 @@ public class ClienteService {
     }
 
     @Transactional
-    public void alterarSenha(UUID lookupId, AlterarSenhaSalvarRequestDTO dto) throws EntidadeNaoEncontradaException, RegraNegocioException {
+    public void solicitarRecuperacaoSenha(String email) throws EntidadeNaoEncontradaException {
+        Cliente cliente = clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado com este e-mail."));
 
-        Cliente cliente = recuperarPor(lookupId);
 
-        if(!passwordEncoder.matches(dto.getSenhaVelha(), cliente.getSenha())){
-            throw new RegraNegocioException("A senha atual informada está incorreta");
+        String codigo = String.format("%06d", new Random().nextInt(999999));
+        cliente.setCodigoVerificacao(codigo);
+        cliente.setExpiracaoCodigo(LocalDateTime.now().plusMinutes(15));
+        clienteRepository.save(cliente);
+
+
+        emailService.enviarEmailRecuperacao(cliente.getEmail(), codigo);
+    }
+
+    @Transactional
+    public void redefinirSenhaComCodigo(String email, String codigo, String novaSenha) throws RegraNegocioException, EntidadeNaoEncontradaException {
+        Cliente cliente = clienteRepository.findByEmail(email)
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Cliente não encontrado com este e-mail."));
+
+        if (cliente.getCodigoVerificacao() == null || !cliente.getCodigoVerificacao().equals(codigo)) {
+            throw new RegraNegocioException("Código de verificação inválido.");
         }
 
-        if(passwordEncoder.matches(dto.getSenhaNova(), cliente.getSenha())){
-            throw new RegraNegocioException("A nova senha não pode ser igual à senha atual");
+        if (LocalDateTime.now().isAfter(cliente.getExpiracaoCodigo())) {
+            throw new RegraNegocioException("O código expirou. Solicite um novo.");
         }
 
-        cliente.setSenha(passwordEncoder.encode(dto.getSenhaNova()));
+        if(cliente.getSenha().equals(passwordEncoder.encode(novaSenha))){
+            throw new RegraNegocioException("A Nova senha Não pode ser igual senha Antiga");
+        }
+
+        cliente.setSenha(passwordEncoder.encode(novaSenha));
+        cliente.setCodigoVerificacao(null);
+        cliente.setExpiracaoCodigo(null);
         clienteRepository.save(cliente);
     }
 

@@ -5,7 +5,6 @@ import org.example.exception.MirlleException;
 import org.example.exception.RegraNegocioException;
 import org.example.mapper.ClienteMapper;
 import org.example.model.Cliente;
-import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
 import org.example.rest.dto.Cliente.ClienteBuscarDTO;
 import org.example.rest.dto.Cliente.ClienteResponseDTO;
 import org.example.rest.dto.Cliente.ClienteSalvarRequestDTO;
@@ -36,14 +35,6 @@ public class ClienteRestController implements ClienteRestControllerAPI {
         Cliente clienteSalvo = service.criar(cliente);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(mapper.from(clienteSalvo));
-    }
-
-    //rota específica para alterar a senha
-    @Override
-    @PutMapping("/{lookupId}/senha")
-    public ResponseEntity<Void> alterarSenha(@PathVariable UUID lookupId, @RequestBody AlterarSenhaSalvarRequestDTO dto) throws MirlleException, EntidadeNaoEncontradaException {
-        service.alterarSenha(lookupId, dto);
-        return ResponseEntity.noContent().build();
     }
 
     @Override

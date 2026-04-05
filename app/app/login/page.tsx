@@ -28,21 +28,22 @@ export default function LoginPage() {
 
   const [erro, setErro] = useState("");
   const [carregando, setCarregando] = useState(false);
+  const [loginFalhou, setLoginFalhou] = useState(false);
 
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setErro("");
     setCarregando(true);
+    setLoginFalhou(false);
 
     try {
       const response = await api.post("/login", { email, senha });
       const tokenJWT = response.data.token;
 
       localStorage.setItem("mirlle_token", tokenJWT);
-
       const dadosDoToken = decodificarToken(tokenJWT);
 
-      if (dadosDoToken && dadosDoToken.perfil === "ADM") {
+      if (dadosDoToken && dadosDoToken.perfil === "ADMIN") {
         router.push("/admin");
       } else {
         router.push("/");
@@ -50,18 +51,17 @@ export default function LoginPage() {
 
     } catch (error: any) {
       setErro("E-mail ou senha incorretos.");
+      setLoginFalhou(true);
     } finally {
       setCarregando(false);
     }
   };
 
   return (
-
     <div className="min-h-screen flex items-center justify-center px-4">
-      {/* CARD: */}
       <div className="max-w-md w-full space-y-8 bg-black p-10 rounded-xl shadow-2xl border-t-4 border-[#C2AE82]">
 
-        {/* Cabeçalho do Login  */}
+
         <div className="text-center">
           <Link href="/" className="text-3xl font-extrabold text-white tracking-tighter cursor-pointer">
             MIRLLE<span className="text-[#C2AE82]">FITNESS</span>
@@ -71,17 +71,13 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Formulário */}
         <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-
           {erro && (
             <div className="bg-red-950 border-l-4 border-red-500 p-4 mb-4">
               <p className="text-sm text-red-200 font-semibold">{erro}</p>
             </div>
           )}
-
           <div className="space-y-4">
-            {/* Input de E-mail */}
             <div>
               <label htmlFor="email" className="block text-sm font-bold text-gray-100">
                 E-mail
@@ -99,8 +95,6 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-
-            {/* Input de Senha (já atualizado acima) */}
             <div>
               <InputSenha
                 id="senha"
@@ -112,7 +106,6 @@ export default function LoginPage() {
           </div>
 
           <div>
-            {/* Botão Principal: Fundo Preto, Texto Dourado */}
             <button
               type="submit"
               disabled={carregando}
@@ -121,9 +114,15 @@ export default function LoginPage() {
               {carregando ? "Autenticando..." : "Entrar"}
             </button>
           </div>
-
-          <div className="text-center mt-4">
-            {/* Texto de Footer Claro e Link Dourado */}
+          {loginFalhou && (
+            <div className="text-center mt-2 animate-in fade-in duration-300">
+               {/* Mandamos o e-mail pela URL para ele não ter que digitar de novo na próxima tela! */}
+              <Link href={`/recuperar-senha?email=${encodeURIComponent(email)}`} className="text-sm font-bold text-[#C2AE82] hover:text-white transition-colors">
+                Esqueci minha senha
+              </Link>
+            </div>
+          )}
+          <div className="text-center mt-4 border-t border-neutral-800 pt-4">
             <p className="text-sm text-gray-400">
               Não tem uma conta? <Link href="/registro" className="font-bold text-[#C2AE82] hover:underline">Criar conta</Link>
             </p>

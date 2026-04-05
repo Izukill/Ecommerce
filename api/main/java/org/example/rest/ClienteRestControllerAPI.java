@@ -48,25 +48,6 @@ public interface ClienteRestControllerAPI {
                                                  ClienteSalvarRequestDTO dto) throws MirlleException;
 
 
-    @Operation(summary = "Alterar senha do cliente.",
-            description = "Exige a senha atual para cadastrar uma nova.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204",
-                    description = "Senha alterada com sucesso. Nenhum conteúdo retornado no corpo da resposta."),
-            @ApiResponse(responseCode = "400",
-                    description = "Erro de validação: Senha atual incorreta, ou a nova senha não atende aos requisitos.",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class))),
-            @ApiResponse(responseCode = "500",
-                    description = "Erro inesperado.",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = ProblemDetail.class)))
-    })
-    @SecurityRequirement(name = "bearerAuth")
-    ResponseEntity<Void> alterarSenha(@Parameter(description = "LookupId do cliente.") UUID lookupId,
-            @RequestBody AlterarSenhaSalvarRequestDTO dto) throws MirlleException, EntidadeNaoEncontradaException;
-
-
     @Operation(summary = "Recuperar um cliente existente.",
             description = "Recupera um cliente existente com base no seu lookupId.")
     @ApiResponses(value = {

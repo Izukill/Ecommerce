@@ -47,6 +47,32 @@ public class AutenticacaoRestController implements AutenticacaoRestControllerAPI
 
     }
 
+    @PostMapping("/esqueci-senha")
+    public ResponseEntity<String> solicitarRecuperacao(@RequestBody Map<String, String> body) {
+        try {
+            clienteService.solicitarRecuperacaoSenha(body.get("email"));
+            return ResponseEntity.ok("Código enviado para o e-mail.");
+        } catch (Exception e) {
+            // Retorna 400 mas não dizemos exatamente qual foi o erro por segurança
+            // (evita que hackers fiquem testando quais e-mails existem no banco)
+            return ResponseEntity.badRequest().body("Se o e-mail existir, um código será enviado.");
+        }
+    }
+
+    @PostMapping("/redefinir-senha")
+    public ResponseEntity<String> redefinirSenha(@RequestBody Map<String, String> body) {
+        try {
+            String email = body.get("email");
+            String codigo = body.get("codigo");
+            String novaSenha = body.get("novaSenha");
+
+            clienteService.redefinirSenhaComCodigo(email, codigo, novaSenha);
+            return ResponseEntity.ok("Senha redefinida com sucesso!");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @PostMapping("/validar-codigo")
     public ResponseEntity<String> validarCodigo(@RequestBody @Valid ValidarEmailRequestDTO dados) {
         try {

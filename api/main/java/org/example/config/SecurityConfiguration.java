@@ -49,6 +49,7 @@ public class SecurityConfiguration {
                         //rotas públicas (qualquer um acessa, sem token)
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**").permitAll()
                         .requestMatchers("/login/validar-codigo", "/login/reenviar-codigo").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/login/esqueci-senha", "/login/redefinir-senha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pedidos").permitAll() //fazer pedido
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta

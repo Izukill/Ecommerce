@@ -44,6 +44,9 @@ public class PedidoService {
     @Autowired
     private PedidoMapper pedidoMapper;
 
+    @Autowired
+    private EmailService emailService;
+
 
     @Transactional
     public CheckoutResponseDTO processarCheckout(PedidoCheckoutRequestDTO dto) throws RegraNegocioException {
@@ -117,8 +120,9 @@ public class PedidoService {
 
 
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
-
+        emailService.enviarEmailNovoPedido(pedidoSalvo, pixResponse);
         PedidoResponseDTO pedidoDTO = pedidoMapper.from(pedidoSalvo);
+
 
         return new CheckoutResponseDTO(pedidoDTO, pixResponse);
     }
@@ -171,10 +175,14 @@ public class PedidoService {
     @Transactional
     public void atualizarStatus(UUID lookupId, PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException {
         Pedido pedido = recuperarPor(lookupId);
+        EnumStatusPedido statusAntigo = pedido.getStatus();
         pedido.setStatus(dto.getStatus());
-
-
         pedidoRepository.save(pedido);
+
+        if (statusAntigo != dto.getStatus()) {
+            emailService.enviarEmailAtualizacaoStatus(pedido);
+        }
+
     }
 
 
@@ -182,11 +190,10 @@ public class PedidoService {
 
     //metodo auxiliar
     private Cliente obterClienteLogado() throws RegraNegocioException {
-        ///pega o email do usuario que passou pelo filtro
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = ((UserDetails) principal).getUsername();
 
-        //e busca o cliente completo no banco
+
         return clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new RegraNegocioException("Cliente não autorizado ou não encontrado."));
     }
