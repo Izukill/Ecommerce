@@ -12,6 +12,7 @@ import org.example.rest.dto.Autenticacao.TokenResponseDTO;
 import org.example.rest.dto.Email.ValidarEmailRequestDTO;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 
 import java.util.Map;
 
@@ -77,5 +78,41 @@ public interface AutenticacaoRestControllerAPI {
             @RequestBody(description = "JSON contendo o e-mail do cliente para o qual o código será reenviado.",
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(example = "{ \"email\": \"cliente@email.com\" }"))) Map<String, String> body);
+    @Operation(summary = "Solicitar recuperação de senha (Esqueci minha senha).",
+            description = "Gera um código de 6 dígitos e envia para o e-mail informado. Por motivos de segurança (para evitar enumeração de contas), mensagens de erro e sucesso são genéricas.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Operação processada. Código enviado para o e-mail.",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Operação processada (mascara possíveis erros).",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class)))
+    })
+    @PostMapping("/esqueci-senha")
+    ResponseEntity<String> solicitarRecuperacao(
+            @RequestBody(description = "JSON contendo o e-mail da conta a ser recuperada.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{ \"email\": \"seu@email.com\" }"))) Map<String, String> body);
+
+
+    @Operation(summary = "Redefinir a senha do usuário com código.",
+            description = "Valida o código de 6 dígitos recebido por e-mail e atualiza a senha da conta.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Senha redefinida com sucesso.",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class))),
+            @ApiResponse(responseCode = "400",
+                    description = "Código de verificação inválido ou expirado.",
+                    content = @Content(mediaType = "text/plain",
+                            schema = @Schema(implementation = String.class)))
+    })
+    @PostMapping("/redefinir-senha")
+    ResponseEntity<String> redefinirSenha(
+            @RequestBody(description = "JSON contendo o e-mail, o código numérico e a nova senha.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(example = "{\n  \"email\": \"seu@email.com\",\n  \"codigo\": \"123456\",\n  \"novaSenha\": \"novaSenha123\"\n}"))) Map<String, String> body);
 
 }

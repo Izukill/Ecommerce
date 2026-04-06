@@ -7,6 +7,7 @@ import org.example.mapper.PedidoMapper;
 import org.example.model.Pedido;
 import org.example.payment.PixService;
 import org.example.rest.dto.Pedido.*;
+import org.example.rest.dto.Pix.PixResponseDTO;
 import org.example.rest.dto.Pix.WebhookMercadoPagoDTO;
 import org.example.service.PedidoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,11 +60,20 @@ public class PedidoRestController implements PedidoRestControllerAPI{
     }
 
     @Override
+    @PutMapping("/{lookupId}/status")
     public ResponseEntity<Void> atualizarStatus(@PathVariable("lookupId") UUID lookupId, @RequestBody @Valid PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException {
         service.atualizarStatus(lookupId, dto);
 
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{lookupId}/pix")
+    public ResponseEntity<PixResponseDTO> recuperarPix(@PathVariable("lookupId") UUID lookupId) throws RegraNegocioException {
+        PixResponseDTO pix = service.recuperarPixDoPedido(lookupId);
+        return ResponseEntity.ok(pix);
+    }
+
+
 
 
 

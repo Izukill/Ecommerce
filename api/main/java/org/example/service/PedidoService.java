@@ -185,6 +185,22 @@ public class PedidoService {
 
     }
 
+    @Transactional
+    public PixResponseDTO recuperarPixDoPedido(UUID lookupId) throws RegraNegocioException {
+        Pedido pedido = recuperarPor(lookupId);
+
+        if (pedido.getStatus() != EnumStatusPedido.AGUARDANDO_PAGAMENTO) {
+            throw new RegraNegocioException("Este pedido não está mais aguardando pagamento.");
+        }
+
+        if (pedido.getPagamentoMercadoPagoId() == null) {
+            throw new RegraNegocioException("Nenhum Pix foi gerado para este pedido.");
+        }
+
+
+        return pixService.buscarPixExistente(pedido.getPagamentoMercadoPagoId());
+    }
+
 
 
 

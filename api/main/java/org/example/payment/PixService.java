@@ -42,45 +42,39 @@ public class PixService {
         try {
             PaymentClient client = new PaymentClient();
 
-            OffsetDateTime dataExpiracaoMercadoPago = OffsetDateTime.now().plusMinutes(30); //data expiração do pagamento de 30 min
-
             String cpfLimpo = cliente.getCpf().replaceAll("[^0-9]", "");
 
-            //pega o cpf limpo para passar no payer request
             IdentificationRequest identification = IdentificationRequest.builder()
                     .type("CPF")
                     .number(cpfLimpo)
                     .build();
 
-            //pega quem tá pagando
             PaymentPayerRequest payer = PaymentPayerRequest.builder()
                     .email(cliente.getEmail())
                     .firstName(cliente.getNome())
                     .identification(identification)
                     .build();
 
-            //pega qual o valor e o metodo de pagamento
             PaymentCreateRequest request = PaymentCreateRequest.builder()
                     .transactionAmount(valorTotal)
                     .paymentMethodId("pix")
                     .payer(payer)
-                    .dateOfExpiration(dataExpiracaoMercadoPago)
                     .build();
 
+            // AQUI ESTÁ O SEGREDO: A chave de idempotência gerada com UUID
             MPRequestOptions customOptions = MPRequestOptions.builder()
                     .accessToken(accessToken)
+                    .customHeaders(java.util.Map.of("x-idempotency-key", java.util.UUID.randomUUID().toString()))
                     .build();
 
-            //se passa as customOptions como segundo parâmetro para passar o token
             Payment payment = client.create(request, customOptions);
 
-            //extrai os dados do QR Code da resposta
             String base64 = payment.getPointOfInteraction().getTransactionData().getQrCodeBase64();
             String copiaECola = payment.getPointOfInteraction().getTransactionData().getQrCode();
             Long mpPaymentId = payment.getId();
 
             return new PixResponseDTO(mpPaymentId, base64, copiaECola);
-            //tratagem de erros pra checar configurações
+
         } catch (MPApiException apiException) {
             System.err.println("ERRO API MERCADO PAGO: " + apiException.getApiResponse().getContent());
             throw new RuntimeException("Erro na API do Mercado Pago. Verifique os logs.");
@@ -113,8 +107,29 @@ public class PixService {
                 }
             }
 
-        } catch (MPApiException | MPException e) {
-            System.err.println("Erro ao verificar pagamento no Mercado Pago: " + e.getMessage());
+        } catch (MPApiException apiException) {
+            System.err.println("ERRO API MERCADO PAGO (Webhook): " + apiException.getApiResponse().getContent());
+        } catch (MPException e) {
+            System.err.println("ERRO INTERNO NA SDK (Webhook): " + e.getMessage());
+        }
+    }
+
+    public PixResponseDTO buscarPixExistente(Long idPagamentoMP) {
+        try {
+            PaymentClient client = new PaymentClient();
+            Payment payment = client.get(idPagamentoMP);
+
+            String base64 = payment.getPointOfInteraction().getTransactionData().getQrCodeBase64();
+            String copiaECola = payment.getPointOfInteraction().getTransactionData().getQrCode();
+
+            return new PixResponseDTO(idPagamentoMP, base64, copiaECola);
+
+        } catch (MPApiException apiException) {
+            System.err.println("ERRO API MP AO BUSCAR: " + apiException.getApiResponse().getContent());
+            throw new RuntimeException("Erro ao buscar o QR Code no Mercado Pago.");
+        } catch (MPException e) {
+            System.err.println("ERRO SDK AO BUSCAR: " + e.getMessage());
+            throw new RuntimeException("Erro interno de conexão.");
         }
     }
 

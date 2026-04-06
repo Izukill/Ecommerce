@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.example.exception.MirlleException;
 import org.example.exception.RegraNegocioException;
 import org.example.rest.dto.Pedido.*;
+import org.example.rest.dto.Pix.PixResponseDTO;
 import org.example.rest.dto.Pix.WebhookMercadoPagoDTO;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,7 @@ import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -111,5 +113,28 @@ public interface PedidoRestControllerAPI {
     })
     @PatchMapping("/{lookupId}/status")
     ResponseEntity<Void> atualizarStatus(@PathVariable("lookupId") UUID lookupId, @RequestBody @Valid PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException;
+
+    @Operation(summary = "Recuperar o pix de um pedido existente.",
+            description = "Recupera os dados de pagamento via pix (qrcode em base64 e código copia-e-cola) de um pedido que ainda esteja com o status AGUARDANDO_PAGAMENTO.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Operação realizada com sucesso.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = PixResponseDTO.class))),
+
+            @ApiResponse(responseCode = "400",
+                    description = "Pedido não encontrado ou não está mais aguardando pagamento.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+
+            @ApiResponse(responseCode = "500",
+                    description = "Erro inesperado ou falha na comunicação com a API do Mercado Pago.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @GetMapping("/{lookupId}/pix")
+    ResponseEntity<PixResponseDTO> recuperarPix(@Parameter(description = "LookupId do pedido para buscar o código Pix.")
+                                                @PathVariable("lookupId") UUID lookupId) throws RegraNegocioException;
+
 
 }

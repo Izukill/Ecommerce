@@ -8,7 +8,7 @@ import org.example.model.EnumStatusPedido;
 @Data
 public class PedidoStatusUpdateRequestDTO {
 
-    @Schema(description = "Novo status do pedido", example = "EM_PROCESSO")
+    @Schema(description = "Novo status do pedido", example = "AGUARDANDO_PAGAMENTO")
     @NotNull(message = "o status do pedido é obritagório")
     private EnumStatusPedido status;
 
