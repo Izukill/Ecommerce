@@ -54,14 +54,14 @@ export default function AbaPedidos() {
         await api.put(`/pedidos/${pedidoId}/status`, { status: novoStatus });
         toast.success(`Pedido atualizado com sucesso!`);
 
-        // Atualiza a lista na tela imediatamente
+        //atualiza a lista automaticamente
         setPedidos((listaAnterior) =>
           listaAnterior.map((ped) =>
             ped.lookupId === pedidoId ? { ...ped, status: novoStatus } : ped
           )
         );
 
-        // Atualiza o modal aberto
+        //atualiza o modal aberto
         if (pedidoSelecionado && pedidoSelecionado.lookupId === pedidoId) {
           setPedidoSelecionado({ ...pedidoSelecionado, status: novoStatus });
         }
@@ -80,9 +80,7 @@ export default function AbaPedidos() {
         setValorFinalPix(valorTotal);
         setIsModalPixAberto(true);
 
-        //toast.dismiss(toastId);
       } catch (error) {
-        //toast.dismiss(toastId);
         toast.error("Erro ao resgatar o Pix. Tente recarregar a página.");
       }
   };

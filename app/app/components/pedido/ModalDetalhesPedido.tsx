@@ -45,7 +45,7 @@ interface ModalDetalhesPedidoProps {
   getStatusBadge: (status: string) => string;
   onAtualizarStatus: (pedidoId: string, novoStatus: string) => void;
   isAdmin?: boolean;
-  onVerPix?: (pedidoId: string, valorTotal: number) => void; // 👈 Nova função para abrir o PIX
+  onVerPix?: (pedidoId: string, valorTotal: number) => void;
 }
 
 export default function ModalDetalhesPedido({
@@ -71,7 +71,6 @@ export default function ModalDetalhesPedido({
         case "AGUARDANDO_PAGAMENTO":
           return (
             <div className="flex flex-wrap gap-2 w-full sm:w-auto">
-              {/* 👇 Botão Pagar Agora para o Cliente */}
               {onVerPix && (
                 <button
                   onClick={() => onVerPix(pedidoSelecionado.lookupId, pedidoSelecionado.valorTotal)}
@@ -98,11 +97,10 @@ export default function ModalDetalhesPedido({
             </button>
           );
         default:
-          return null; // Cliente não vê botões se o pedido já estiver PAGO ou ENVIADO
+          return null;
       }
     }
 
-    // VISÃO DO ADMINISTRADOR (Seus superpoderes)
     switch (pedidoSelecionado.status) {
       case "AGUARDANDO_PAGAMENTO":
         return (
