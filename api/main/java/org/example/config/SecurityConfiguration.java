@@ -59,6 +59,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/error").permitAll() //rota de erro liberada para não mascara excessões
 
                         //rotas pra ADM
+                        .requestMatchers(HttpMethod.GET, "/pedidos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/produtos").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/produtos/**").hasRole("ADMIN")
@@ -76,7 +77,11 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.GET, "/clientes/me").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.PUT, "/clientes/me").hasRole("CLIENTE")
                         .requestMatchers(HttpMethod.GET,"/enderecos/meus-enderecos").hasRole("CLIENTE")
-                        .requestMatchers(HttpMethod.GET, "pedidos/meus-pedidos").hasRole("CLIENTE")
+                        .requestMatchers(HttpMethod.GET, "/pedidos/meus-pedidos").hasRole("CLIENTE")
+
+                        //rotas compartilhadas
+                        .requestMatchers(HttpMethod.PUT,"/pedidos/**").hasAnyRole("ADMIN", "CLIENTE")
+                        .requestMatchers(HttpMethod.GET,"/pedidos/**").hasAnyRole("ADMIN", "CLIENTE")
 
                         //qualquer outro endpoint que não foi setado acima faz com que no mínimo precise estar autenticado por segurança
                         .anyRequest().authenticated()

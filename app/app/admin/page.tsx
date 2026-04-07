@@ -91,6 +91,7 @@ export default function AdminDashboardPage() {
                         ${pedido.status === 'PAGO' ? 'bg-green-950/30 text-green-400 border-green-900/50' :
                           pedido.status === 'ENVIADO' ? 'bg-blue-950/30 text-blue-400 border-blue-900/50' :
                           pedido.status === 'CANCELADO' ? 'bg-red-950/30 text-red-400 border-red-900/50' :
+                          pedido.status === 'AGUARDANDO_PAGAMENTO' ? 'bg-yellow-950/30 text-yellow-400 border-yellow-900/50' :
                           'bg-blue-950/30 text-blue-400 border-blue-900/50'}`}
                       >
                         {pedido.status}

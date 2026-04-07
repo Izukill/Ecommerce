@@ -61,8 +61,7 @@ export default function PedidosAdminPage() {
 
   const handleAtualizarStatus = async (pedidoId: string, novoStatus: string) => {
       try {
-        // Supondo que a sua rota no Spring Boot seja PATCH /pedidos/{id}/status com o novo status no body ou parâmetro
-        await api.patch(`/pedidos/${pedidoId}/status`, { status: novoStatus });
+        await api.put(`/pedidos/${pedidoId}/status`, { status: novoStatus });
 
 
         fecharModal();
@@ -87,9 +86,10 @@ export default function PedidosAdminPage() {
   const getStatusBadge = (status: string) => {
     const s = (status || "").toUpperCase();
     switch (s) {
-      case "PAGO": return "bg-green-900/30 text-green-400 border-green-900/50";
-      case "ENVIADO": return "bg-blue-900/30 text-blue-400 border-blue-900/50";
-      case "CANCELADO": return "bg-red-900/30 text-red-500 border-red-900/50";
+      case "PAGO": return "bg-green-950/30 text-green-400 border-green-900/50";
+      case "ENVIADO": return "bg-blue-950/30 text-blue-400 border-blue-900/50";
+      case "CANCELADO": return "bg-red-950/30 text-red-400 border-red-900/50";
+      case "AGUARDANDO_PAGAMENTO": return "bg-yellow-950/30 text-yellow-400 border-yellow-900/50";
       default: return "bg-neutral-800 text-gray-400 border-neutral-700";
     }
   };
@@ -299,6 +299,7 @@ export default function PedidosAdminPage() {
         formatarMoeda={formatarMoeda}
         getStatusBadge={getStatusBadge}
         onAtualizarStatus={handleAtualizarStatus}
+        isAdmin={true}
       />
 
     </div>

@@ -57,7 +57,7 @@ export default function ModalDetalhesPedido({
   getStatusBadge,
   onAtualizarStatus,
   isAdmin = false,
-  onVerPix={handleVerPix}
+  onVerPix
 }: ModalDetalhesPedidoProps) {
 
   if (!isOpen || !pedidoSelecionado) return null;

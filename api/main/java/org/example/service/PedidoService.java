@@ -174,15 +174,64 @@ public class PedidoService {
 
     @Transactional
     public void atualizarStatus(UUID lookupId, PedidoStatusUpdateRequestDTO dto) throws RegraNegocioException {
-        Pedido pedido = recuperarPor(lookupId);
-        EnumStatusPedido statusAntigo = pedido.getStatus();
-        pedido.setStatus(dto.getStatus());
-        pedidoRepository.save(pedido);
 
-        if (statusAntigo != dto.getStatus()) {
-            emailService.enviarEmailAtualizacaoStatus(pedido);
+        //trava pro cliente não conseguir alterar o status para pago
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = authentication.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+
+        EnumStatusPedido novoStatus = dto.getStatus();
+
+        if (!isAdmin) {
+            //o cliente só tem permissão para transitar entre cancelado e aguardando pagamento
+            if (novoStatus != EnumStatusPedido.CANCELADO && novoStatus != EnumStatusPedido.AGUARDANDO_PAGAMENTO) {
+                throw new RegraNegocioException("Você não tem permissão para alterar o pedido para este status.");
+            }
         }
 
+
+        Pedido pedido = recuperarPor(lookupId);
+        EnumStatusPedido statusAntigo = pedido.getStatus();
+
+        if (statusAntigo == novoStatus) {
+            return;
+        }
+
+        //reabertura cancelado -> aguardando pagamento
+        if (statusAntigo == EnumStatusPedido.CANCELADO && novoStatus != EnumStatusPedido.CANCELADO) {
+
+            for (ItemPedido item : pedido.getItens()) {
+                VariacaoProduto produto = item.getProduto();
+
+                if (produto.getQuantidadeEstoque() < item.getQuantidade()) {
+                    throw new RegraNegocioException("Estoque insuficiente para reabrir o pedido. O produto ID "
+                            + produto.getLookupId() + " não possui " + item.getQuantidade() + " unidades.");
+                }
+
+                //tira do estoque denovo e salva
+                produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - item.getQuantidade());
+                variacaoProdutoRepository.save(produto);
+            }
+        }
+
+        //pedido cancelado Aguardando pagamento -> cancelado
+        else if (statusAntigo != EnumStatusPedido.CANCELADO && novoStatus == EnumStatusPedido.CANCELADO) {
+
+            for (ItemPedido item : pedido.getItens()) {
+                VariacaoProduto produto = item.getProduto();
+
+                //devolve pro estoque
+                produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() + item.getQuantidade());
+                variacaoProdutoRepository.save(produto);
+            }
+        }
+
+        if (novoStatus == EnumStatusPedido.AGUARDANDO_PAGAMENTO) {
+            pedido.setDataExpiracao(LocalDateTime.now().plusMinutes(30));
+        }
+
+        pedido.setStatus(novoStatus);
+        pedidoRepository.save(pedido);
+        emailService.enviarEmailAtualizacaoStatus(pedido);
     }
 
     @Transactional

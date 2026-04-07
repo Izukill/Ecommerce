@@ -41,11 +41,11 @@ export default function AbaPedidos() {
 
   const getStatusBadge = (status: string) => {
       switch (status?.toUpperCase()) {
-        case 'PAGO': return 'bg-green-500/10 text-green-500 border-green-500/20';
-        case 'ENVIADO': return 'bg-blue-500/10 text-blue-500 border-blue-500/20';
-        case 'AGUARDANDO_PAGAMENTO': return 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20';
-        case 'CANCELADO': return 'bg-red-500/10 text-red-500 border-red-500/20';
-        default: return 'bg-gray-500/10 text-gray-400 border-gray-500/20';
+      case "PAGO": return "bg-green-950/30 text-green-400 border-green-900/50";
+      case "ENVIADO": return "bg-blue-950/30 text-blue-400 border-blue-900/50";
+      case "CANCELADO": return "bg-red-950/30 text-red-400 border-red-900/50";
+      case "AGUARDANDO_PAGAMENTO": return "bg-yellow-950/30 text-yellow-400 border-yellow-900/50";
+      default: return "bg-neutral-800 text-gray-400 border-neutral-700";
       }
   };
 

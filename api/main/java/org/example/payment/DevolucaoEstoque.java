@@ -24,7 +24,7 @@ public class DevolucaoEstoque {
     @Transactional
     public void cancelarPedidosNaoPagosEDevolverEstoque() {
 
-        // 1. Busca todos os pedidos AGUARDANDO_PAGAMENTO que já passaram do tempo limite
+        //busca todos os pedidos AGUARDANDO_PAGAMENTO que já passaram do tempo limite
         List<Pedido> pedidosExpirados = pedidoRepository.findByStatusAndDataExpiracaoBefore(
                 EnumStatusPedido.AGUARDANDO_PAGAMENTO,
                 LocalDateTime.now()
