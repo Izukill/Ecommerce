@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import ModalDetalhesPedido, { Pedido } from "@/app/components/pedido/ModalDetalhesPedido";
 import { Package, Eye } from "lucide-react";
+import toast from 'react-hot-toast';
 
 export default function PedidosAdminPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -70,6 +71,8 @@ export default function PedidosAdminPage() {
       } catch (error) {
         console.error("Erro ao atualizar status:", error);
         toast.error("Não foi possível atualizar o status do pedido.");
+      } finally{
+        toast.success("Pedido Atualizado com sucesso");
       }
     };
 

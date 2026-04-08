@@ -68,7 +68,6 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
       {/* Container Principal do Modal com Scroll Interno */}
       <div className="bg-neutral-950 border border-neutral-800 rounded-2xl w-full max-w-5xl max-h-[90vh] overflow-y-auto relative shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in fade-in zoom-in-95 duration-200">
 
-        {/* Botão de Fechar (X) fixo no topo direito */}
         <button
           onClick={onClose}
           className="absolute top-4 right-4 z-50 w-10 h-10 flex items-center justify-center bg-black/50 hover:bg-red-500 text-white rounded-full transition-colors backdrop-blur-sm"
@@ -89,7 +88,6 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
           ) : (
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
-              {/* ESQUERDA: GALERIA */}
               <div className="w-full">
                 <GaleriaProduto
                   imagemCapa={produto.imagemUrl}
@@ -98,7 +96,6 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
                 />
               </div>
 
-              {/* DIREITA: DETALHES E COMPRA */}
               <div className="flex flex-col">
                 <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2 pr-8">
                   {produto.nome}

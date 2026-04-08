@@ -66,7 +66,12 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
   const isAtivo = produto.ativo !== false;
 
   const variacoes = produto.variacoes || [];
-  const tamanhosUnicos = Array.from(new Set(variacoes.map(v => v.tamanho)));
+  const ORDEM_TAMANHOS: Record<string, number> = {
+    "P": 1, "M": 2, "G": 3, "GG": 4, "G1": 5, "G2": 6, "G3": 7, "U": 8
+  };
+
+  const tamanhosUnicos = Array.from(new Set(variacoes.map(v => v.tamanho)))
+    .sort((a, b) => (ORDEM_TAMANHOS[a] || 99) - (ORDEM_TAMANHOS[b] || 99));
 
   const coresUnicas = variacoes.reduce((acc, varAtual) => {
     const jaExiste = acc.find(c => c.nome === varAtual.cor);
@@ -84,9 +89,6 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
     return mapaDeCores[corNormalizada] || "linear-gradient(45deg, #C2AE82, #171717)";
   };
 
-  // ==========================================
-  // LÓGICA DE EXIBIÇÃO DA IMAGEM
-  // ==========================================
   let imagemExibicao = imagemCapaOriginal;
   if (corHover) {
     const corAchada = coresUnicas.find(c => c.nome === corHover);
@@ -148,7 +150,6 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
                   onClick={(e) => {
                     e.preventDefault();
 
-                    // MÁGICA AQUI: Se for desativar, limpa a Fixada E limpa o Hover instantaneamente!
                     if (corFixada === cor.nome) {
                       setCorFixada(null);
                       setCorHover(null);
@@ -176,11 +177,11 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
           </span>
         </div>
 
-        <h3 className="text-lg font-bold text-gray-100 mb-1 leading-tight line-clamp-2 group-hover:text-[#C2AE82] transition-colors">
+        <h3 className="text-lg font-bold text-gray-100 mb-1 leading-tight line-clamp-2 min-h-[2.8rem] group-hover:text-[#C2AE82] transition-colors">
           {produto.nome}
         </h3>
 
-        <div className="mt-4 flex items-center justify-between relative z-20">
+        <div className="mt-auto pt-4 flex items-center justify-between relative z-20">
           <p className="text-xl font-extrabold text-white">
             {formatarPreco(produto.preco)}
           </p>

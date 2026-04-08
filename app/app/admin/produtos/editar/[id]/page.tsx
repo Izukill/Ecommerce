@@ -4,9 +4,12 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { AlertTriangle } from "lucide-react";
+import toast from "react-hot-toast";
 
 import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
 import GerenciadorVariacoes, { Variacao } from "@/app/components/produto/GerenciadorVariacoes";
+import FotosPorCor from "@/app/components/produto/FotosPorCor";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
 
 interface Categoria {
@@ -19,7 +22,7 @@ export default function EditarProdutoPage() {
   const params = useParams();
   const produtoId = params.id as string;
 
-  // Estados do formulário
+
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
@@ -27,23 +30,21 @@ export default function EditarProdutoPage() {
   const [imagemUrl, setImagemUrl] = useState("");
   const [variacoes, setVariacoes] = useState<Variacao[]>([]);
 
-  // NOVO: Controle de status Ativo/Inativo
+
   const [ativo, setAtivo] = useState(true);
 
-  // Estados de controle gerais
+
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [carregandoDados, setCarregandoDados] = useState(true);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
-  // NOVO: Estados para exclusão
+
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
 
-  // ==========================================
-  // CARREGAR DADOS DO PRODUTO E CATEGORIAS
-  // ==========================================
+
   useEffect(() => {
     if (!produtoId) return;
 
@@ -63,7 +64,7 @@ export default function EditarProdutoPage() {
         setDescricao(prod.descricao || "");
         setImagemUrl(prod.imagemUrl || "");
 
-        // Carrega o status do banco (se não existir, assume como ativo)
+        //carrega o status do banco (se não existir, assume como ativo)
         setAtivo(prod.ativo !== false);
 
         if (prod.variacoes) {
@@ -93,9 +94,6 @@ export default function EditarProdutoPage() {
     carregarTudo();
   }, [produtoId]);
 
-  // ==========================================
-  // SALVAR ALTERAÇÕES (PUT)
-  // ==========================================
   const handleAtualizarProduto = async (e: FormEvent) => {
     e.preventDefault();
     setErro("");
@@ -129,27 +127,25 @@ export default function EditarProdutoPage() {
       }, 2000);
 
     } catch (error: any) {
-
       console.error("Erro na atualização:", error.response?.data || error.message);
-      setErro("Erro ao atualizar o produto. Verifique a conexão com o servidor.");
+      toast.error("Erro ao atualizar o produto");
     } finally {
+      toast.success("Produto atualizado com sucesso");
       setSalvando(false);
     }
   };
 
-  // ==========================================
-  // EXCLUIR PRODUTO (DELETE)
-  // ==========================================
   const confirmarExclusao = async () => {
     setExcluindo(true);
     try {
       await api.delete(`/produtos/${produtoId}`);
       setModalExcluirAberto(false);
-      router.push("/admin/produtos"); // Volta para a lista após excluir
+      router.push("/admin/produtos"); //volta para a lista após excluir
     } catch (error) {
-      setErro("Erro ao excluir o produto. Ele pode estar atrelado a algum pedido.");
       setModalExcluirAberto(false);
+      toast.error("Erro ao excluir o produto");
     } finally {
+      toast.success("Produto excluido com sucesso");
       setExcluindo(false);
     }
   };
@@ -166,7 +162,6 @@ export default function EditarProdutoPage() {
   return (
     <div className="max-w-5xl mx-auto space-y-6">
 
-      {/* CABEÇALHO COM BOTÕES DE AÇÃO */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-extrabold text-white tracking-tight">Editar Produto</h2>
@@ -174,7 +169,7 @@ export default function EditarProdutoPage() {
         </div>
 
         <div className="flex items-center gap-3">
-          {/* BOTÃO EXCLUIR NO TOPO */}
+
           <button
             type="button"
             onClick={() => setModalExcluirAberto(true)}
@@ -197,8 +192,9 @@ export default function EditarProdutoPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-17">
               <CapaProdutoUpload imagemUrl={imagemUrl} setImagemUrl={setImagemUrl} />
+              <FotosPorCor variacoes={variacoes} setVariacoes={setVariacoes} />
             </div>
 
             <div className="lg:col-span-2 space-y-6">
@@ -233,10 +229,8 @@ export default function EditarProdutoPage() {
 
               <GerenciadorVariacoes variacoes={variacoes} setVariacoes={setVariacoes} />
 
-              {/* ÁREA DE SALVAR E ATIVAR/DESATIVAR */}
+              {/* ativar/desativar */}
               <div className="pt-6 space-y-4">
-
-                {/* BOTÃO DE STATUS DA VITRINE */}
                 <button
                   type="button"
                   onClick={() => setAtivo(!ativo)}
@@ -250,7 +244,6 @@ export default function EditarProdutoPage() {
                   {ativo ? 'Produto Ativo na Vitrine (Clique para Ocultar)' : 'Produto Oculto (Clique para Ativar na Vitrine)'}
                 </button>
 
-                {/* BOTÃO FINAL DE SALVAR */}
                 <button type="submit" disabled={salvando} className="w-full py-4 px-8 rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] font-extrabold disabled:opacity-50 transition-colors shadow-lg">
                   {salvando ? "Atualizando..." : "Salvar Alterações"}
                 </button>
@@ -261,7 +254,6 @@ export default function EditarProdutoPage() {
         </form>
       </div>
 
-      {/* ================= MODAL DE CONFIRMAÇÃO DE EXCLUSÃO ================= */}
       <ModalExclusao
         isOpen={modalExcluirAberto}
         onClose={() => setModalExcluirAberto(false)}
@@ -272,9 +264,10 @@ export default function EditarProdutoPage() {
             <p>
               Tem certeza que deseja excluir <span className="text-white font-bold">"{nome}"</span>?
             </p>
-            <p className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20">
-              ⚠️ Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.
-            </p>
+            <div className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20 flex items-start gap-2">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+              <p>Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.</p>
+            </div>
           </div>
         }
       />

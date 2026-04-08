@@ -6,6 +6,7 @@ import Link from "next/link";
 import { api } from "@/lib/api";
 import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
 import GerenciadorVariacoes, { Variacao } from "@/app/components/produto/GerenciadorVariacoes";
+import FotosPorCor from "@/app/components/produto/FotosPorCor";
 
 interface Categoria {
   lookupId: string;
@@ -101,8 +102,9 @@ export default function NovoProdutoPage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
             {/* LADO ESQUERDO: COMPONENTE DE IMAGEM */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 space-y-17">
               <CapaProdutoUpload imagemUrl={imagemUrl} setImagemUrl={setImagemUrl} />
+              <FotosPorCor variacoes={variacoes} setVariacoes={setVariacoes} />
             </div>
 
             {/* LADO DIREITO: COMPONENTES DE DADOS E VARIAÇÕES */}

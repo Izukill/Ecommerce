@@ -18,6 +18,9 @@ public class ProdutoBuscarDTO {
     @Schema(description = "Filtra pela data de criação")
     private LocalDateTime dataCriacao;
 
+    @Schema(description = "Filtra pelo status")
+    private boolean ativo;
+
     @Schema(description = "Número da página a ser retornada. Começa com zero.")
     private Integer numeroPagina = 0;
 

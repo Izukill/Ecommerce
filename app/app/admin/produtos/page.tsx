@@ -33,7 +33,7 @@ export default function ListaProdutosPage() {
   //inicializacao do hook para ler os param da url
   const searchParams = useSearchParams();
 
-  //falor inicial dos filtros
+  //valor inicial dos filtros
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState(searchParams.get("categoria") || "");
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
@@ -65,6 +65,11 @@ export default function ListaProdutosPage() {
     setErro("");
 
     try {
+      // 1. Buscamos as categorias PRIMEIRO para servir de "Dicionário de Tradução"
+      const resCategorias = await api.get("/categorias");
+      const dadosCategorias = resCategorias.data?.content || resCategorias.data || [];
+      setCategoriasDb(Array.isArray(dadosCategorias) ? dadosCategorias : []);
+
       const params = new URLSearchParams({
         page: pagina.toString(),
         size: tamanhoPagina.toString(),
@@ -72,13 +77,15 @@ export default function ListaProdutosPage() {
       });
 
       if (filtroNome) params.append("nome", filtroNome);
-      if (filtroCategoria) params.append("categoria", filtroCategoria);
 
-      const [resProdutos, resCategorias] = await Promise.all([
-        api.get(`/produtos?${params.toString()}`),
-        api.get("/categorias")
-      ]);
 
+      if (filtroCategoria) {
+        params.append("categoriaId", filtroCategoria);
+        params.append("categoria", filtroCategoria);
+      }
+
+      // 3. Só depois buscamos os produtos já com os parâmetros cravados
+      const resProdutos = await api.get(`/produtos?${params.toString()}`);
       const pageData = resProdutos.data;
       const dadosProdutos = pageData.content || pageData || [];
 
@@ -87,9 +94,6 @@ export default function ListaProdutosPage() {
       if (pageData.totalPages !== undefined) {
         setTotalPaginas(pageData.totalPages);
       }
-
-      const dadosCategorias = resCategorias.data?.content || resCategorias.data || [];
-      setCategoriasDb(Array.isArray(dadosCategorias) ? dadosCategorias : []);
 
     } catch (error) {
       setErro("Não foi possível carregar os dados. Verifique a conexão com o servidor.");
@@ -152,6 +156,36 @@ export default function ListaProdutosPage() {
       if (filtroAtivo === "ativos" && !produto.ativo) return false;
       if (filtroAtivo === "inativos" && produto.ativo) return false;
       if (filtroPreco && produto.preco > parseFloat(filtroPreco)) return false;
+
+      // 👇 Filtro de Categoria Blindado
+      if (filtroCategoria) {
+        const filtroLimpo = filtroCategoria.toLowerCase().trim();
+        let matchCat = false;
+
+        if (typeof produto.categoria === 'object' && produto.categoria !== null) {
+          // 1ª Tentativa: Verifica pelo nome ignorando maiúsculas e espaços
+          if (produto.categoria.nome && produto.categoria.nome.toLowerCase().trim() === filtroLimpo) {
+            matchCat = true;
+          }
+          // 2ª Tentativa: Se a API não retornou o nome (comum em DTOs), cruza o ID do produto com o nosso dicionário
+          const catDb = categoriasDb.find(c => c.nome.toLowerCase().trim() === filtroLimpo);
+          if (catDb && produto.categoria.lookupId === catDb.lookupId) {
+            matchCat = true;
+          }
+        } else if (typeof produto.categoria === 'string') {
+          if (produto.categoria.toLowerCase().trim() === filtroLimpo) {
+            matchCat = true;
+          }
+        }
+
+        if (!matchCat) return false; // Se não bateu de nenhum jeito, esconde o card
+      }
+
+      // Filtro de Nome ignorando case
+      if (filtroNome && !produto.nome.toLowerCase().includes(filtroNome.toLowerCase())) {
+        return false;
+      }
+
       return true;
     })
     .sort((a, b) => {
@@ -201,7 +235,7 @@ export default function ListaProdutosPage() {
           >
             <option value="">Todas as Categorias</option>
             {categoriasDb.map(cat => (
-              <option key={cat.lookupId} value={cat.nome}>{cat.nome}</option>
+              <option key={cat.lookupId} value={cat.lookupId}>{cat.nome}</option>
             ))}
           </select>
         </div>

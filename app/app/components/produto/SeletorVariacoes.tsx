@@ -64,7 +64,7 @@ export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: S
         </div>
       </div>
 
-      {/* tamanho só vem depois de selecionar a cor por regra de negócio*/}
+      {/* tamanho só vem depois de selecionar a cor*/}
       {corSelecionada && (
         <div className="animate-in fade-in slide-in-from-top-2 duration-300">
           <h3 className="text-sm font-bold text-gray-300 uppercase tracking-widest mb-3">
