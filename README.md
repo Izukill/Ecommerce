@@ -36,8 +36,8 @@ Para manter o histórico do projeto limpo e rastreável, este repositório segue
 
 | Tipo | Descrição | Exemplo de Uso |
 | :--- | :--- | :--- |
-| **`feat`** | Introdução de um recurso totalmente novo no sistema ou no código. | `feat: implementacao do endpoint de criar pedido
-| **`refector`** | Refatoração de código, melhora de lógicas ou de algum sistema. | `refactor: tela de admin.` |` |
+| **`feat`** | Introdução de um recurso totalmente novo no sistema ou no código. | `feat: implementacao do endpoint de criar pedido` |
+| **`refector`** | Refatoração de código, melhora de lógicas ou de algum sistema. | `refactor: tela de admin.` |
 | **`fix`** | Resolução de um bug, erro ou ajuste de comportamento incorreto de algo já entregue. | `fix: correcao do calculo de valor total na classe Pedido` |
 | **`add`** | Inclusão de arquivos auxiliares (configurações, imagens, docs ou dependências). | `add: inclusao do diagrama de classes e MER no README` |
 | **`remove`** | Exclusão de arquivos, limpeza de código morto ou remoção de configurações antigas. | `remove: exclusao da antiga classe Cor, substituida por Variacao` |
