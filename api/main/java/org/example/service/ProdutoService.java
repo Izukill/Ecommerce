@@ -1,5 +1,6 @@
 package org.example.service;
 
+import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.RegraNegocioException;
 import org.example.model.Categoria;
 import org.example.model.Produto;
@@ -160,7 +161,7 @@ public class ProdutoService {
     }
 
 
-    public Page<Produto> buscar(ProdutoBuscarDTO dto, Pageable pageable) {
+    public Page<Produto> buscar(ProdutoBuscarDTO dto, Pageable pageable) throws EntidadeNaoEncontradaException {
 
         //filtro por nome
         if (dto.getNome() != null && !dto.getNome().isBlank()) {
@@ -168,12 +169,14 @@ public class ProdutoService {
         }
 
         //filtro por categoria
-        if (dto.getCategoria() != null) {
-            return produtoRepository.findByCategoriaAndAtivoTrue(dto.getCategoria(), pageable);
+        if (dto.getCategoriaId() != null) {
+            Categoria categoria = categoriaRepository.findByLookupId(dto.getCategoriaId())
+                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Categoria não encontrada."));
+            return produtoRepository.findByCategoriaAndAtivoTrue(categoria, pageable);
         }
 
         //se n tiver filtros returona tudo
-        return produtoRepository.findAll(pageable);
+        return produtoRepository.findByAtivoTrue(pageable);
     }
 
     public void ativar(UUID lookupId) throws RegraNegocioException {

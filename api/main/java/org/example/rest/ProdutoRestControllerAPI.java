@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
 import org.example.rest.dto.Produto.ProdutoBuscarDTO;
 import org.example.rest.dto.Produto.ProdutoResponseDTO;
@@ -118,7 +119,7 @@ public interface ProdutoRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
-    ResponseEntity<Page<ProdutoResponseDTO>> buscar(@ParameterObject ProdutoBuscarDTO dto, @ParameterObject Pageable pageable) throws MirlleException;
+    ResponseEntity<Page<ProdutoResponseDTO>> buscar(@ParameterObject ProdutoBuscarDTO dto, @ParameterObject Pageable pageable) throws MirlleException, EntidadeNaoEncontradaException;
 
     @Operation(summary = "Ativar um produto desativado (admin).",
             description = "Ativa um produto que o admin desativou através do atalho da tela de produtos.")

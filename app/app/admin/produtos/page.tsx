@@ -81,7 +81,6 @@ export default function ListaProdutosPage() {
 
       if (filtroCategoria) {
         params.append("categoriaId", filtroCategoria);
-        params.append("categoria", filtroCategoria);
       }
 
       // 3. Só depois buscamos os produtos já com os parâmetros cravados
@@ -159,26 +158,12 @@ export default function ListaProdutosPage() {
 
       // 👇 Filtro de Categoria Blindado
       if (filtroCategoria) {
-        const filtroLimpo = filtroCategoria.toLowerCase().trim();
-        let matchCat = false;
-
         if (typeof produto.categoria === 'object' && produto.categoria !== null) {
-          // 1ª Tentativa: Verifica pelo nome ignorando maiúsculas e espaços
-          if (produto.categoria.nome && produto.categoria.nome.toLowerCase().trim() === filtroLimpo) {
-            matchCat = true;
-          }
-          // 2ª Tentativa: Se a API não retornou o nome (comum em DTOs), cruza o ID do produto com o nosso dicionário
-          const catDb = categoriasDb.find(c => c.nome.toLowerCase().trim() === filtroLimpo);
-          if (catDb && produto.categoria.lookupId === catDb.lookupId) {
-            matchCat = true;
-          }
-        } else if (typeof produto.categoria === 'string') {
-          if (produto.categoria.toLowerCase().trim() === filtroLimpo) {
-            matchCat = true;
-          }
+          // Comparar pelo lookupId, não pelo nome
+          if (produto.categoria.lookupId !== filtroCategoria) return false;
+        } else {
+          return false;
         }
-
-        if (!matchCat) return false; // Se não bateu de nenhum jeito, esconde o card
       }
 
       // Filtro de Nome ignorando case

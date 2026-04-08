@@ -2,9 +2,9 @@ package org.example.rest.dto.Produto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.example.model.Categoria;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Data
 public class ProdutoBuscarDTO {
@@ -13,7 +13,7 @@ public class ProdutoBuscarDTO {
     private String nome;
 
     @Schema(description = "Filtra pela categoria", example = "Moda Praia")
-    private Categoria categoria;
+    private UUID categoriaId;
 
     @Schema(description = "Filtra pela data de criação")
     private LocalDateTime dataCriacao;

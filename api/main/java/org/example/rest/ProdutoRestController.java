@@ -1,5 +1,6 @@
 package org.example.rest;
 
+import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
 import org.example.mapper.ProdutoMapper;
 import org.example.model.Produto;
@@ -66,7 +67,7 @@ public class ProdutoRestController implements ProdutoRestControllerAPI{
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<ProdutoResponseDTO>> buscar(ProdutoBuscarDTO dto, Pageable pageable) throws MirlleException {
+    public ResponseEntity<Page<ProdutoResponseDTO>> buscar(ProdutoBuscarDTO dto, Pageable pageable) throws MirlleException, EntidadeNaoEncontradaException {
         Page<Produto> pagina = service.buscar(dto, pageable);
         return ResponseEntity.ok(pagina.map(mapper::from));
     }
