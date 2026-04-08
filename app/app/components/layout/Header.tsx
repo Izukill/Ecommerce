@@ -1,10 +1,15 @@
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useCart } from "@/app/contexts/CartContext";
+import {
+  User,
+  ChevronDown,
+  Package,
+  LayoutDashboard,
+  LogOut,
+} from "lucide-react";
 
 export default function Header() {
   const { usuario, logout } = useAuth();
@@ -67,9 +72,7 @@ export default function Header() {
                     </svg>
                   </div>
                   <span className="font-bold capitalize hidden sm:block">Olá, {primeiroNome}</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={`w-4 h-4 transition-transform ${menuAberto ? 'rotate-180' : ''}`}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                  </svg>
+                  <ChevronDown size={18} strokeWidth={2.5} className={`transition-transform duration-200 ${menuAberto ? 'rotate-180' : ''}`} />
                 </button>
 
                 {/* dropdown */}
@@ -87,17 +90,17 @@ export default function Header() {
                         <Link
                           href="/cliente?aba=perfil"
                           onClick={() => setMenuAberto(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
                         >
-                          👤 Meu Perfil
+                          <User size={16} /> Meu Perfil
                         </Link>
 
                         <Link
                           href="/cliente?aba=pedidos"
                           onClick={() => setMenuAberto(false)}
-                          className="block px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-gray-300 hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
                         >
-                          📦 Meus Pedidos
+                          <Package size={16} /> Meus Pedidos
                         </Link>
                       </>
                     )}
@@ -106,9 +109,9 @@ export default function Header() {
                         <Link
                           href="/admin"
                           onClick={() => setMenuAberto(false)}
-                          className="block px-4 py-2 text-sm text-[#C2AE82] font-bold hover:bg-[#C2AE82]/10 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 text-sm text-[#C2AE82] font-bold hover:bg-[#C2AE82]/10 transition-colors"
                         >
-                          ⚙️ Painel Admin
+                          <LayoutDashboard size={16} /> Painel Admin
                         </Link>
                       </div>
                     )}
@@ -116,9 +119,9 @@ export default function Header() {
                     <div className="mt-2 pt-2 border-t border-neutral-800">
                       <button
                         onClick={handleLogout}
-                        className="w-full text-left px-4 py-2 text-sm text-red-500 font-bold hover:bg-red-500/10 transition-colors"
+                        className="flex items-center gap-2 w-full text-left px-4 py-2 text-sm text-red-500 font-bold hover:bg-red-500/10 transition-colors"
                       >
-                        Sair da conta
+                        <LogOut size={16} /> Sair da conta
                       </button>
                     </div>
                   </div>

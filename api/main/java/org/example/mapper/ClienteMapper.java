@@ -33,6 +33,7 @@ public class ClienteMapper {
         dto.setNome(entity.getNome());
         dto.setEmail(entity.getEmail());
         dto.setCpf(entity.getCpf());
+        dto.setDataCadastro(entity.getDataCadastro());
         dto.setTelefone(entity.getTelefone());
 
         return dto;

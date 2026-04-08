@@ -25,7 +25,6 @@ export default function ResumoPedido({ processando }: { processando: boolean }) 
                 <p className="text-xs text-gray-400 mt-0.5">{item.cor} - {item.tamanho}</p>
               </div>
 
-              {/* 👇 AQUI ESTÁ A MÁGICA DO LAYOUT FLEXÍVEL (flex-wrap e gap-y-2) */}
               <div className="flex flex-wrap justify-between items-center gap-x-2 gap-y-3 mt-3 w-full">
 
                 <div className="flex items-center gap-3">
@@ -48,7 +47,6 @@ export default function ResumoPedido({ processando }: { processando: boolean }) 
                     </button>
                   </div>
 
-                  {/* 👇 NOVO BOTÃO DE REMOVER BONITINHO */}
                   <button
                     type="button"
                     title="Remover produto"
@@ -61,7 +59,6 @@ export default function ResumoPedido({ processando }: { processando: boolean }) 
                   </button>
                 </div>
 
-                {/* 👇 PREÇO COM PROTEÇÃO DE QUEBRA (whitespace-nowrap e ml-auto) */}
                 <span className="text-sm sm:text-base font-extrabold text-[#C2AE82] whitespace-nowrap ml-auto">
                   R$ {(item.preco * Number(item.quantidade)).toFixed(2).replace('.', ',')}
                 </span>

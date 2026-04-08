@@ -6,6 +6,10 @@ import ActionCard from "@/app/components/layout/ActionCard";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
+import {
+  Shirt,
+  Tags,
+} from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { usuario } = useAuth();
@@ -116,7 +120,7 @@ export default function AdminDashboardPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
           <ActionCard
-            icone="👕"
+            icone={Shirt}
             titulo="Gerenciar Produtos"
             descricao="Cadastre, edite e organize o seu catálogo de roupas."
             textoBotao="Acessar Produtos"
@@ -124,7 +128,7 @@ export default function AdminDashboardPage() {
           />
 
           <ActionCard
-            icone="🏷️"
+            icone={Tags}
             titulo="Gerenciar Categorias"
             descricao="Crie novas categorias para organizar a sua vitrine."
             textoBotao="Acessar Categorias"

@@ -2,6 +2,7 @@
 
 import { useState, ChangeEvent } from "react";
 import { api } from "@/lib/api";
+import { Camera } from "lucide-react";
 
 export interface Variacao {
   tamanho: string;
@@ -163,7 +164,7 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
                 </div>
               </>
             ) : (
-              <span className="text-xs">📷</span>
+              <Camera size={18} className="text-gray-500" />
             )}
             {!imagemVariacaoAtual && (
               <input type="file" accept="image/*" onChange={handleUploadImagemVariacao} className="absolute inset-0 opacity-0 cursor-pointer" disabled={fazendoUploadVariacao} />

@@ -2,6 +2,7 @@
 
 import { ChangeEvent, useState } from "react";
 import { api } from "@/lib/api";
+import { Camera } from "lucide-react";
 
 interface CapaProdutoUploadProps {
   imagemUrl: string;
@@ -42,8 +43,8 @@ export default function CapaProdutoUpload({ imagemUrl, setImagemUrl }: CapaProdu
         {imagemUrl ? (
           <img src={imagemUrl} alt="Preview" className="absolute inset-0 w-full h-full object-cover" />
         ) : (
-          <div className="space-y-2">
-            <span className="text-4xl">📸</span>
+          <div className="space-y-2 flex flex-col items-center justify-center text-center">
+            <Camera size={48} strokeWidth={1.5} className="text-neutral-500" />
             <p className="text-xs text-gray-400 font-medium px-2">Clique para selecionar a foto de capa.</p>
           </div>
         )}

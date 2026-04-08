@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
+import { Tags } from "lucide-react";
 
 interface Categoria {
   lookupId: string;
@@ -228,7 +229,9 @@ export default function CategoriasPage() {
               </div>
             ) : categorias.length === 0 ? (
               <div className="p-10 text-center flex flex-col items-center">
-                <span className="text-4xl mb-4">:(</span>
+                <div className="mb-4 text-neutral-600">
+                  <Tags size={56} strokeWidth={1.5} />
+                </div>
                 <p className="text-gray-300 font-bold text-lg">Nenhuma categoria cadastrada</p>
                 <p className="text-gray-500 text-sm mt-1">Use o formulário ao lado para criar a primeira.</p>
               </div>

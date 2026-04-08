@@ -3,6 +3,7 @@ import { Inter, Geist, Geist_Mono } from "next/font/google";
 import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from './contexts/CartContext';
 import { Toaster, DefaultToastOptions } from 'react-hot-toast';
+import ConditionalFooter from "./components/layout/CondicionalFooter";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -60,7 +61,10 @@ export default function RootLayout({
        <Toaster position="top-right" reverseOrder={false} toastOptions={configuracaoToast}/>
         <AuthProvider>
           <CartProvider>
-            {children}
+            <main className="flex-grow">
+              {children}
+            </main>
+            <ConditionalFooter />
           </CartProvider>
         </AuthProvider>
       </body>

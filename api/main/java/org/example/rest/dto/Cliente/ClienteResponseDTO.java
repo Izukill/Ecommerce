@@ -2,6 +2,7 @@ package org.example.rest.dto.Cliente;
 
 import lombok.Data;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -17,5 +18,7 @@ public class ClienteResponseDTO {
     private String telefone;
 
     private String cpf;
+
+    private LocalDate dataCadastro;
 
 }

@@ -7,6 +7,7 @@ interface Usuario {
   sub: string;
   perfil: string;
   nome: string;
+  lookupId: string;
 }
 
 interface AuthContextType {

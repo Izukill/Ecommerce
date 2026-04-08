@@ -66,6 +66,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.PATCH,"/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/admin/dashboard").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PUT,"admin/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/upload/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/categorias").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/categorias/**").hasRole("ADMIN")

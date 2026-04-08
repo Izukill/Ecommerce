@@ -7,6 +7,7 @@ import { api } from "@/lib/api";
 import ProdutoCard from "@/app/components/produto/ProdutoCard";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
 import ModalAtivacao from "@/app/components/layout/ModalAtivacao";
+import { Shirt, Plus, AlertTriangle } from "lucide-react";
 
 interface Categoria {
   lookupId: string;
@@ -171,7 +172,7 @@ export default function ListaProdutosPage() {
           href="/admin/produtos/novo"
           className="inline-flex items-center justify-center px-6 py-3 text-sm font-extrabold rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] shadow-lg transition-all"
         >
-          <span className="mr-2 text-lg">+</span> Adicionar Produto
+          <Plus size={20} className="mr-2" strokeWidth={2.5} /> Adicionar Produto
         </Link>
       </div>
 
@@ -235,7 +236,9 @@ export default function ListaProdutosPage() {
         </div>
       ) : produtosFiltradosEOrdenados.length === 0 ? (
         <div className="py-20 text-center bg-black rounded-xl border border-neutral-800">
-          <span className="text-4xl mb-4">👕</span>
+          <div className="flex justify-center mb-4 text-neutral-600">
+            <Shirt size={56} strokeWidth={1.5} />
+          </div>
           <p className="text-gray-300 font-bold text-lg mt-4">Nenhum produto encontrado</p>
           <p className="text-gray-500 text-sm mt-1">Nesta página não há produtos que correspondam à sua busca.</p>
         </div>
@@ -247,20 +250,17 @@ export default function ListaProdutosPage() {
                 <div key={produto.lookupId} className="flex flex-col gap-3">
                 <ProdutoCard produto={produto} isAdmin={true} />
 
-<div className="flex gap-2">
+          <div className="flex gap-2">
                   <Link
                     href={`/admin/produtos/editar/${produto.lookupId}`}
-                    // 👇 Mudamos de flex-1 para w-[70%]
                     className="w-[70%] flex justify-center items-center gap-2 px-4 py-2 bg-neutral-800 text-gray-300 font-bold text-sm rounded-lg border border-neutral-700 hover:text-white hover:bg-neutral-700 transition-all shadow-md"
                   >
                     Editar
                   </Link>
 
-                  {/* 👇 A MÁGICA VISUAL ACONTECE AQUI */}
                   {produto.ativo ? (
                     <button
                       onClick={() => abrirModalExclusao(produto)}
-                      // 👇 Mudamos de flex-1 para w-[30%]
                       className="w-[30%] flex justify-center items-center px-4 py-2 bg-red-950/30 text-red-500 font-bold text-sm rounded-lg border border-red-900/50 hover:bg-red-900/50 transition-all shadow-md"
                     >
                       Excluir
@@ -315,14 +315,14 @@ export default function ListaProdutosPage() {
             <p>
               Tem certeza que deseja excluir <span className="text-white font-bold">"{produtoParaExcluir?.nome}"</span>?
             </p>
-            <p className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20">
-              ⚠️ Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.
-            </p>
+            <div className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20 flex items-start gap-2">
+              <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
+              <p>Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.</p>
+            </div>
           </div>
         }
       />
 
-      {/* 👇 NOVO COMPONENTE EXTERNALIZADO DO MODAL DE ATIVAÇÃO */}
       <ModalAtivacao
         isOpen={isModalAtivacaoAberto}
         onClose={fecharModalAtivacao}

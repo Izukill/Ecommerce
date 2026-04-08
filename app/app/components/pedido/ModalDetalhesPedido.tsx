@@ -1,5 +1,11 @@
 'use client';
 
+import {
+  RotateCcw,
+  Package,
+  CalendarDays
+} from "lucide-react"
+
 export interface Cliente {
   nome: string;
   telefone?: string;
@@ -76,7 +82,7 @@ export default function ModalDetalhesPedido({
                   onClick={() => onVerPix(pedidoSelecionado.lookupId, pedidoSelecionado.valorTotal)}
                   className="flex-1 sm:flex-none px-4 py-2 bg-green-500/20 hover:bg-green-500/40 text-green-400 font-extrabold text-sm rounded-lg transition-colors border border-green-500/50"
                 >
-                  ✔️ Pagar Agora
+                  ✓ Pagar Agora
                 </button>
               )}
               <button
@@ -91,9 +97,9 @@ export default function ModalDetalhesPedido({
           return (
             <button
               onClick={() => onAtualizarStatus(pedidoSelecionado.lookupId, "AGUARDANDO_PAGAMENTO")}
-              className="w-full sm:w-auto px-4 py-2 bg-yellow-600/10 hover:bg-yellow-600/30 text-yellow-500 font-extrabold text-sm rounded-lg transition-colors border border-yellow-600/30"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 font-extrabold text-sm rounded-lg transition-colors border border-yellow-600/50"
             >
-              ⟲ Reabrir Pedido
+              <RotateCcw size={17} /> Reabrir Pedido
             </button>
           );
         default:
@@ -123,18 +129,18 @@ export default function ModalDetalhesPedido({
         return (
           <button
             onClick={() => onAtualizarStatus(pedidoSelecionado.lookupId, "ENVIADO")}
-            className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all border border-blue-500"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-sm rounded-lg shadow-[0_0_15px_rgba(37,99,235,0.4)] transition-all border border-blue-500"
           >
-            📦 Marcar como Enviado
+            <Package size={18} /> Marcar como Enviado
           </button>
         );
       case "CANCELADO":
         return (
           <button
             onClick={() => onAtualizarStatus(pedidoSelecionado.lookupId, "AGUARDANDO_PAGAMENTO")}
-            className="w-full sm:w-auto px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 font-extrabold text-sm rounded-lg transition-colors border border-yellow-600/50"
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-yellow-600/20 hover:bg-yellow-600/40 text-yellow-500 font-extrabold text-sm rounded-lg transition-colors border border-yellow-600/50"
           >
-            ⟲ Reabrir Pedido
+            <RotateCcw size={17} /> Reabrir Pedido
           </button>
         );
       default:
@@ -150,7 +156,7 @@ export default function ModalDetalhesPedido({
           <div className="break-all">
             <h3 className="text-xl sm:text-2xl font-extrabold text-white">
               <span className="text-gray-400 font-normal mr-2 hidden sm:inline">Data:</span>
-              <span className="text-gray-400 font-normal mr-1 sm:hidden">🗓️</span>
+              <CalendarDays size={20} className="text-gray-400 sm:hidden" />
               {formatarData(pedidoSelecionado.dataHora)}
             </h3>
             <p className="text-xs sm:text-sm text-gray-500 mt-1 uppercase tracking-wider font-mono">
@@ -162,7 +168,7 @@ export default function ModalDetalhesPedido({
             <span className={`px-3 sm:px-4 py-1.5 text-[10px] sm:text-xs font-bold uppercase rounded-full border text-center ${getStatusBadge(pedidoSelecionado.status)}`}>
               {pedidoSelecionado.status || "Desconhecido"}
             </span>
-            <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors bg-neutral-800 p-1.5 sm:p-2 rounded-lg">
+            <button onClick={onClose} className="text-gray-500 hover:text-white transition-colors bg-neutral-800 p-1.5 w-10 sm:p-2  rounded-lg">
               ✕
             </button>
           </div>

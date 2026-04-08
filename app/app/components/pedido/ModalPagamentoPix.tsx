@@ -36,7 +36,6 @@ export default function ModalPagamentoPix({ isOpen, pixData, valorTotal, onClose
 
         <h2 className="text-3xl font-extrabold text-white mb-2 tracking-tight">Pagamento via PIX</h2>
 
-        {/* 👇 BLOCO DE DESTAQUE DO VALOR */}
         <div className="w-full bg-[#C2AE82]/10 border border-[#C2AE82]/30 rounded-xl py-4 flex flex-col items-center justify-center mt-2 mb-4">
           <span className="text-gray-400 text-xs uppercase tracking-widest font-bold mb-1">Total a pagar</span>
           <span className="text-4xl font-black text-[#C2AE82] tracking-tighter drop-shadow-md">

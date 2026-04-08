@@ -5,7 +5,6 @@ import org.example.exception.RegraNegocioException;
 import org.example.model.Cliente;
 import org.example.model.EnumPerfil;
 import org.example.repository.ClienteRepository;
-import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
 import org.example.rest.dto.Cliente.ClienteBuscarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;

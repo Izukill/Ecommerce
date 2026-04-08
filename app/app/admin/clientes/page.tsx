@@ -3,6 +3,7 @@
 import { useState, useEffect, FormEvent } from "react";
 import { api } from "@/lib/api";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
+import { Users, Mail, Phone } from "lucide-react";
 
 export interface Cliente {
   lookupId: string;
@@ -10,7 +11,7 @@ export interface Cliente {
   email: string;
   telefone?: string;
   cpf?: string;
-  dataCriacao?: string;
+  dataCadastro?: string;
 }
 
 export default function ListaClientesPage() {
@@ -47,14 +48,13 @@ export default function ListaClientesPage() {
       const params = new URLSearchParams({
         page: pagina.toString(),
         size: tamanhoPagina.toString(),
-        sort: 'dataCriacao,desc' // Traz os mais recentes primeiro
+        sort: 'dataCadastro,desc'
       });
 
       if (filtroNome) params.append("nome", filtroNome);
       if (filtroEmail) params.append("email", filtroEmail);
       if (filtroTelefone) params.append("telefone", filtroTelefone);
 
-      // Assumindo que o endpoint no seu Java é /clientes ou /usuarios
       const response = await api.get(`/clientes?${params.toString()}`);
 
       const pageData = response.data;
@@ -81,9 +81,7 @@ export default function ListaClientesPage() {
     setPaginaAtual(0);
   }, [filtroNome, filtroEmail, filtroTelefone]);
 
-  // ==========================================
-  // FUNÇÕES DE EDIÇÃO
-  // ==========================================
+
   const abrirModalEdicao = (cliente: Cliente) => {
     setClienteEditando(cliente);
     setNomeEdicao(cliente.nome);
@@ -111,7 +109,7 @@ export default function ListaClientesPage() {
       });
 
       fecharModalEdicao();
-      carregarClientes(paginaAtual); // Atualiza a lista
+      carregarClientes(paginaAtual); //atualiza a lista
     } catch (error) {
       toast.error("Erro ao atualizar o cliente.");
     } finally {
@@ -119,9 +117,6 @@ export default function ListaClientesPage() {
     }
   };
 
-  // ==========================================
-  // FUNÇÕES DE EXCLUSÃO
-  // ==========================================
   const abrirModalExclusao = (cliente: Cliente) => {
     setClienteParaExcluir(cliente);
     setIsModalExclusaoAberto(true);
@@ -195,7 +190,9 @@ export default function ListaClientesPage() {
           </div>
         ) : clientes.length === 0 ? (
           <div className="p-16 text-center flex flex-col items-center">
-            <span className="text-4xl mb-4">👥</span>
+            <div className="mb-4 text-neutral-600">
+              <Users size={56} strokeWidth={1.5} />
+            </div>
             <p className="text-gray-300 font-bold text-lg">Nenhum cliente encontrado</p>
             <p className="text-gray-500 text-sm mt-1">Sua busca não retornou resultados.</p>
           </div>
@@ -230,10 +227,10 @@ export default function ListaClientesPage() {
                     {/* CONTATO */}
                     <td className="px-6 py-4 whitespace-nowrap">
                       <p className="text-sm text-gray-300 flex items-center gap-2">
-                        ✉️ {cliente.email}
+                        <Mail size={16} className="text-gray-500" /> {cliente.email}
                       </p>
                       <p className="text-sm text-gray-400 mt-1 flex items-center gap-2">
-                        📞 {cliente.telefone || <span className="text-gray-600 italic">Não informado</span>}
+                        <Phone size={16} className="text-gray-500" /> {cliente.telefone || <span className="text-gray-600 italic">Não informado</span>}
                       </p>
                     </td>
 
@@ -243,7 +240,7 @@ export default function ListaClientesPage() {
                         {cliente.cpf || <span className="text-gray-600 italic">CPF pendente</span>}
                       </p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Cadastrado em: {cliente.dataCriacao ? new Date(cliente.dataCriacao).toLocaleDateString('pt-BR') : '-'}
+                        Cadastrado em: {cliente.dataCadastro ? new Date(cliente.dataCadastro).toLocaleDateString('pt-BR') : '-'}
                       </p>
                     </td>
 

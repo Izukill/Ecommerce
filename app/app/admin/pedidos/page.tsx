@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import ModalDetalhesPedido, { Pedido } from "@/app/components/pedido/ModalDetalhesPedido";
+import { Package, Eye } from "lucide-react";
 
 export default function PedidosAdminPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
@@ -164,6 +165,7 @@ export default function PedidosAdminPage() {
           >
             <option value="todos">Todos</option>
             <option value="PAGO">Pago</option>
+            <option value="AGUARDANDO_PAGAMENTO">Aguarando Pagamento</option>
             <option value="ENVIADO">Enviado</option>
             <option value="CANCELADO">Cancelado</option>
           </select>
@@ -198,7 +200,9 @@ export default function PedidosAdminPage() {
           </div>
         ) : pedidosFiltrados.length === 0 ? (
           <div className="py-20 text-center">
-            <span className="text-4xl mb-4 block">📦</span>
+            <div className="flex justify-center mb-4 text-neutral-600">
+              <Package size={56} strokeWidth={1.5} />
+            </div>
             <p className="text-gray-300 font-bold text-lg mt-4">Nenhum pedido encontrado</p>
             <p className="text-gray-500 text-sm mt-1">Nenhum pedido corresponde aos filtros aplicados.</p>
           </div>
@@ -247,16 +251,14 @@ export default function PedidosAdminPage() {
                       {formatarMoeda(pedido.valorTotal)}
                     </td>
 
-                    {/* Botão de Ver Detalhes (A "Seta") */}
+                    {/* Botão de Ver Detalhes */}
                     <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => abrirDetalhes(pedido)}
                         className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:text-white hover:bg-neutral-700 transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
                         title="Ver Detalhes do Pedido"
                       >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-5 h-5">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
-                        </svg>
+                        <Eye size={20} strokeWidth={2} />
                       </button>
                     </td>
                   </tr>

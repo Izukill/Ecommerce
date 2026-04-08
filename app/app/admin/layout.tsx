@@ -3,29 +3,55 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
+import { useState, useRef, useEffect } from "react";
+import ModalEditarPerfil from "../components/admin/ModalEditarPerfil";
+import {
+  LayoutDashboard,
+  ShoppingBag,
+  Shirt,
+  Tags,
+  Users,
+  User,
+  CircleUserRound,
+  UserPen,
+  LogOut
+} from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { usuario, logout } = useAuth();
 
+  const [isDropdownAberto, setIsDropdownAberto] = useState(false);
+  const [isModalPerfilAberto, setIsModalPerfilAberto] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
   const nomeAdmin = usuario && usuario.nome ? usuario.nome.split(' ')[0] : "Admin";
   const inicial = nomeAdmin.charAt(0).toUpperCase();
 
+  useEffect(() => {
+    function handleCliqueFora(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownAberto(false);
+      }
+    }
+    document.addEventListener("mousedown", handleCliqueFora);
+    return () => document.removeEventListener("mousedown", handleCliqueFora);
+  }, []);
+
   const menuItens = [
-    { nome: "Visão Geral", rota: "/admin", icone: "📊" },
-    { nome: "Pedidos", rota: "/admin/pedidos", icone: "🛍️" },
-    { nome: "Produtos", rota: "/admin/produtos", icone: "👕" },
-    { nome: "Categorias", rota: "/admin/categorias", icone: "🏷️" },
-    { nome: "Clientes", rota: "/admin/clientes", icone: "👥" },
+    { nome: "Visão Geral", rota: "/admin", icone: LayoutDashboard },
+    { nome: "Pedidos", rota: "/admin/pedidos", icone: ShoppingBag },
+    { nome: "Produtos", rota: "/admin/produtos", icone: Shirt },
+    { nome: "Categorias", rota: "/admin/categorias", icone: Tags },
+    { nome: "Clientes", rota: "/admin/clientes", icone: Users },
   ];
 
   return (
     <div className="min-h-screen flex">
       <aside className="w-72 bg-neutral-900 flex flex-col hidden md:flex z-20">
         <div className="h-20 flex items-center justify-center border-b border-neutral-800">
-          {/* 👇 LOGO ADICIONADA AQUI */}
           <Link href="/" className="flex items-center gap-2 cursor-pointer">
-            <img src="/logoMirle.png" alt="Logo MirlleFitness" className="h-12 w-auto object-contain" />
+            <img src="/adminlogo.png" alt="Logo MirlleFitness" className="h-15 w-auto object-contain" />
             <span className="text-2xl font-extrabold text-white tracking-tighter">
               MIRLLE<span className="text-[#C2AE82]">FITNESS</span>
             </span>
@@ -35,17 +61,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <nav className="flex-1 px-4 py-6 space-y-3 overflow-y-auto">
           {menuItens.map((item) => {
             const ativo = pathname === item.rota;
+            const Icone = item.icone;
+
             return (
               <Link
                 key={item.rota}
                 href={item.rota}
-                className={`flex items-center px-4 py-3.5 text-base font-bold rounded-xl transition-all ${
+                className={`flex items-center px-4 py-3.5 text-base font-bold rounded-xl transition-all group ${
                   ativo
                     ? "bg-neutral-800 text-[#C2AE82] shadow-sm border border-neutral-700"
                     : "text-gray-400 hover:bg-neutral-800/50 hover:text-white"
                 }`}
               >
-                <span className="mr-4 text-xl">{item.icone}</span>
+                <Icone size={22} className="mr-4 transition-colors" />
                 {item.nome}
               </Link>
             );
@@ -57,32 +85,79 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={logout}
             className="flex items-center w-full px-4 py-3.5 text-base font-bold text-red-400 rounded-xl hover:bg-red-950/30 hover:text-red-300 transition-colors"
           >
-            <span className="mr-4 text-xl">🚪</span>
+            <LogOut size={22} className="mr-4" />
             Sair do Sistema
           </button>
         </div>
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-hidden">
+        {/* Header Superior Direito Modificado 👇 */}
         <header className="h-20 bg-neutral-900 border-b border-neutral-800 flex items-center justify-between px-8 z-10">
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Painel Administrativo</h1>
 
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-end hidden sm:flex">
-              {/* 👇 TAMANHO DO NOME AUMENTADO PARA text-lg */}
-              <span className="text-md font-bold text-gray-200 capitalize">{nomeAdmin}</span>
-              <span className="text-sm font-semibold text-[#C2AE82]">MirlleFitness</span>
-            </div>
-            <div className="h-11 w-11 bg-black rounded-full flex items-center justify-center border-2 border-[#C2AE82] shadow-md">
-              <span className="text-[#C2AE82] font-black text-lg">{inicial}</span>
-            </div>
+          {/* 👇 Envolvemos tudo numa div relativa para posicionar o Dropdown */}
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownAberto(!isDropdownAberto)}
+              className="flex items-center gap-4 group cursor-pointer p-2 rounded-full hover:bg-neutral-800/50 transition-colors"
+            >
+              <div className="flex flex-col items-end hidden sm:flex">
+                <span className="text-md font-bold text-gray-200 capitalize group-hover:text-white transition-colors">
+                  {nomeAdmin}
+                </span>
+                <span className="text-sm font-semibold text-[#C2AE82]">MirlleFitness</span>
+              </div>
+              <div className="h-11 w-11 rounded-full flex items-center justify-center border-2 border-[#C2AE82] text-[#C2AE82] bg-black shadow-md group-hover:border-white group-hover:text-white transition-all">
+                <User size={24} strokeWidth={2} />
+              </div>
+            </button>
+
+            {isDropdownAberto && (
+              <div className="absolute right-0 mt-3 w-56 bg-neutral-900/95 backdrop-blur-sm rounded-xl shadow-2xl border border-neutral-800 p-2 z-50 animate-in fade-in slide-in-from-top-1 duration-200">
+                <div className="px-3 py-2 border-b border-neutral-800 mb-2">
+                    <p className="text-xs text-gray-500 font-medium">Logado como</p>
+                    <p className="text-sm font-bold text-white truncate">{usuario?.email}</p>
+                </div>
+
+                <button
+                  onClick={() => {
+                    setIsDropdownAberto(false);
+                    setIsModalPerfilAberto(true);
+                  }}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-semibold text-gray-300 rounded-lg hover:bg-[#C2AE82]/10 hover:text-[#C2AE82] transition-colors"
+                >
+                  <UserPen size={18} />
+                  Meus Dados
+                </button>
+
+                <button
+                  onClick={logout}
+                  className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-semibold text-red-400 rounded-lg hover:bg-red-950/30 hover:text-red-300 transition-colors mt-1"
+                >
+                  <LogOut size={18} />
+                  Sair
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-8 lg:p-10 border-l border-neutral-800">
+        <div className="flex-1 overflow-y-auto p-8 lg:p-10 border-l border-neutral-800 custom-scrollbar">
           {children}
         </div>
       </main>
+      {usuario && (
+        <ModalEditarPerfil
+          isOpen={isModalPerfilAberto}
+          onClose={() => setIsModalPerfilAberto(false)}
+          lookupId={usuario.lookupId}
+          nomeAtual={usuario.nome || "Admin"}
+          aoSalvarComSucesso={(novoNome) => {
+            window.location.reload();
+          }}
+        />
+      )}
     </div>
   );
 }
