@@ -6,7 +6,7 @@ import java.util.UUID;
 @Data
 public class EnderecoResponseDTO {
 
-    private UUID lookupID;
+    private UUID lookupId;
 
     private String rua;
 
@@ -21,6 +21,8 @@ public class EnderecoResponseDTO {
     private String cidade;
 
     private String estado;
+
+    private Boolean ativo;
 
 
 

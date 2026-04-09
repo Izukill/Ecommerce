@@ -38,6 +38,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
         setlookupId(dadosDoBanco.lookupId);
 
         const resEnderecos = await api.get('/enderecos/meus-enderecos');
+        console.log(resEnderecos)
         setEnderecos(resEnderecos.data);
 
       } catch (error: any) {
@@ -53,15 +54,18 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
   const excluirEndereco = async () => {
     if (!enderecoExcluindo) return;
 
+    const idParaDeletar = enderecoExcluindo.lookupId;
+
     try {
-        const idParaDeletar = enderecoExcluindo.lookupID || enderecoExcluindo.lookupId;
         await api.delete(`/enderecos/${idParaDeletar}`);
-        setEnderecos((listaAnterior) => listaAnterior.filter(end => end !== enderecoExcluindo));
+        setEnderecos((listaAnterior) => listaAnterior.filter(end =>
+            end.lookupId !== idParaDeletar
+        ));
         setEnderecoExcluindo(null);
         toast.success("Endereço excluído com sucesso!");
     } catch (error: any) {
         console.error("Erro ao excluir:", error.response?.status, error.response?.data || error.message);
-        toast.error("Erro ao excluir endereço.");
+        toast.error("Não foi possível excluir este endereço.");
     }
   };
 
@@ -118,14 +122,14 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {enderecos.map((end) => (
-              <div key={end.lookupID} className="bg-neutral-900 border border-neutral-700 rounded-xl p-5 hover:border-[#C2AE82] transition-colors relative group">
+              <div key={end.lookupId} className="bg-neutral-900 border border-neutral-700 rounded-xl p-5 hover:border-[#C2AE82] transition-colors relative group">
                 <p className="font-bold text-white mb-1">{end.rua}, {end.numero}</p>
                 <p className="text-sm text-gray-400">{end.bairro} - {end.cidade}/{end.estado}</p>
                 <p className="text-sm text-gray-500 mt-2">CEP: {end.cep}</p>
 
-                <div className="absolute top-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button onClick={() => setEnderecoEditando(end)} className="text-[#C2AE82] hover:text-white text-sm font-bold">Editar</button>
-                  <button onClick={() => setEnderecoExcluindo(end)} className="text-red-500 hover:text-red-400 text-sm font-bold">Excluir</button>
+              <div className="mt-4 pt-3 border-t border-neutral-800 sm:border-transparent sm:pt-0 sm:mt-0 sm:absolute sm:top-4 sm:right-4 flex gap-4 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button onClick={() => setEnderecoEditando(end)} className="text-[#C2AE82] hover:text-white text-sm font-bold uppercase tracking-wider sm:normal-case sm:tracking-normal">Editar</button>
+                  <button onClick={() => setEnderecoExcluindo(end)} className="text-red-500 hover:text-red-400 text-sm font-bold uppercase tracking-wider sm:normal-case sm:tracking-normal">Excluir</button>
                 </div>
               </div>
             ))}
@@ -144,10 +148,11 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
          }}
       />
       <ModalEditarEndereco
+         enderecosAtuais={enderecos}
          enderecoEditando={enderecoEditando}
          setEnderecoEditando={setEnderecoEditando}
          aoSalvarComSucesso={(enderecoAtualizado) => {
-            setEnderecos(enderecos.map(end => end.lookupID === enderecoAtualizado.lookupID ? enderecoAtualizado : end));
+            setEnderecos(enderecos.map(end => end.lookupId === enderecoAtualizado.lookupId ? enderecoAtualizado : end));
          }}
       />
       <ModalExclusao
@@ -162,6 +167,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
           }
       />
       <ModalCriarEndereco
+          enderecosAtuais={enderecos}
           enderecoCriando={enderecoCriando}
           setEnderecoCriando={setEnderecoCriando}
           aoSalvarComSucesso={(novoEndereco) => {

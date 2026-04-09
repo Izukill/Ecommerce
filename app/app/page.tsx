@@ -26,19 +26,16 @@ export default function HomePage() {
   useEffect(() => {
     const carregarDadosHome = async () => {
       try {
-        // 👇 2. Busca Global dos Lançamentos (Pegamos os 8 mais recentes para encher o carrossel)
         const resLancamentos = await api.get("/produtos?page=0&size=8&sort=dataCriacao,desc");
         const dadosLancamentos = resLancamentos.data?.content || resLancamentos.data || [];
         setLancamentos(dadosLancamentos.filter((p: Produto) => p.ativo === true));
 
-        // 3. Busca as categorias que o Admin escolheu mostrar na Home
         const resCategorias = await api.get("/categorias?sort=ordemExibicao,asc");
         const categoriasDb = resCategorias.data?.content || resCategorias.data || [];
         const categoriasAtivasNaHome = categoriasDb.filter((c: any) => c.mostrarNaHome === true);
 
         const vitrinesCompletas: VitrineCategoria[] = [];
 
-        // 4. Monta as faixas de categorias
         for (const cat of categoriasAtivasNaHome) {
           const res = await api.get(`/produtos?categoriaId=${cat.lookupId}&page=0&size=8&sort=dataCriacao,desc`);
           const dados = res.data?.content || res.data || [];
@@ -71,7 +68,7 @@ export default function HomePage() {
       <Header />
 
       <main className="flex-grow">
-        {/* HERO BANNER */}
+        {/* banner */}
         <div className="relative bg-black/70 h-[70vh] flex items-center justify-center border-b border-gray-900 shadow-2xl">
           <BackgroundAnimado />
           <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-3xl mx-auto">
@@ -85,7 +82,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* CONTAINER PRINCIPAL DAS VITRINES */}
+        {/* vitrine */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-32">
 
           {carregando ? (
@@ -95,12 +92,11 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              {/* 👇 5. SESSÃO FIXA DE LANÇAMENTOS (Sempre no topo) */}
+              {/* sessão fixa de lançamentos (sempre no topo) */}
               {lancamentos.length > 0 && (
                 <div id="lancamentos" className="vitrine-section relative">
                   <div className="flex items-end justify-between mb-8 border-b border-[#C2AE82]/30 pb-4">
                     <div>
-                      {/* Título com destaque visual diferente das categorias */}
                       <h2 className="text-3xl font-extrabold text-[#C2AE82] tracking-tight sm:text-4xl flex items-center gap-3">
                         <span className="relative flex h-4 w-4">
                           <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C2AE82] opacity-75"></span>
@@ -119,7 +115,7 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* 6. VITRINES DINÂMICAS DE CATEGORIAS */}
+              {/* 6. vitrines de categorias dinamicas */}
               {vitrines.length > 0 && vitrines.map((vitrine) => (
                 <div key={vitrine.id} className="vitrine-section">
                   <div className="flex items-end justify-between mb-8 border-b border-neutral-800 pb-4">

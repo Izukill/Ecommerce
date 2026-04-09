@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from "@/lib/api";
 import toast from 'react-hot-toast';
+import { Loader2 } from "lucide-react";
 import ModalDetalhesPedido from "@/app/components/pedido/ModalDetalhesPedido";
 import ModalPagamentoPix from "@/app/components/pedido/ModalPagamentoPix";
 
@@ -19,6 +20,11 @@ export interface Pedido {
 export default function AbaPedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
+
+  const [paginaAtiva, setPaginaAtiva] = useState(0);
+  const [temMaisPaginas, setTemMaisPaginas] = useState(false);
+  const [carregandoMais, setCarregandoMais] = useState(false);
+  const TAMANHO_PAGINA = 10;
 
   const [isModalPixAberto, setIsModalPixAberto] = useState(false);
   const [pixData, setPixData] = useState<any>(null);
@@ -54,14 +60,12 @@ export default function AbaPedidos() {
         await api.put(`/pedidos/${pedidoId}/status`, { status: novoStatus });
         toast.success(`Pedido atualizado com sucesso!`);
 
-        //atualiza a lista automaticamente
         setPedidos((listaAnterior) =>
           listaAnterior.map((ped) =>
             ped.lookupId === pedidoId ? { ...ped, status: novoStatus } : ped
           )
         );
 
-        //atualiza o modal aberto
         if (pedidoSelecionado && pedidoSelecionado.lookupId === pedidoId) {
           setPedidoSelecionado({ ...pedidoSelecionado, status: novoStatus });
         }
@@ -75,41 +79,58 @@ export default function AbaPedidos() {
       const toastId = toast.loading("Buscando código Pix...");
       try {
         const response = await api.get(`/pedidos/${pedidoId}/pix`);
+        toast.dismiss(toastId); //remove o loading
 
         setPixData(response.data);
         setValorFinalPix(valorTotal);
         setIsModalPixAberto(true);
 
       } catch (error) {
+        toast.dismiss(toastId);
         toast.error("Erro ao resgatar o Pix. Tente recarregar a página.");
       }
   };
 
   useEffect(() => {
-      const buscarDados = async () => {
-        try {
-          const response = await api.get('/pedidos/meus-pedidos');
-          const dadosDoBanco = response.data;
+    const buscarDados = async () => {
+      if (paginaAtiva === 0) setCarregando(true);
+      else setCarregandoMais(true);
 
-          if (dadosDoBanco && dadosDoBanco.content) {
-            setPedidos(dadosDoBanco.content);
-          } else if (Array.isArray(dadosDoBanco)) {
-            setPedidos(dadosDoBanco);
-          } else {
-            setPedidos([]);
-          }
+      try {
+        const response = await api.get(`/pedidos/meus-pedidos?page=${paginaAtiva}&size=${TAMANHO_PAGINA}&sort=dataHora,desc`);
+        const dadosDoBanco = response.data;
+        const itensRecebidos = dadosDoBanco?.content || dadosDoBanco || [];
 
-        } catch (error: any) {
-          console.error("Erro na API:", error.response?.status, error.response?.data || error.message);
-        } finally {
-          setCarregando(false);
+        if (paginaAtiva === 0) {
+          setPedidos(itensRecebidos);
+        } else {
+          setPedidos((prev) => [...prev, ...itensRecebidos]);
         }
+
+        if (dadosDoBanco.last !== undefined) {
+          setTemMaisPaginas(!dadosDoBanco.last);
+        } else {
+          setTemMaisPaginas(itensRecebidos.length === TAMANHO_PAGINA);
+        }
+
+      } catch (error: any) {
+        console.error("Erro na API:", error.response?.status, error.response?.data || error.message);
+      } finally {
+        setCarregando(false);
+        setCarregandoMais(false);
+      }
     };
+
     buscarDados();
-  }, []);
+  }, [paginaAtiva]);
 
   if (carregando) {
-    return <div className="text-[#C2AE82] text-center mt-10 animate-pulse">Buscando seus pedidos...</div>;
+    return (
+      <div className="flex flex-col items-center justify-center py-20 gap-3">
+        <Loader2 size={32} className="animate-spin text-[#C2AE82]" />
+        <div className="text-[#C2AE82] font-bold tracking-widest uppercase text-sm">Buscando seus pedidos...</div>
+      </div>
+    );
   }
 
   return (
@@ -121,33 +142,53 @@ export default function AbaPedidos() {
           Você ainda não realizou nenhum pedido.
         </p>
       ) : (
-        <div className="space-y-4">
-          {pedidos.map((pedido) => (
-            <div key={pedido.lookupId} className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-[#C2AE82] transition-colors group">
-              <div className="flex-1">
-                <p className="text-gray-200 text-lg">Pedido</p>
-                <p className="text-neutral-600 text-xs mt-0.5 font-mono">{pedido.lookupId}</p>
+        <div className="space-y-6">
+          <div className="space-y-4">
+            {pedidos.map((pedido) => (
+              <div key={pedido.lookupId} className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-neutral-900 border border-neutral-800 rounded-xl p-5 hover:border-[#C2AE82] transition-colors group">
+                <div className="flex-1">
+                  <p className="text-gray-200 text-lg font-bold">Pedido</p>
+                  <p className="text-neutral-500 text-xs mt-0.5 font-mono">{pedido.lookupId}</p>
+                </div>
+                <div className="mt-3 sm:mt-0 flex-1 flex sm:justify-center">
+                  <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full border ${getStatusBadge(pedido.status)}`}>
+                    {pedido.status || "DESCONHECIDO"}
+                  </span>
+                </div>
+                <div className="flex-1 flex items-center justify-start sm:justify-end gap-6 mt-4 sm:mt-0">
+                  <span className="font-bold text-[#C2AE82] text-lg">
+                    {formatarMoeda(pedido.valorTotal)}
+                  </span>
+                  <button
+                    onClick={() => setPedidoSelecionado(pedido)}
+                    className="text-sm font-bold text-gray-400 hover:text-white transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 border sm:border-transparent border-neutral-700 px-3 py-1.5 rounded-md"
+                  >
+                    Ver Detalhes &rarr;
+                  </button>
+                </div>
               </div>
-              <div className="mt-3 sm:mt-0 flex-1 flex sm:justify-center">
-                <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full border ${getStatusBadge(pedido.status)}`}>
-                  {pedido.status || "DESCONHECIDO"}
-                </span>
-              </div>
-              <div className="flex-1 flex items-center justify-start sm:justify-end gap-6 mt-4 sm:mt-0">
-                <span className="font-bold text-[#C2AE82] text-lg">
-                  {formatarMoeda(pedido.valorTotal)}
-                </span>
-                <button
-                  onClick={() => setPedidoSelecionado(pedido)}
-                  className="text-sm font-bold text-gray-400 hover:text-white transition opacity-100 sm:opacity-0 sm:group-hover:opacity-100 border sm:border-transparent border-neutral-700 px-3 py-1.5 rounded-md"
-                >
-                  Ver Detalhes &rarr;
-                </button>
-              </div>
+            ))}
+          </div>
+
+          {temMaisPaginas && (
+            <div className="flex justify-center pt-4">
+              <button
+                onClick={() => setPaginaAtiva(prev => prev + 1)}
+                disabled={carregandoMais}
+                className="px-6 py-2.5 bg-neutral-900 border border-neutral-700 hover:border-[#C2AE82] text-white font-bold text-sm rounded-full transition-all flex items-center gap-2 disabled:opacity-50"
+              >
+                {carregandoMais ? (
+                   <><Loader2 size={16} className="animate-spin" /> Carregando...</>
+                ) : (
+                   "Mostrar pedidos anteriores"
+                )}
+              </button>
             </div>
-          ))}
+          )}
+
         </div>
       )}
+
       <ModalDetalhesPedido
         isOpen={!!pedidoSelecionado}
         pedidoSelecionado={pedidoSelecionado}
@@ -166,8 +207,6 @@ export default function AbaPedidos() {
         valorTotal={valorFinalPix}
         onClose={() => setIsModalPixAberto(false)}
       />
-
     </div>
-
   );
 }

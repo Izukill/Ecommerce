@@ -5,7 +5,7 @@ import ModalAtivacao from "@/app/components/layout/ModalAtivacao";
 import toast from 'react-hot-toast';
 
 export interface Endereco {
-    lookupID: number;
+    lookupId: number;
     cep: string;
     rua: string;
     bairro: string;
@@ -16,12 +16,14 @@ export interface Endereco {
 }
 
 interface ModalProps {
+    enderecosAtuais: any[];
     enderecoEditando: Endereco | null;
     setEnderecoEditando: (endereco: Endereco | null) => void;
     aoSalvarComSucesso: (enderecoAtualizado: Endereco) => void;
 }
 
 export default function ModalEditarEndereco({
+    enderecosAtuais,
     enderecoEditando,
     setEnderecoEditando,
     aoSalvarComSucesso
@@ -41,8 +43,28 @@ export default function ModalEditarEndereco({
     };
 
     const executarAtualizacaoAPI = async () => {
+
+        const formatarTexto = (texto: string) => texto ? texto.toString().toLowerCase().trim().replace(/\s+/g, ' ') : '';
+        const formatarCep = (cep: string) => cep ? cep.replace(/\D/g, '') : '';
+
+        const enderecoDuplicado = enderecosAtuais.find((end) =>
+            end.lookupId !== enderecoEditando.lookupId &&
+            formatarCep(end.cep) === formatarCep(enderecoEditando.cep) &&
+            formatarTexto(end.rua) === formatarTexto(enderecoEditando.rua) &&
+            String(end.numero) === String(enderecoEditando.numero) &&
+            formatarTexto(end.bairro) === formatarTexto(enderecoEditando.bairro) &&
+            formatarTexto(end.cidade) === formatarTexto(enderecoEditando.cidade) &&
+            formatarTexto(end.estado) === formatarTexto(enderecoEditando.estado)
+        );
+
+        if (enderecoDuplicado) {
+            toast.error("Você já possui este exato endereço cadastrado!");
+            return;
+        }
+
+
         try {
-            await api.put(`/enderecos/${enderecoEditando.lookupID}`, enderecoEditando);
+            await api.put(`/enderecos/${enderecoEditando.lookupId}`, enderecoEditando);
             aoSalvarComSucesso(enderecoEditando);
             setIsConfirmando(false);
             setEnderecoEditando(null);
@@ -57,7 +79,7 @@ export default function ModalEditarEndereco({
 
     return (
         <>
-            <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
                 <div className="bg-neutral-900 border-t-4 border-t-[#C2AE82] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
                     <div className="p-6 border-b border-neutral-800 flex justify-between items-center">

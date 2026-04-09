@@ -16,7 +16,6 @@ export default function DetalhesProdutoPage() {
   const [produto, setProduto] = useState<any>(null);
   const [carregando, setCarregando] = useState(true);
 
-  // Estado que recebe a variação exata que o usuário escolheu no Seletor
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null);
   const [quantidade, setQuantidade] = useState(1);
 
@@ -34,32 +33,11 @@ export default function DetalhesProdutoPage() {
     if (produtoId) carregarProduto();
   }, [produtoId]);
 
-  // Reseta a quantidade para 1 sempre que a usuária trocar de cor ou tamanho
+  //reseta a quantidade para 1 sempre que a usuária trocar de cor ou tamanho
   useEffect(() => {
     setQuantidade(1);
   }, [variacaoSelecionada]);
 
-  const handleAdicionarAoCarrinho = () => {
-    if (!variacaoSelecionada) {
-      alert("Por favor, selecione uma cor e um tamanho primeiro!");
-      return;
-    }
-
-    // AQUI ENTRARÁ A LÓGICA DO CONTEXTO DE CARRINHO NO FUTURO
-    const itemCarrinho = {
-      produtoId: produto.lookupId,
-      nome: produto.nome,
-      preco: produto.preco,
-      variacaoId: variacaoSelecionada.lookupId,
-      cor: variacaoSelecionada.cor,
-      tamanho: variacaoSelecionada.tamanho,
-      quantidade: quantidade,
-      imagem: variacaoSelecionada.imagemUrl || produto.imagemUrl
-    };
-
-    console.log("Adicionado ao carrinho:", itemCarrinho);
-    toast.success(`Oba! ${quantidade}x ${produto.nome} (${variacaoSelecionada.cor} - ${variacaoSelecionada.tamanho}) adicionado ao carrinho! 🛒`);
-  };
 
   if (carregando) {
     return (
@@ -80,7 +58,6 @@ export default function DetalhesProdutoPage() {
     );
   }
 
-  // Verifica se o produto tem alguma variação cadastrada e com estoque
   const temEstoqueGeral = produto.variacoes && produto.variacoes.length > 0;
 
   return (

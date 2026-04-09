@@ -19,8 +19,14 @@ export default function ModalAtivacao({
 }: ModalAtivacaoProps) {
   if (!isOpen) return null;
 
+
+  const handleConfirmar = () => {
+    onConfirm();
+    onClose();
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
       <div className="bg-neutral-900 border-t-4 border-green-500 rounded-xl shadow-2xl p-6 w-full max-w-md animate-in fade-in zoom-in duration-200">
         <h3 className="text-xl font-extrabold text-white mb-2">{titulo}</h3>
 
@@ -38,7 +44,7 @@ export default function ModalAtivacao({
           </button>
           <button
             type="button"
-            onClick={onConfirm}
+            onClick={handleConfirmar}
             className="px-4 py-2 text-sm font-bold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors shadow-lg"
           >
             Sim, Ativar

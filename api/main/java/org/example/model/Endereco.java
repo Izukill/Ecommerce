@@ -47,5 +47,7 @@ public class Endereco {
 
     private String estado;
 
+    private Boolean ativo= true;
+
 
 }

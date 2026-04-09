@@ -10,15 +10,18 @@ export interface EnderecoCriacao {
     cidade: string;
     complemento?: string;
     estado: string;
+    ativo: boolean;
 }
 
 interface ModalProps {
+    enderecosAtuais: any[];
     enderecoCriando: EnderecoCriacao | null;
     setEnderecoCriando: React.Dispatch<React.SetStateAction<EnderecoCriacao | null>>;
     aoSalvarComSucesso: (enderecoCriado: any) => void;
 }
 
 export default function ModalCriarEndereco({
+    enderecosAtuais,
     enderecoCriando,
     setEnderecoCriando,
     aoSalvarComSucesso
@@ -71,6 +74,23 @@ export default function ModalCriarEndereco({
     const executarCriacaoAPI = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        const formatarTexto = (texto: string) => texto ? texto.toString().toLowerCase().trim().replace(/\s+/g, ' ') : '';
+        const formatarCep = (cep: string) => cep ? cep.replace(/\D/g, '') : '';
+
+        const enderecoDuplicado = enderecosAtuais.find((end) =>
+            formatarCep(end.cep) === formatarCep(enderecoCriando.cep) &&
+            formatarTexto(end.rua) === formatarTexto(enderecoCriando.rua) &&
+            String(end.numero) === String(enderecoCriando.numero) && // Converte para string por segurança
+            formatarTexto(end.bairro) === formatarTexto(enderecoCriando.bairro) &&
+            formatarTexto(end.cidade) === formatarTexto(enderecoCriando.cidade) &&
+            formatarTexto(end.estado) === formatarTexto(enderecoCriando.estado)
+        );
+
+        if (enderecoDuplicado) {
+            toast.error("Você já possui este exato endereço cadastrado!");
+            return;
+        }
+
         try {
             const response = await api.post('/enderecos', enderecoCriando);
             aoSalvarComSucesso(response.data);
@@ -84,7 +104,7 @@ export default function ModalCriarEndereco({
     };
 
     return (
-        <div className="fixed inset-0 z-40 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-neutral-900 border-t-4 border-t-[#C2AE82] rounded-2xl w-full max-w-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
 
                 <div className="p-6 border-b border-neutral-800 flex justify-between items-center">

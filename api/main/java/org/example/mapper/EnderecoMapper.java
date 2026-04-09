@@ -19,6 +19,7 @@ public class EnderecoMapper {
                 .bairro(dto.getBairro())
                 .numero(dto.getNumero())
                 .complemento(dto.getComplemento())
+                .ativo(true)
                 .build();
 
     }
@@ -28,7 +29,7 @@ public class EnderecoMapper {
 
         EnderecoResponseDTO dto= new EnderecoResponseDTO();
 
-        dto.setLookupID(entity.getLookupId());
+        dto.setLookupId(entity.getLookupId());
         dto.setCep(entity.getCep());
         dto.setCidade(entity.getCidade());
         dto.setEstado(entity.getEstado());
@@ -36,6 +37,7 @@ public class EnderecoMapper {
         dto.setBairro(entity.getBairro());
         dto.setNumero(entity.getNumero());
         dto.setComplemento(entity.getComplemento());
+        dto.setAtivo(entity.getAtivo());
 
         return dto;
 

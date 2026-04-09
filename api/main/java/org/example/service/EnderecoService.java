@@ -6,6 +6,7 @@ import org.example.model.Endereco;
 import org.example.repository.ClienteRepository;
 import org.example.repository.EnderecoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -31,6 +32,7 @@ public class EnderecoService {
         Cliente clienteLogado = obterClienteLogado();
 
         endereco.setCliente(clienteLogado);
+        endereco.setAtivo(true);
 
         return enderecoRepository.save(endereco);
     }
@@ -72,13 +74,17 @@ public class EnderecoService {
     @Transactional
     public void remover(UUID lookupId) throws RegraNegocioException {
         Endereco endereco = recuperarPor(lookupId);
-        enderecoRepository.delete(endereco);
+
+        endereco.setAtivo(false);
+        enderecoRepository.save(endereco);
     }
 
 
     public List<Endereco> listar() throws RegraNegocioException {
         Cliente clienteLogado = obterClienteLogado();
-        return clienteLogado.getEnderecos();
+        return clienteLogado.getEnderecos().stream()
+                .filter(Endereco::getAtivo)
+                .toList();
     }
 
 
