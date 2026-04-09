@@ -1,68 +1,32 @@
 'use client';
 
 export default function BackgroundAnimado() {
-  const formas = [
-    { id: 1, tipo: 'quadrado', left: '10%', size: 40, delay: '0s', duration: '12s' },
-    { id: 2, tipo: 'triangulo', left: '25%', size: 60, delay: '2s', duration: '18s' },
-    { id: 3, tipo: 'quadrado', left: '45%', size: 30, delay: '5s', duration: '10s' },
-    { id: 4, tipo: 'triangulo', left: '60%', size: 50, delay: '1s', duration: '15s' },
-    { id: 5, tipo: 'quadrado', left: '80%', size: 45, delay: '4s', duration: '14s' },
-    { id: 6, tipo: 'triangulo', left: '90%', size: 35, delay: '7s', duration: '19s' },
-  ];
-
   return (
-    // pointer-events-none garante que o usuário consiga clicar nos botões que ficarem por cima da animação
-    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+    <div className="absolute inset-0 overflow-hidden bg-black">
 
-      {/* O motor da animação em CSS puro */}
-      <style>{`
-        @keyframes flutuar {
-          0% {
-            transform: translateY(100px) rotate(0deg);
-            opacity: 0;
-          }
-          20% {
-            opacity: 0.2; /* Fica levemente transparente para não atrapalhar a leitura do site */
-          }
-          80% {
-            opacity: 0.2;
-          }
-          100% {
-            transform: translateY(-800px) rotate(360deg);
-            opacity: 0;
-          }
-        }
-        .animacao-flutuar {
-          position: absolute;
-          bottom: -100px;
-          animation-name: flutuar;
-          animation-timing-function: linear;
-          animation-iteration-count: infinite;
-        }
-      `}</style>
+      {/* O VÍDEO DE FUNDO
+        - autoPlay: Começa sozinho
+        - loop: Repete infinitamente
+        - muted: Mudo (obrigatório para navegadores deixarem dar autoplay)
+        - playsInline: Evita que o iPhone abra o vídeo em tela cheia do nada
+      */}
+      <video
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover filter grayscale-[80%] opacity-40"
+      >
+        <source src="/videos/VideoBackground.mp4" type="video/mp4" />
+        Seu navegador não suporta vídeos de fundo.
+      </video>
 
-      {formas.map((forma) => (
-        <div
-          key={forma.id}
-          className="animacao-flutuar"
-          style={{
-            left: forma.left,
-            animationDuration: forma.duration,
-            animationDelay: forma.delay,
-          }}
-        >
-          {forma.tipo === 'quadrado' ? (
-            <svg width={forma.size} height={forma.size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              {/* O stroke="#C2AE82" puxa a cor dourada que você já usa */}
-              <rect x="5" y="5" width="90" height="90" stroke="#C2AE82" strokeWidth="3" />
-            </svg>
-          ) : (
-            <svg width={forma.size} height={forma.size} viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <polygon points="50,5 95,95 5,95" stroke="#C2AE82" strokeWidth="3" />
-            </svg>
-          )}
-        </div>
-      ))}
+       {/* brilhos de fundo pro vídeo */}
+      <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22 opacity=%220.05%22/%3E%3C/svg%3E')] pointer-events-none"></div>
+
+      <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-neutral-950 pointer-events-none"></div>
+
+      <div className="absolute -bottom-[20%] left-[20%] w-[60%] h-[30%] bg-[#C2AE82] mix-blend-screen filter blur-[100px] opacity-10 pointer-events-none"></div>
     </div>
   );
 }

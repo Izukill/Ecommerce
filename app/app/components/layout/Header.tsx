@@ -3,6 +3,7 @@ import { useRouter } from 'next/navigation';
 import Link from "next/link";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useCart } from "@/app/contexts/CartContext";
+import { api } from "@/lib/api";
 import {
   User,
   ChevronDown,
@@ -10,6 +11,11 @@ import {
   LayoutDashboard,
   LogOut,
 } from "lucide-react";
+
+interface CategoriaNav {
+  lookupId: string;
+  nome: string;
+}
 
 export default function Header() {
   const { usuario, logout } = useAuth();
@@ -19,6 +25,21 @@ export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const [categorias, setCategorias] = useState<CategoriaNav[]>([]);
+
+  useEffect(() => {
+    const carregarCategoriasMenu = async () => {
+      try {
+        const response = await api.get('/categorias');
+        const dados = response.data?.content || response.data || [];
+        setCategorias(dados);
+      } catch (error) {
+        console.error("Erro ao carregar categorias no Header", error);
+      }
+    };
+    carregarCategoriasMenu();
+  }, []);
 
   useEffect(() => {
     const handleClickFora = (event: MouseEvent) => {
@@ -51,12 +72,51 @@ export default function Header() {
               </Link>
             </div>
 
-            <nav className="hidden md:flex items-center space-x-8">
-              <Link href="/#vitrine" className="text-black font-semibold hover:text-white transition-colors">Lançamentos</Link>
-              <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Moda Praia</Link>
-              <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Acessórios</Link>
-              <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Ofertas</Link>
-            </nav>
+                <nav className="hidden md:flex items-center space-x-8">
+                  <Link href="/#lancamentos" className="text-black font-semibold hover:text-white transition-colors">Lançamentos</Link>
+
+                  {/* 👇 O NOVO MENU DROPDOWN DE CATEGORIAS */}
+                  <div className="relative group py-6">
+
+                    <button className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1 focus:outline-none">
+                      Categorias <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
+                    </button>
+
+                    {/* 👇 CAIXA DO MENU (Agora mais larga: w-[500px] ou [600px] e centralizada) */}
+                    <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[300px] lg:w-[400px] bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-6">
+
+                      {categorias.length === 0 ? (
+                        <div className="text-sm text-gray-500 text-center py-4">Carregando categorias...</div>
+                      ) : (
+
+                        <div className="grid grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-3">
+                          {categorias.map((cat) => (
+                            <Link
+                              key={cat.lookupId}
+                              href={`/produtos?categoria=${cat.lookupId}`}
+                              className="text-sm font-medium text-gray-300 hover:text-[#C2AE82] hover:bg-[#C2AE82]/10 px-3 py-2 rounded-lg transition-colors flex items-center"
+                            >
+                              {cat.nome}
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Botão de atalho estilizado e centralizado embaixo do Grid */}
+                      <div className="border-t border-neutral-800 mt-6 pt-5 flex justify-center">
+                        <Link
+                          href="/produtos"
+                          className="inline-flex items-center px-6 py-2 border border-[#C2AE82] text-xs font-bold text-[#C2AE82] hover:bg-[#C2AE82] hover:text-black rounded-full uppercase tracking-wider transition-all"
+                        >
+                          Ver Toda a Coleção
+                        </Link>
+                      </div>
+
+                    </div>
+                  </div>
+
+                  <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Ofertas</Link>
+                </nav>
           </div>
 
           <div className="flex items-center space-x-5">
