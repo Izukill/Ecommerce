@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 export interface Variacao {
   lookupId: string;
@@ -13,17 +13,27 @@ export interface Variacao {
 interface SeletorVariacoesProps {
   variacoes: Variacao[];
   onVariacaoSelecionada: (variacao: Variacao | null) => void;
+  onCorSelecionada?: (cor: string | null) => void;
 }
 
-export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: SeletorVariacoesProps) {
+const ORDEM_TAMANHOS: Record<string, number> = {
+  "P": 1, "M": 2, "G": 3, "GG": 4, "G1": 5, "G2": 6, "G3": 7, "U": 8
+};
+
+export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada, onCorSelecionada }: SeletorVariacoesProps) {
   const [corSelecionada, setCorSelecionada] = useState<string | null>(null);
   const [tamanhoSelecionado, setTamanhoSelecionado] = useState<string | null>(null);
 
-  //extrai as cores únicas para montar os botões de cor
+  // extrai as cores únicas para montar os botões de cor
   const coresDisponiveis = Array.from(new Set(variacoes.map(v => v.cor)));
 
-  //filtra as variações baseado na cor que a usuária clicou
-  const variacoesDaCor = variacoes.filter(v => v.cor === corSelecionada);
+  const variacoesDaCor = variacoes
+    .filter(v => v.cor === corSelecionada)
+    .sort((a, b) => {
+      const pesoA = ORDEM_TAMANHOS[a.tamanho] || 99;
+      const pesoB = ORDEM_TAMANHOS[b.tamanho] || 99;
+      return pesoA - pesoB;
+    });
 
   //quando a usuária troca a cor, resetamos o tamanho
   const handleSelecionarCor = (cor: string) => {
@@ -31,6 +41,10 @@ export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada }: S
     setCorSelecionada(cor);
     setTamanhoSelecionado(null);
     onVariacaoSelecionada(null); // Reseta a seleção final pro componente pai
+
+    if (onCorSelecionada) {
+      onCorSelecionada(cor);
+    }
   };
 
   //quando a usuária clica no tamanho, verifica a variação exata no array e manda para o pai

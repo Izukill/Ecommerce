@@ -149,6 +149,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
                   onMouseLeave={() => setCorHover(null)}
                   onClick={(e) => {
                     e.preventDefault();
+                    e.stopPropagation();
 
                     if (corFixada === cor.nome) {
                       setCorFixada(null);

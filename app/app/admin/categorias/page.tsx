@@ -4,11 +4,13 @@ import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
-import { Tags } from "lucide-react";
+import { Tags, Eye, EyeOff, GripVertical } from "lucide-react";
 
 interface Categoria {
   lookupId: string;
   nome: string;
+  mostrarNaHome?: boolean;
+  ordemExibicao?: number;
 }
 
 export default function CategoriasPage() {
@@ -17,28 +19,45 @@ export default function CategoriasPage() {
   const [erroCarregar, setErroCarregar] = useState("");
 
   const [nomeNovaCategoria, setNomeNovaCategoria] = useState("");
+
+  const [mostrarNaHome, setMostrarNaHome] = useState(false);
+  const [ordemExibicao, setOrdemExibicao] = useState<number | string>(1);
+
   const [salvando, setSalvando] = useState(false);
   const [erroSalvar, setErroSalvar] = useState("");
   const [sucesso, setSucesso] = useState(false);
 
   const [categoriaEditando, setCategoriaEditando] = useState<Categoria | null>(null);
 
-  // ==========================================
-  // Controle do Modal Externalizado
-  // ==========================================
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
   const [categoriaParaExcluir, setCategoriaParaExcluir] = useState<Categoria | null>(null);
 
   const carregarCategorias = async () => {
     try {
       const response = await api.get("/categorias");
+      let dados = [];
+
       if (response.data && Array.isArray(response.data.content)) {
-        setCategorias(response.data.content);
+        dados = response.data.content;
       } else if (Array.isArray(response.data)) {
-        setCategorias(response.data);
-      } else {
-        setCategorias([]);
+        dados = response.data;
       }
+
+      const categoriasOrdenadas = dados.sort((a: Categoria, b: Categoria) => {
+        //quem tá ativo sempre no topo
+        if (a.mostrarNaHome && !b.mostrarNaHome) return -1;
+        if (!a.mostrarNaHome && b.mostrarNaHome) return 1;
+
+        if (a.mostrarNaHome && b.mostrarNaHome) {
+          return (a.ordemExibicao || 0) - (b.ordemExibicao || 0);
+        }
+
+        //quem tá inativo sempre abaixo e por ordem de nome
+        return a.nome.localeCompare(b.nome);
+      });
+
+      setCategorias(categoriasOrdenadas);
+
     } catch (error) {
       setErroCarregar("Não foi possível carregar as categorias.");
     } finally {
@@ -50,20 +69,8 @@ export default function CategoriasPage() {
     carregarCategorias();
   }, []);
 
-// ==========================================
-  // FUNÇÃO AUXILIAR: Formatar nome (Capitalize)
-  // Ex: "moda praia" -> "Moda Praia"
-  // ==========================================
   const formatarNomeCategoria = (texto: string) => {
-    return texto
-      .trim()
-      .split(/\s+/) // Divide as palavras considerando um ou mais espaços
-      .map(palavra => {
-        // Ignora palavras vazias se houver múltiplos espaços
-        if (palavra.length === 0) return "";
-        return palavra.charAt(0).toUpperCase() + palavra.slice(1).toLowerCase();
-      })
-      .join(" ");
+    return texto.trim().split(/\s+/).map(palavra => palavra.length === 0 ? "" : palavra.charAt(0).toUpperCase() + palavra.slice(1).toLowerCase()).join(" ");
   };
 
   const handleSalvarCategoria = async (e: FormEvent) => {
@@ -72,45 +79,42 @@ export default function CategoriasPage() {
     setSucesso(false);
 
     const nomeDigitado = nomeNovaCategoria.trim();
-
-    if (!nomeDigitado) {
-      setErroSalvar("O nome da categoria é obrigatório.");
-      return;
-    }
+    if (!nomeDigitado) { setErroSalvar("O nome da categoria é obrigatório."); return; }
 
     const nomeFormatado = formatarNomeCategoria(nomeDigitado);
-
-    //validação Inteligente (Ignora maiúsculas e espaços)
     const nomeLimpoDigitado = nomeDigitado.toLowerCase().replace(/\s+/g, '');
+
     const categoriaDuplicada = categorias.find(cat => {
       if (categoriaEditando && cat.lookupId === categoriaEditando.lookupId) return false;
-      const nomeLimpoExistente = cat.nome.toLowerCase().replace(/\s+/g, '');
-      return nomeLimpoDigitado === nomeLimpoExistente;
+      return nomeLimpoDigitado === cat.nome.toLowerCase().replace(/\s+/g, '');
     });
 
     if (categoriaDuplicada) {
-      setErroSalvar(`A categoria "${categoriaDuplicada.nome}" já existe. Evite nomes repetidos ou muito parecidos.`);
+      setErroSalvar(`A categoria "${categoriaDuplicada.nome}" já existe.`);
       return;
     }
 
     setSalvando(true);
 
+    const payload = {
+      nome: nomeFormatado,
+      mostrarNaHome,
+      ordemExibicao: ordemExibicao === "" ? 1 : Number(ordemExibicao)
+    };
+
     try {
       if (categoriaEditando) {
-        // Envia o nomeFormatado para a API
-        await api.put(`/categorias/${categoriaEditando.lookupId}`, { nome: nomeFormatado });
+        await api.put(`/categorias/${categoriaEditando.lookupId}`, payload);
       } else {
-        // Envia o nomeFormatado para a API
-        await api.post("/categorias", { nome: nomeFormatado });
+        await api.post("/categorias", payload);
       }
 
       setSucesso(true);
       cancelarEdicao();
       carregarCategorias();
-
       setTimeout(() => setSucesso(false), 3000);
     } catch (error: any) {
-      setErroSalvar("Erro ao salvar a categoria. Verifique e tente novamente.");
+      setErroSalvar("Erro ao salvar a categoria.");
     } finally {
       setSalvando(false);
     }
@@ -119,6 +123,8 @@ export default function CategoriasPage() {
   const iniciarEdicao = (categoria: Categoria) => {
     setCategoriaEditando(categoria);
     setNomeNovaCategoria(categoria.nome);
+    setMostrarNaHome(categoria.mostrarNaHome || false);
+    setOrdemExibicao(categoria.ordemExibicao || 0);
     setErroSalvar("");
     setSucesso(false);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -127,85 +133,91 @@ export default function CategoriasPage() {
   const cancelarEdicao = () => {
     setCategoriaEditando(null);
     setNomeNovaCategoria("");
+    setMostrarNaHome(false);
+    setOrdemExibicao(1);
     setErroSalvar("");
   };
 
-  const abrirModalExclusao = (categoria: Categoria) => {
-    setCategoriaParaExcluir(categoria);
-    setIsModalExclusaoAberto(true);
-  };
-
-  const fecharModalExclusao = () => {
-    setIsModalExclusaoAberto(false);
-    setCategoriaParaExcluir(null);
-  };
+  const abrirModalExclusao = (categoria: Categoria) => { setCategoriaParaExcluir(categoria); setIsModalExclusaoAberto(true); };
+  const fecharModalExclusao = () => { setIsModalExclusaoAberto(false); setCategoriaParaExcluir(null); };
 
   const confirmarExclusao = async () => {
     if (!categoriaParaExcluir) return;
-
     try {
       await api.delete(`/categorias/${categoriaParaExcluir.lookupId}`);
       setCategorias(categorias.filter(c => c.lookupId !== categoriaParaExcluir.lookupId));
       fecharModalExclusao();
     } catch (error) {
-      toast.error("Erro ao excluir. Essa categoria já deve estar vinculada a algum produto.");
+      setErroCarregar("Erro ao excluir. Essa categoria já deve estar vinculada a algum produto.");
       fecharModalExclusao();
     }
   };
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto relative">
-
       <div>
         <h2 className="text-3xl font-extrabold text-white tracking-tight">Categorias</h2>
-        <p className="text-sm text-gray-400 mt-1">Crie e gerencie as categorias dos seus produtos.</p>
+        <p className="text-sm text-gray-400 mt-1">Crie e gerencie as categorias e as vitrines da Home.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* COLUNA ESQUERDA: Formulário */}
+        {/* formulário */}
         <div className="lg:col-span-1">
           <div className="bg-black p-6 rounded-xl shadow-2xl border-t-4 border-[#C2AE82] sticky top-8">
             <h3 className="text-lg font-bold text-white mb-4">
               {categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
             </h3>
 
-            <form onSubmit={handleSalvarCategoria} className="space-y-4">
-              {erroSalvar && (
-                <div className="bg-red-950/50 border-l-4 border-red-500 p-3 rounded-md">
-                  <p className="text-xs text-red-200 font-semibold">{erroSalvar}</p>
-                </div>
-              )}
-
-              {sucesso && (
-                <div className="bg-green-950/50 border-l-4 border-green-500 p-3 rounded-md">
-                  <p className="text-xs text-green-200 font-semibold">Salva com sucesso!</p>
-                </div>
-              )}
+            <form onSubmit={handleSalvarCategoria} className="space-y-5">
+              {erroSalvar && <div className="bg-red-950/50 border-l-4 border-red-500 p-3 rounded-md"><p className="text-xs text-red-200 font-semibold">{erroSalvar}</p></div>}
+              {sucesso && <div className="bg-green-950/50 border-l-4 border-green-500 p-3 rounded-md"><p className="text-xs text-green-200 font-semibold">Salva com sucesso!</p></div>}
 
               <div>
-                <label htmlFor="nomeCategoria" className="block text-sm font-bold text-gray-100">Nome *</label>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nome *</label>
                 <input
-                  id="nomeCategoria" type="text" required
-                  className="mt-1 appearance-none rounded-lg block w-full px-4 py-3 border border-neutral-700 placeholder-gray-500 text-gray-100 focus:outline-none focus:ring-2 focus:ring-[#C2AE82] focus:border-transparent bg-neutral-900 sm:text-sm transition-all"
-                  placeholder="Ex: Moda Praia"
+                  type="text" required placeholder="Ex: Moda Praia"
+                  className="w-full px-4 py-3 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-white focus:ring-2 focus:ring-[#C2AE82] outline-none"
                   value={nomeNovaCategoria} onChange={(e) => setNomeNovaCategoria(e.target.value)}
                 />
               </div>
 
-              <div className="space-y-2">
-                <button
-                  type="submit" disabled={salvando}
-                  className="w-full flex justify-center py-3 px-4 border border-transparent text-sm font-extrabold rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#C2AE82] focus:ring-offset-black disabled:opacity-50 transition-all shadow-lg"
-                >
+              <div className="border-t border-neutral-800 pt-4 space-y-4">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox" className="sr-only"
+                      checked={mostrarNaHome} onChange={(e) => setMostrarNaHome(e.target.checked)}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${mostrarNaHome ? 'bg-[#C2AE82]' : 'bg-neutral-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${mostrarNaHome ? 'translate-x-4' : ''}`}></div>
+                  </div>
+                  <div className="text-sm">
+                    <p className="font-bold text-gray-200">Exibir Vitrine na Home</p>
+                    <p className="text-[10px] text-gray-500 leading-tight mt-0.5">Cria uma faixa de produtos exclusivos desta categoria na tela inicial.</p>
+                  </div>
+                </label>
+
+                <div className={`transition-all duration-300 ${mostrarNaHome ? 'opacity-100 max-h-20' : 'opacity-50 max-h-20 grayscale pointer-events-none'}`}>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Ordem na Home</label>
+                  <div className="flex items-center gap-2">
+                    <GripVertical size={16} className="text-gray-600" />
+                    <input
+                       type="number" min="1" disabled={!mostrarNaHome}
+                       className="w-20 px-3 py-2 bg-neutral-900 border border-neutral-700 rounded-lg text-sm text-center text-white focus:ring-2 focus:ring-[#C2AE82] outline-none disabled:bg-black"
+                       value={ordemExibicao}
+                       onChange={(e) => setOrdemExibicao(e.target.value === "" ? "" : Number(e.target.value))}
+                     />
+                    <span className="text-xs text-gray-500">(1 = Topo)</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-2 pt-2">
+                <button type="submit" disabled={salvando} className="w-full py-3 text-sm font-extrabold rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] transition-all shadow-lg">
                   {salvando ? "Salvando..." : (categoriaEditando ? "Atualizar" : "Criar Categoria")}
                 </button>
-
                 {categoriaEditando && (
-                  <button
-                    type="button" onClick={cancelarEdicao}
-                    className="w-full flex justify-center py-3 px-4 border border-neutral-700 text-sm font-bold rounded-lg text-gray-300 bg-transparent hover:bg-neutral-800 transition-all"
-                  >
+                  <button type="button" onClick={cancelarEdicao} className="w-full py-3 text-sm font-bold rounded-lg text-gray-300 hover:bg-neutral-800 transition-all border border-neutral-700">
                     Cancelar Edição
                   </button>
                 )}
@@ -214,96 +226,54 @@ export default function CategoriasPage() {
           </div>
         </div>
 
-        {/* COLUNA DIREITA: Tabela de Listagem */}
+        {/* tabela */}
         <div className="lg:col-span-2">
-          {erroCarregar && (
-            <div className="bg-red-950/50 border-l-4 border-red-500 p-4 rounded-md mb-4">
-              <p className="text-sm text-red-200 font-semibold">{erroCarregar}</p>
-            </div>
-          )}
-
+          {erroCarregar && <div className="bg-red-950/50 border-l-4 border-red-500 p-4 rounded-md mb-4"><p className="text-sm text-red-200 font-semibold">{erroCarregar}</p></div>}
           <div className="bg-black rounded-xl shadow-2xl border border-neutral-800 overflow-hidden">
             {carregando ? (
-              <div className="p-10 text-center text-[#C2AE82] font-bold tracking-widest uppercase animate-pulse">
-                Carregando categorias...
-              </div>
+              <div className="p-10 text-center text-[#C2AE82] font-bold tracking-widest uppercase animate-pulse">Carregando categorias...</div>
             ) : categorias.length === 0 ? (
-              <div className="p-10 text-center flex flex-col items-center">
-                <div className="mb-4 text-neutral-600">
-                  <Tags size={56} strokeWidth={1.5} />
-                </div>
-                <p className="text-gray-300 font-bold text-lg">Nenhuma categoria cadastrada</p>
-                <p className="text-gray-500 text-sm mt-1">Use o formulário ao lado para criar a primeira.</p>
-              </div>
+              <div className="p-10 text-center"><p className="text-gray-300 font-bold text-lg">Nenhuma categoria</p></div>
             ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
-                  <thead>
-                    <tr className="bg-neutral-900 border-b border-neutral-800 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                      <th className="px-6 py-4">Nome</th>
-                      <th className="px-6 py-4 text-right">Ações</th>
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-neutral-900 border-b border-neutral-800 text-xs font-bold text-gray-400 uppercase tracking-wider">
+                    <th className="px-6 py-4">Nome</th>
+                    <th className="px-6 py-4 text-center">Vitrine Home</th>
+                    <th className="px-6 py-4 text-right">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-800">
+                  {categorias.map((categoria) => (
+                    <tr key={categoria.lookupId} className="hover:bg-neutral-900/50 transition-colors">
+                      <td className="px-6 py-4">
+                        <Link href={`/admin/produtos?categoria=${categoria.nome}`} className="text-lg font-bold text-gray-100 hover:text-[#C2AE82] transition-colors">{categoria.nome}</Link>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        {categoria.mostrarNaHome ? (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#C2AE82]/10 border border-[#C2AE82]/30 rounded-md text-[#C2AE82] text-xs font-bold">
+                            <Eye size={14} /> Ativa (Pos: {categoria.ordemExibicao || 0})
+                          </div>
+                        ) : (
+                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-800 border border-neutral-700 rounded-md text-gray-500 text-xs font-bold">
+                            <EyeOff size={14} /> Oculta
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 text-right space-x-3">
+                        <button onClick={() => iniciarEdicao(categoria)} className="text-gray-400 hover:text-white"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                        <button onClick={() => abrirModalExclusao(categoria)} className="text-red-500 hover:text-red-400"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                      </td>
                     </tr>
-                  </thead>
-                  <tbody className="divide-y divide-neutral-800">
-                    {categorias.map((categoria) => (
-                      <tr key={categoria.lookupId} className="hover:bg-neutral-900/50 transition-colors">
-
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <Link
-                            href={`/admin/produtos?categoria=${categoria.nome}`}
-                            title="Ver produtos desta categoria"
-                            className="text-lg font-bold text-gray-100 hover:text-[#C2AE82] transition-colors cursor-pointer inline-block"
-                          >
-                            {categoria.nome}
-                          </Link>
-                          <p className="text-xs text-gray-500 font-mono mt-0.5">ID: {categoria.lookupId}</p>
-                        </td>
-
-                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-3">
-                          <button
-                            onClick={() => iniciarEdicao(categoria)}
-                            className="text-gray-400 hover:text-white transition-colors inline-block"
-                            title="Editar Categoria"
-                          >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                          </button>
-
-                          <button
-                            onClick={() => abrirModalExclusao(categoria)}
-                            className="text-red-500 hover:text-red-400 transition-colors inline-block"
-                            title="Excluir Categoria"
-                          >
-                            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                          </button>
-                        </td>
-
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
+                  ))}
+                </tbody>
+              </table>
             )}
           </div>
         </div>
       </div>
 
-      {/* USO DO COMPONENTE EXTERNALIZADO */}
-      <ModalExclusao
-        isOpen={isModalExclusaoAberto}
-        onClose={fecharModalExclusao}
-        onConfirm={confirmarExclusao}
-        titulo="Excluir Categoria?"
-        mensagem={
-          <>
-            Tem certeza que deseja excluir a categoria <span className="text-white font-bold">"{categoriaParaExcluir?.nome}"</span>? Esta ação não poderá ser desfeita.
-          </>
-        }
-      />
-
+      <ModalExclusao isOpen={isModalExclusaoAberto} onClose={fecharModalExclusao} onConfirm={confirmarExclusao} titulo="Excluir Categoria?" mensagem={<>Tem certeza que deseja excluir a categoria <span className="text-white font-bold">"{categoriaParaExcluir?.nome}"</span>?</>} />
     </div>
   );
 }

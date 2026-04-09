@@ -11,6 +11,8 @@ public class CategoriaMapper {
     public Categoria from(CategoriaSalvarRequestDTO dto){
         return Categoria.builder()
                 .nome(dto.getNome())
+                .mostrarNaHome(dto.getMostrarNaHome())
+                .ordemExibicao(dto.getOrdemExibicao())
                 .build();
 
 
@@ -22,6 +24,8 @@ public class CategoriaMapper {
 
         dto.setLookupId(entity.getLookupId());
         dto.setNome(entity.getNome());
+        dto.setMostrarNaHome(entity.getMostrarNaHome());
+        dto.setOrdemExibicao(entity.getOrdemExibicao());
         dto.setAtivo(entity.isAtivo());
 
         return dto;

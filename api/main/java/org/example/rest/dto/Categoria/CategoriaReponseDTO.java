@@ -13,4 +13,7 @@ public class CategoriaReponseDTO {
 
     private boolean ativo;
 
+    private Boolean mostrarNaHome;
+
+    private Integer ordemExibicao;
 }

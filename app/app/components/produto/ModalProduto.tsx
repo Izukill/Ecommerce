@@ -19,6 +19,7 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
   const [carregando, setCarregando] = useState(true);
 
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null);
+  const [corAtiva, setCorAtiva] = useState<string | null>(null);
   const [quantidade, setQuantidade] = useState(1);
 
   // Busca os detalhes completos do produto assim que o modal abre
@@ -46,7 +47,6 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
       return;
     }
 
-    // Chama a função real do nosso Contexto!
     adicionarAoCarrinho({
       produtoId: produto.lookupId,
       variacaoId: variacaoSelecionada.lookupId,
@@ -89,11 +89,18 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10">
 
               <div className="w-full">
-                <GaleriaProduto
-                  imagemCapa={produto.imagemUrl}
-                  imagemVariacao={variacaoSelecionada?.imagemUrl}
-                  nomeProduto={produto.nome}
-                />
+                {(() => {
+                  const imagemDaCorAtiva = corAtiva
+                    ? produto.variacoes?.find((v: any) => v.cor === corAtiva)?.imagemUrl
+                    : null;
+                  return (
+                    <GaleriaProduto
+                      imagemCapa={produto.imagemUrl}
+                      imagemVariacao={variacaoSelecionada?.imagemUrl || imagemDaCorAtiva}
+                      nomeProduto={produto.nome}
+                    />
+                  );
+                })()}
               </div>
 
               <div className="flex flex-col">
@@ -118,6 +125,7 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
                     <SeletorVariacoes
                       variacoes={produto.variacoes}
                       onVariacaoSelecionada={setVariacaoSelecionada}
+                      onCorSelecionada={setCorAtiva}
                     />
 
                     {variacaoSelecionada && (

@@ -39,6 +39,10 @@ public class Categoria {
     @Column(nullable = false)
     private boolean ativo= true;
 
+    private Boolean mostrarNaHome = false;
+
+    private Integer ordemExibicao = 0;
+
     @JsonIgnore
     @OneToMany(mappedBy = "categoria", orphanRemoval = true, cascade = CascadeType.ALL)
     private List<Produto> produtos;
