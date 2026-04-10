@@ -4,7 +4,7 @@ package org.example.repository;
 import org.example.model.Cliente;
 import org.example.model.EnumStatusPedido;
 import org.example.model.Pedido;
-import org.example.rest.dto.dashboard.PedidoResumoDTO;
+import org.example.rest.dto.Dashboard.PedidoResumoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -59,7 +59,7 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
 
     @Query("""
-        SELECT new org.example.rest.dto.dashboard.PedidoResumoDTO(
+        SELECT new org.example.rest.dto.Dashboard.PedidoResumoDTO(
             p.lookupId,
             p.cliente.nome,
             p.dataHora,

@@ -20,6 +20,10 @@ public class ItemPedidoResponseDTO {
 
     private BigDecimal precoUnitario;
 
+    private String imagemUrl;
+
+    private String imagemCapa;
+
 
 
 }

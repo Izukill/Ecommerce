@@ -1,9 +1,25 @@
 'use client';
 
 import { useCart } from "@/app/contexts/CartContext";
+import { useState, useEffect } from "react";
+import { api } from "@/lib/api";
 
 export default function ResumoPedido({ processando }: { processando: boolean }) {
   const { carrinho, valorTotal, atualizarQuantidade, removerDoCarrinho } = useCart();
+
+  const [freteFixo, setFreteFixo] = useState<number>(0);
+  const [carregandoFrete, setCarregandoFrete] = useState(true);
+
+  useEffect(() => {
+    api.get("/config")
+      .then(res => {
+        if (res.data && res.data.frete !== undefined) {
+          setFreteFixo(res.data.frete);
+        }
+      })
+      .catch(err => console.error("Erro ao buscar frete:", err))
+      .finally(() => setCarregandoFrete(false));
+  }, []);
 
   return (
     <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-2xl sticky top-28">
@@ -13,12 +29,10 @@ export default function ResumoPedido({ processando }: { processando: boolean }) 
         {carrinho.map((item: any, index: number) => (
           <div key={`${item.variacaoId}-${index}`} className="flex gap-4">
 
-            {/* Imagem do Produto */}
             <div className="w-20 h-20 bg-black rounded-lg border border-neutral-800 overflow-hidden flex-shrink-0">
               <img src={item.imagemUrl} alt={item.nome} className="w-full h-full object-cover" />
             </div>
 
-            {/* Informações e Controles */}
             <div className="flex-grow flex flex-col justify-center">
               <div>
                 <h4 className="text-sm font-bold text-white line-clamp-1">{item.nome}</h4>
@@ -28,7 +42,6 @@ export default function ResumoPedido({ processando }: { processando: boolean }) 
               <div className="flex flex-wrap justify-between items-center gap-x-2 gap-y-3 mt-3 w-full">
 
                 <div className="flex items-center gap-3">
-                  {/* Controle numérico */}
                   <div className="flex items-center border border-neutral-700 rounded-lg bg-black overflow-hidden h-8">
                     <button
                       type="button"
@@ -76,18 +89,22 @@ export default function ResumoPedido({ processando }: { processando: boolean }) 
         </div>
         <div className="flex justify-between text-gray-400 text-sm">
           <span>Frete</span>
-          <span className="text-green-500 font-bold">Grátis</span>
+          <span className="font-bold text-white">
+            {carregandoFrete ? "Calculando..." : `R$ ${freteFixo.toFixed(2).replace('.', ',')}`}
+          </span>
         </div>
         <div className="flex justify-between items-center pt-3 border-t border-neutral-800">
           <span className="text-lg font-bold text-white">Total</span>
-          <span className="text-2xl font-extrabold text-[#C2AE82]">R$ {valorTotal.toFixed(2).replace('.', ',')}</span>
+          <span className="text-2xl font-extrabold text-[#C2AE82]">
+            R$ {(valorTotal + freteFixo).toFixed(2).replace('.', ',')}
+          </span>
         </div>
       </div>
 
       <button
         type="submit"
         form="checkout-form"
-        disabled={processando || carrinho.length === 0}
+        disabled={processando || carrinho.length === 0 || carregandoFrete}
         className="w-full mt-8 h-14 bg-[#C2AE82] hover:bg-[#a8956b] text-black font-extrabold text-lg rounded-xl shadow-[0_10px_30px_rgba(194,174,130,0.2)] transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {processando ? (

@@ -26,6 +26,8 @@ public class PedidoResponseDTO {
 
     private Endereco enderecoEntrega;
 
+    private BigDecimal freteFixo;
+
     private List<ItemPedidoResponseDTO> itens;
 
 

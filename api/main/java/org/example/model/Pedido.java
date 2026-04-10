@@ -48,6 +48,9 @@ public class Pedido {
     @JoinColumn(name = "endereco_id")
     private Endereco enderecoEntrega;
 
+    @Column(nullable = false)
+    private BigDecimal freteFixo;
+
     private LocalDateTime dataHora;
 
     @Column(name = "data_expiracao")

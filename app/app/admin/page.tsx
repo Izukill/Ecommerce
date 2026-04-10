@@ -6,15 +6,61 @@ import ActionCard from "@/app/components/layout/ActionCard";
 import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
+import toast from "react-hot-toast";
 import {
   Shirt,
   Tags,
+  Truck
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
   const { usuario } = useAuth();
   const primeiroNome = usuario && usuario.nome ? usuario.nome.split(' ')[0] : "Admin";
   const { dashboard, carregando } = useAdminDashboard();
+
+  const [frete, setFrete] = useState<string>("0.00");
+  const [salvandoFrete, setSalvandoFrete] = useState(false);
+
+  useEffect(() => {
+    api.get("/config")
+      .then(res => {
+        if (res.data && res.data.frete !== undefined) {
+          setFrete(res.data.frete.toFixed(2));
+        }
+      })
+      .catch(err => console.error("Erro ao buscar frete:", err));
+  }, []);
+
+  const handleSalvarFrete = async () => {
+    setSalvandoFrete(true);
+    try {
+      const valorNumerico = parseFloat(frete.replace(',', '.'));
+      if (isNaN(valorNumerico)) {
+        toast.error("Digite um valor válido.");
+        setSalvandoFrete(false);
+        return;
+      }
+
+      await api.put("/config/frete", { frete: valorNumerico });
+
+      setFrete(valorNumerico.toFixed(2));
+
+      toast.success("Valor do frete atualizado para todos os novos pedidos!");
+    } catch (error) {
+      toast.error("Erro ao atualizar o frete.");
+    } finally {
+      setSalvandoFrete(false);
+    }
+  };
+
+  const formatarFreteVisualmente = () => {
+    const valorNumerico = parseFloat(frete.replace(',', '.'));
+    if (!isNaN(valorNumerico)) {
+      setFrete(valorNumerico.toFixed(2));
+    } else {
+      setFrete("0.00");
+    }
+  };
 
   if (carregando || !dashboard) {
       return <div className="text-white">Carregando...</div>;
@@ -23,7 +69,6 @@ export default function AdminDashboardPage() {
   return (
     <div className="space-y-10">
 
-      {/*CABEÇALHO */}
       <div>
         <h2 className="text-3xl font-extrabold text-white tracking-tight">
           Olá, <span className="text-[#C2AE82] capitalize">{primeiroNome}</span>
@@ -31,7 +76,7 @@ export default function AdminDashboardPage() {
         <p className="text-sm text-gray-400 mt-1">Aqui está o resumo do seu negócio hoje.</p>
       </div>
 
-      {/* 2. CARDS DE ESTATÍSTICAS (Visão Geral) */}
+      {/* estatísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="bg-black p-6 rounded-xl shadow-lg border border-neutral-800 border-l-4 border-l-[#C2AE82]">
           <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Faturamento (Mês)</p>
@@ -63,7 +108,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* LISTA DE PEDIDOS RECENTES */}
+      {/* lista dos 4 pedidos recentes */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-white">Últimos Pedidos</h3>
@@ -114,7 +159,6 @@ export default function AdminDashboardPage() {
 
       <hr className="border-neutral-800 my-8" />
 
-      {/*ATALHOS DE GERENCIAMENTO */}
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Ações Rápidas</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -135,6 +179,46 @@ export default function AdminDashboardPage() {
             href="/admin/categorias"
           />
 
+        </div>
+      </div>
+
+      <div>
+        <h3 className="text-xl font-bold text-white mb-4">Configurações da Loja</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl shadow-lg">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="p-3 bg-[#C2AE82]/20 text-[#C2AE82] rounded-lg">
+                <Truck size={24} />
+              </div>
+              <h3 className="text-xl font-bold text-white">Frete Fixo</h3>
+            </div>
+
+            <p className="text-sm text-gray-400 mb-4">
+              Este valor será cobrado em todas as novas compras. Pedidos antigos não serão afetados.
+            </p>
+
+            <div className="flex gap-3">
+              <div className="relative flex-1">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 font-bold">R$</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={frete}
+                  onChange={(e) => setFrete(e.target.value)}
+                  onFocus={(e) => e.target.select()}
+                  onBlur={formatarFreteVisualmente}
+                  className="w-full pl-10 pr-3 py-2 bg-black border border-neutral-700 rounded-lg text-white font-bold focus:ring-1 focus:ring-[#C2AE82] outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                />
+              </div>
+              <button
+                onClick={handleSalvarFrete}
+                disabled={salvandoFrete}
+                className="px-4 py-2 bg-[#C2AE82] hover:bg-[#a8956b] text-black font-extrabold rounded-lg transition-colors disabled:opacity-50"
+              >
+                {salvandoFrete ? "Salvando..." : "Salvar"}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 

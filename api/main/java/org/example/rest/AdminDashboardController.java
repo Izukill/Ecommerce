@@ -2,7 +2,7 @@ package org.example.rest;
 
 
 
-import org.example.rest.dto.dashboard.DashboardAdminDTO;
+import org.example.rest.dto.Dashboard.DashboardAdminDTO;
 import org.example.service.DashboardAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -47,6 +47,9 @@ public class PedidoService {
     @Autowired
     private EmailService emailService;
 
+    @Autowired
+    private CheckoutFreteService checkoutFreteService;
+
 
     @Transactional
     public CheckoutResponseDTO processarCheckout(PedidoCheckoutRequestDTO dto) throws RegraNegocioException {
@@ -62,10 +65,14 @@ public class PedidoService {
                     return clienteRepository.save(novoCliente);
                 });
 
+        CheckoutFrete checkoutFrete = checkoutFreteService.obterConfiguracoes();
+        BigDecimal freteCobrado = checkoutFrete.getFrete();
+
         //monta o pedido
         Pedido pedido = new Pedido();
         pedido.setItens(new ArrayList<>());
         pedido.setCliente(cliente);
+        pedido.setFreteFixo(freteCobrado);
 
         //seta status do pedido, endereço e a data limite de pagamento
         pedido.setStatus(EnumStatusPedido.AGUARDANDO_PAGAMENTO);
@@ -112,7 +119,8 @@ public class PedidoService {
             pedido.getItens().add(novoItem);
         }
 
-        pedido.setValorTotal(valorTotalCarrinho);
+        //valor total valor do itens + frete
+        pedido.setValorTotal(valorTotalCarrinho.add(freteCobrado));
 
         //gera o pix e salva o id no pedido para o mercado pago
         PixResponseDTO pixResponse = pixService.gerarPix(pedido.getValorTotal(), pedido.getCliente());

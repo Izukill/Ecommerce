@@ -54,6 +54,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/pedidos").permitAll() //fazer pedido
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta
                         .requestMatchers(HttpMethod.GET, "/produtos/**").permitAll() //ver a vitrine
+                        .requestMatchers(HttpMethod.GET,"/config/frete").permitAll()
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll() //ver categorias
                         .requestMatchers(HttpMethod.POST, "/webhook/mercadopago").permitAll() //rota para o mercado pago (pix)
                         .requestMatchers("/error").permitAll() //rota de erro liberada para não mascara excessões
@@ -71,6 +72,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/categorias").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/categorias/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/categorias/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST,"/config/**").hasRole("ADMIN")
 
                         //rotas pra CLIENTE
                         .requestMatchers(HttpMethod.POST, "/enderecos").hasRole("CLIENTE")

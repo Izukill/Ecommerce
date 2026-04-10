@@ -40,12 +40,11 @@ export default function CheckoutPage() {
     }
   }, [carrinho, router, processando, pedidoRealizadoId, isModalPixAberto]);
 
-  // 👇 NOVA LÓGICA DE BUSCA: Batendo nos dois endpoints (Perfil e Endereços)
   useEffect(() => {
     if (usuario) {
       const buscarDadosEEnderecos = async () => {
         try {
-          // Promise.all faz as duas buscas ao mesmo tempo para a tela carregar mais rápido!
+          // (Promise.all) faz as duas buscas ao mesmo tempo para a tela carregar mais rápido
           const [resPerfil, resEnderecos] = await Promise.all([
             api.get('/clientes/me'),
             api.get('/enderecos/meus-enderecos')
@@ -54,7 +53,6 @@ export default function CheckoutPage() {
           const perfil = resPerfil.data;
           const listaEnderecos = resEnderecos.data;
 
-          // Preenche os dados pessoais
           setFormData(prev => ({
             ...prev,
             nome: perfil.nome || "",
@@ -63,7 +61,6 @@ export default function CheckoutPage() {
             telefone: perfil.telefone || ""
           }));
 
-          // Preenche a lista de endereços se existir algum
           if (listaEnderecos && listaEnderecos.length > 0) {
             setEnderecosSalvos(listaEnderecos);
           }
@@ -98,7 +95,7 @@ export default function CheckoutPage() {
         cep: "", rua: "", numero: "", complemento: "", bairro: "", cidade: "", estado: ""
       }));
     } else {
-      const endEscolhido = enderecosSalvos.find(end => String(end.lookupID) === valor);
+      const endEscolhido = enderecosSalvos.find(end => String(end.lookupId) === valor);
       if (endEscolhido) {
         preencherEnderecoForm(endEscolhido);
       }
@@ -185,7 +182,7 @@ export default function CheckoutPage() {
                     >
                       <option value="novo">✨ Usar Endereço não Cadastrado</option>
                       {enderecosSalvos.map((end) => (
-                        <option key={end.lookupID} value={String(end.lookupID)}>
+                        <option key={end.lookupId} value={String(end.lookupId)}>
                           🏠 {end.rua}, {end.numero} - {end.bairro}, {end.cidade}/{end.estado}
                         </option>
                       ))}

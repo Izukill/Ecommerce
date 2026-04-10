@@ -22,6 +22,7 @@ public class PedidoMapper {
         dto.setStatus(entity.getStatus());
         dto.setDataHora(entity.getDataHora());
         dto.setCliente(entity.getCliente());
+        dto.setFreteFixo(entity.getFreteFixo());
         dto.setEnderecoEntrega(entity.getEnderecoEntrega());
         dto.setValorTotal(entity.getValorTotal());
 
@@ -39,10 +40,12 @@ public class PedidoMapper {
                         if (itemEntidade.getProduto() != null) {
                             itemDto.setTamanho(itemEntidade.getProduto().getTamanho().name());
                             itemDto.setCor(itemEntidade.getProduto().getCor());
+                            itemDto.setImagemUrl(itemEntidade.getProduto().getImagemUrl());
 
-                            //navegando mais fundo para pegar o nome da roupa (ex: Top, Biquíni)
+                            //navegando mais fundo para pegar o nome da roupa (ex: Top, Biquíni) e a imagem
                             if (itemEntidade.getProduto().getProduto() != null) {
                                 itemDto.setNomeProduto(itemEntidade.getProduto().getProduto().getNome());
+                                itemDto.setImagemCapa(itemEntidade.getProduto().getProduto().getImagemUrl());
                             }
                         }
 

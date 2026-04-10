@@ -1,4 +1,4 @@
-package org.example.rest.dto.dashboard;
+package org.example.rest.dto.Dashboard;
 
 import lombok.Data;
 

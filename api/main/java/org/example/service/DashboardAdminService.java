@@ -4,8 +4,8 @@ package org.example.service;
 
 import org.example.repository.PedidoRepository;
 import org.example.repository.ProdutoRepository;
-import org.example.rest.dto.dashboard.DashboardAdminDTO;
-import org.example.rest.dto.dashboard.PedidoResumoDTO;
+import org.example.rest.dto.Dashboard.DashboardAdminDTO;
+import org.example.rest.dto.Dashboard.PedidoResumoDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
