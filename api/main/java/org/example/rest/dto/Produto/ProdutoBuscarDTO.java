@@ -12,6 +12,9 @@ public class ProdutoBuscarDTO {
     @Schema(description = "Filtra pelo nome do produto", example = "Top Fitness")
     private String nome;
 
+    @Schema(description = "Filtra por categoria null", example = "false")
+    private Boolean semCategoria;
+
     @Schema(description = "Filtra pela categoria", example = "Moda Praia")
     private UUID categoriaId;
 
@@ -19,7 +22,7 @@ public class ProdutoBuscarDTO {
     private LocalDateTime dataCriacao;
 
     @Schema(description = "Filtra pelo status")
-    private boolean ativo;
+    private Boolean ativo;
 
     @Schema(description = "Número da página a ser retornada. Começa com zero.")
     private Integer numeroPagina = 0;

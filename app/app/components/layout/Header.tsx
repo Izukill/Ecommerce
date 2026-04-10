@@ -40,7 +40,7 @@ export default function Header() {
       try {
         const response = await api.get('/categorias?sort=ordemExibicao,asc');
         const dados = response.data?.content || response.data || [];
-        setCategorias(dados.filter((c: any) => c.mostrarNaHome !== false)); // Filtra se quiser apenas as ativas
+        setCategorias(dados.filter((c: any) => c.mostrarNaHome !== false));
       } catch (error) {
         console.error("Erro ao carregar categorias no Header", error);
       }
@@ -58,7 +58,6 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", handleClickFora);
   }, []);
 
-  // Bloqueia a rolagem da página quando o menu mobile está aberto
   useEffect(() => {
     if (menuMobileAberto) {
       document.body.style.overflow = 'hidden';
@@ -101,11 +100,9 @@ export default function Header() {
               </Link>
             </div>
 
-            {/* 👇 Navegação Desktop (Esconde no Celular) */}
+            {/* navegação no pc */}
             <nav className="hidden md:flex items-center space-x-8 ml-30">
               <Link href="/#lancamentos" className="text-black font-semibold hover:text-white transition-colors">Lançamentos</Link>
-
-              {/* O NOVO MEGA MENU HORIZONTAL (Desktop) */}
               <div className="relative group py-6">
                 <button className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1 focus:outline-none">
                   Categorias <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
@@ -139,8 +136,6 @@ export default function Header() {
               <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Ofertas</Link>
             </nav>
           </div>
-
-          {/* User e Cart (Mantidos iguaizinhos) */}
           <div className="flex items-center space-x-4 sm:space-x-5">
             {usuario ? (
               <div className="relative border-r border-black/20 pr-4 sm:pr-5" ref={menuRef}>

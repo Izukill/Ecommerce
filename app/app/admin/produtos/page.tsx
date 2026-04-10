@@ -55,7 +55,6 @@ export default function ListaProdutosPage() {
     setProdutoParaAtivar(null);
   };
 
-  // ESTADOS DE PAGINAÇÃO
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
   const tamanhoPagina = 12;
@@ -65,25 +64,33 @@ export default function ListaProdutosPage() {
     setErro("");
 
     try {
-      // 1. Buscamos as categorias PRIMEIRO para servir de "Dicionário de Tradução"
+      // 1. busca as categorias PRIMEIRO para servir de "dicionário de tradução"
       const resCategorias = await api.get("/categorias");
       const dadosCategorias = resCategorias.data?.content || resCategorias.data || [];
       setCategoriasDb(Array.isArray(dadosCategorias) ? dadosCategorias : []);
 
-      const params = new URLSearchParams({
-        page: pagina.toString(),
-        size: tamanhoPagina.toString(),
-        sort: 'dataCriacao,desc'
-      });
+      const params = new URLSearchParams();
+      params.append("page", pagina.toString());
+      params.append("size", tamanhoPagina.toString());
+
+      params.append("sort", "ativo,desc");
+      params.append("sort", "dataCriacao,desc");
 
       if (filtroNome) params.append("nome", filtroNome);
 
-
-      if (filtroCategoria) {
+      if (filtroCategoria === "null") {
+        params.append("semCategoria", "true");
+      } else if (filtroCategoria) {
         params.append("categoriaId", filtroCategoria);
       }
 
-      // 3. Só depois buscamos os produtos já com os parâmetros cravados
+      if (filtroAtivo === "ativos") {
+        params.append("ativo", "true");
+      } else if (filtroAtivo === "inativos") {
+        params.append("ativo", "false");
+      }
+
+      // 3. só depois busca os produtos já com os parâmetros cravados
       const resProdutos = await api.get(`/produtos?${params.toString()}`);
       const pageData = resProdutos.data;
       const dadosProdutos = pageData.content || pageData || [];
@@ -104,7 +111,7 @@ export default function ListaProdutosPage() {
   useEffect(() => {
     carregarDados(paginaAtual);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginaAtual, filtroNome, filtroCategoria]);
+  }, [paginaAtual, filtroNome, filtroCategoria, filtroAtivo]);
 
   useEffect(() => {
     setPaginaAtual(0);
@@ -147,37 +154,13 @@ export default function ListaProdutosPage() {
       }
   };
 
-  // ==========================================
-  // FILTRAGEM E ORDENAÇÃO COMPLEMENTAR (Front-end)
-  // ==========================================
-  const produtosFiltradosEOrdenados = produtos
-    .filter(produto => {
-      if (filtroAtivo === "ativos" && !produto.ativo) return false;
-      if (filtroAtivo === "inativos" && produto.ativo) return false;
-      if (filtroPreco && produto.preco > parseFloat(filtroPreco)) return false;
+  //filtragem e ordenação dos produtos
+  const produtosFiltradosEOrdenados = produtos.filter(produto => {
 
-      // 👇 Filtro de Categoria Blindado
-      if (filtroCategoria) {
-        if (typeof produto.categoria === 'object' && produto.categoria !== null) {
-          // Comparar pelo lookupId, não pelo nome
-          if (produto.categoria.lookupId !== filtroCategoria) return false;
-        } else {
-          return false;
-        }
-      }
+    if (filtroPreco && produto.preco > parseFloat(filtroPreco)) return false;
 
-      // Filtro de Nome ignorando case
-      if (filtroNome && !produto.nome.toLowerCase().includes(filtroNome.toLowerCase())) {
-        return false;
-      }
-
-      return true;
-    })
-    .sort((a, b) => {
-      if (a.ativo !== b.ativo) return a.ativo ? -1 : 1;
-      if (!a.dataCriacao) return -1;
-      return 0;
-    });
+    return true;
+  });
 
   return (
     <div className="space-y-6 relative pb-10">
@@ -201,7 +184,7 @@ export default function ListaProdutosPage() {
         </div>
       )}
 
-      {/* BARRA DE FILTROS */}
+      {/* barra dos filtros */}
       <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Buscar por Nome</label>
@@ -219,6 +202,7 @@ export default function ListaProdutosPage() {
             value={filtroCategoria} onChange={(e) => setFiltroCategoria(e.target.value)}
           >
             <option value="">Todas as Categorias</option>
+            <option value="null">Sem Categoria</option>
             {categoriasDb.map(cat => (
               <option key={cat.lookupId} value={cat.lookupId}>{cat.nome}</option>
             ))}
@@ -247,7 +231,7 @@ export default function ListaProdutosPage() {
         </div>
       </div>
 
-      {/* GRID DE CARDS */}
+      {/* cards */}
       {carregando ? (
         <div className="py-20 flex justify-center items-center gap-3 text-[#C2AE82] font-bold tracking-widest uppercase">
           <div className="w-8 h-8 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
@@ -323,7 +307,6 @@ export default function ListaProdutosPage() {
         </>
       )}
 
-        {/* MODAL DE EXCLUSÃO */}
       <ModalExclusao
         isOpen={isModalExclusaoAberto}
         onClose={fecharModalExclusao}

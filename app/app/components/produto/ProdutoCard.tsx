@@ -59,9 +59,11 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
     return new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" }).format(preco);
   };
 
-  const nomeCategoria = typeof produto.categoria === 'object' && produto.categoria?.nome
-    ? produto.categoria.nome
-    : String(produto.categoria).replace("_", " ");
+  const nomeCategoria = !produto.categoria || produto.categoria === "null"
+    ? "Sem categoria"
+    : typeof produto.categoria === 'object' && produto.categoria?.nome
+      ? produto.categoria.nome
+      : String(produto.categoria).replace("_", " ");
 
   const isAtivo = produto.ativo !== false;
 

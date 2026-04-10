@@ -5,6 +5,7 @@ import org.example.exception.RegraNegocioException;
 import org.example.model.Categoria;
 import org.example.model.Produto;
 import org.example.repository.CategoriaRepository;
+import org.example.repository.ProdutoRepository;
 import org.example.rest.dto.Categoria.CategoriaBuscarDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -22,6 +23,9 @@ public class CategoriaService {
 
     @Autowired
     private CategoriaRepository categoriaRepository;
+
+    @Autowired
+    private ProdutoRepository produtoRepository;
 
     @Transactional
     public Categoria criar(Categoria categoria) throws RegraNegocioException {
@@ -97,6 +101,17 @@ public class CategoriaService {
         Categoria categoria = recuperarPor(lookupId);
         boolean estavaNaHome = Boolean.TRUE.equals(categoria.getMostrarNaHome());
         Integer ordemAntiga = categoria.getOrdemExibicao();
+
+        List<Produto> produtosAfetados = produtoRepository.findByCategoria(categoria);
+
+        for (Produto produto : produtosAfetados) {
+            produto.setAtivo(false);
+            produto.setCategoria(null);
+        }
+
+        if (!produtosAfetados.isEmpty()) {
+            produtoRepository.saveAll(produtosAfetados);
+        }
 
         categoriaRepository.delete(categoria);
 

@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -20,7 +21,15 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
 
     Page<Produto> findByAtivoTrue(Pageable pageable);
 
+    Page<Produto> findByCategoria(Categoria categoria, Pageable pageable);
+
+    List<Produto> findByCategoria(Categoria categoria);
+
+    Page<Produto> findByCategoriaIsNull(Pageable pageable);
+
     Page<Produto> findByCategoriaAndAtivoTrue(Categoria categoria, Pageable pageable);
+
+    Page<Produto> findByNomeContainingIgnoreCase(String nome, Pageable pageable);
 
     Page<Produto> findByNomeContainingIgnoreCaseAndAtivoTrue(String nome, Pageable pageable);
 
@@ -35,6 +44,18 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
     WHERE p.ativo = true
     """)
     Long contarProdutosAtivos();
+
+    @Query("SELECT p FROM Produto p LEFT JOIN p.categoria c WHERE " +
+            "(:nome IS NULL OR :nome = '' OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) AND " +
+            "(:categoriaId IS NULL OR c.lookupId = :categoriaId) AND " +
+            "(:semCategoria IS NULL OR :semCategoria = false OR c IS NULL) AND " +
+            "(:ativo IS NULL OR p.ativo = :ativo)")
+    Page<Produto> buscarPorFiltros(
+            @Param("nome") String nome,
+            @Param("categoriaId") UUID categoriaId,
+            @Param("semCategoria") Boolean semCategoria,
+            @Param("ativo") Boolean ativo,
+            Pageable pageable);
 
 
 }

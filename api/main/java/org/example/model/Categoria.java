@@ -44,7 +44,7 @@ public class Categoria {
     private Integer ordemExibicao = 0;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "categoria", orphanRemoval = true, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "categoria")
     private List<Produto> produtos;
 
 

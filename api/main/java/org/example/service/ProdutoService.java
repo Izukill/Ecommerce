@@ -104,7 +104,6 @@ public class ProdutoService {
                         .findFirst();
 
                 if (varDesativada.isPresent()) {
-                    // 🎉 "Ressuscita" a variação inativa!
                     VariacaoProduto ressuscitada = varDesativada.get();
                     ressuscitada.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
                     ressuscitada.setImagemUrl(varDto.getImagemUrl());
@@ -130,7 +129,7 @@ public class ProdutoService {
         // 2. SEGUNDO LOOP: Desativa as variações que não vieram do front (O Soft Delete perfeito)
         for (VariacaoProduto varAntiga : produtoExistente.getVariacaoProduto()) {
             if (varAntiga.getLookupId() != null && !variacoesRecebidas.contains(varAntiga.getLookupId())) {
-                varAntiga.setAtivo(false); // Fica oculta da loja, mas os pedidos antigos não quebram!
+                varAntiga.setAtivo(false);
             }
         }
 
@@ -163,20 +162,13 @@ public class ProdutoService {
 
     public Page<Produto> buscar(ProdutoBuscarDTO dto, Pageable pageable) throws EntidadeNaoEncontradaException {
 
-        //filtro por nome
-        if (dto.getNome() != null && !dto.getNome().isBlank()) {
-            return produtoRepository.findByNomeContainingIgnoreCaseAndAtivoTrue(dto.getNome(), pageable);
-        }
-
-        //filtro por categoria
-        if (dto.getCategoriaId() != null) {
-            Categoria categoria = categoriaRepository.findByLookupId(dto.getCategoriaId())
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Categoria não encontrada."));
-            return produtoRepository.findByCategoriaAndAtivoTrue(categoria, pageable);
-        }
-
-        //se n tiver filtros returona tudo
-        return produtoRepository.findByAtivoTrue(pageable);
+        return produtoRepository.buscarPorFiltros(
+                dto.getNome(),
+                dto.getCategoriaId(),
+                dto.getSemCategoria(),
+                dto.getAtivo(),
+                pageable
+        );
     }
 
     public void ativar(UUID lookupId) throws RegraNegocioException {
