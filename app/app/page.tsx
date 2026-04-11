@@ -1,10 +1,15 @@
 'use client';
 
 import { useState, useEffect } from "react";
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, usePathname } from 'next/navigation';
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { Percent, Tag, Sparkles } from "lucide-react";
+import {
+  Percent,
+  Tag,
+  Sparkles,
+  SlidersHorizontal
+} from "lucide-react";
 
 import ProdutoCard, { Produto } from "./components/produto/ProdutoCard";
 import ModalProduto from "./components/produto/ModalProduto";
@@ -27,6 +32,12 @@ export default function HomePage() {
   const [carregando, setCarregando] = useState(true);
   const [produtoVisualizado, setProdutoVisualizado] = useState<string | null>(null);
   const searchParams = useSearchParams();
+  const pathname = usePathname();
+
+  const handleLancamentosClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    document.getElementById('lancamentos')?.scrollIntoView({ behavior: 'smooth' });
+  };
 
   useEffect(() => {
     if (!carregando && searchParams.get('scrollTo') === 'lancamentos') {
@@ -88,7 +99,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-neutral-950 flex flex-col">
+    <div id="comeco" className="min-h-screen bg-neutral-950 flex flex-col">
       <Header />
 
       <main className="flex-grow">
@@ -99,7 +110,7 @@ export default function HomePage() {
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold text-white tracking-tight mb-6">Chegou a Nova Coleção</h1>
             <p className="mt-4 text-lg sm:text-xl text-gray-400 mb-8">Roupas que acompanham o seu ritmo. Conforto e estilo para o seu treino ou para o seu dia a dia.</p>
             <div className="flex justify-center space-x-4">
-              <Link href="#lancamentos" className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-md text-black bg-[#C2AE82] hover:bg-[#a8956b] shadow-lg transition-all md:py-4 md:text-lg md:px-10">
+              <Link href="/#lancamentos" onClick={handleLancamentosClick}  className="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-bold rounded-md text-black bg-[#C2AE82] hover:bg-[#a8956b] shadow-lg transition-all md:py-4 md:text-lg md:px-10">
                 Ver Novidades
               </Link>
             </div>
@@ -118,15 +129,18 @@ export default function HomePage() {
               {/* fixa de promos */}
               {promocoes.length > 0 && (
                 <div id="ofertas" className="vitrine-section relative bg-red-950/5 p-8 rounded-3xl border border-red-900/20">
-                  <div className="flex items-end justify-between mb-8 border-b border-red-600/30 pb-4">
+                  <div className="flex items-center justify-between mb-8 border-b border-red-600/30 pb-4">
                     <div>
-                      <h2 className="text-3xl font-extrabold text-red-500 tracking-tight sm:text-4xl flex items-center gap-3">
-                        <Percent className="animate-bounce" size={32} />
+                      <h2 className="text-2xl sm:text-3xl sm:text-4xl font-extrabold text-red-500 tracking-tight flex items-center gap-2">
+                        <Percent className="animate-bounce shrink-0" size={28} />
                         Ofertas Imperdíveis
                       </h2>
-                      <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Preços especiais por tempo limitado!</p>
+                      <p className="text-xs sm:text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">
+                        Preços especiais por tempo limitado!
+                      </p>
+
                     </div>
-                    <Link href="/produtos?emOferta=true" className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors">
+                    <Link href="/produtos?emOferta=true" className="hidden sm:block text-sm font-bold text-red-400 hover:text-red-300 transition-colors">
                       Ver todas as ofertas &rarr;
                     </Link>
                   </div>
@@ -197,6 +211,13 @@ export default function HomePage() {
           )}
 
         </div>
+        <Link
+          href="/produtos"
+          className="fixed bottom-6 right-6 z-30 md:hidden flex items-center gap-2 bg-[#C2AE82] text-black font-extrabold px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(194,174,130,0.4)] active:scale-95 transition-all"
+        >
+          <SlidersHorizontal size={18} strokeWidth={2.5} />
+          Explorar produtos
+        </Link>
       </main>
 
       {produtoVisualizado && (

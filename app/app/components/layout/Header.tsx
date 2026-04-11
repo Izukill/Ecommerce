@@ -50,6 +50,24 @@ export default function Header() {
     }
   };
 
+  const handleMenuClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      setMenuMobileAberto(false);
+
+      if (pathname === '/') {
+        document.getElementById('comeco')?.scrollIntoView({ behavior: 'smooth' });
+      } else {
+        router.push('/?scrollTo=comeco');
+      }
+    };
+
+  const handleCategoriasClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMenuAberto(false);
+    setMenuMobileAberto(false);
+    router.push('/produtos');
+  };
+
   useEffect(() => {
     const carregarCategoriasMenu = async () => {
       try {
@@ -106,7 +124,7 @@ export default function Header() {
 
             {/* logo */}
             <div className="flex-shrink-0 flex items-center">
-              <Link href="/" className="flex items-center gap-2 cursor-pointer">
+              <Link href="/#comeco" onClick={handleMenuClick} className="flex items-center gap-2 cursor-pointer">
                 <img src="/logoMirle.png" alt="Logo MirlleFitness" className="h-16 md:h-20 w-auto object-contain" />
                 <span className="hidden sm:block text-2xl font-extrabold tracking-tighter text-black">
                   MIRLLE<span className="text-black/70">FITNESS</span>
@@ -121,7 +139,7 @@ export default function Header() {
               </Link>
 
               <div className="relative group py-6">
-                <Link href="/produtos" className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1 focus:outline-none">
+                <Link href="/produtos" onClick={handleCategoriasClick} className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1 focus:outline-none">
                   <Tags size={16} /> Categorias <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
                 </Link>
 
@@ -134,6 +152,7 @@ export default function Header() {
                         <Link
                           key={cat.lookupId}
                           href={`/produtos?categoria=${cat.lookupId}`}
+                          onClick={handleCategoriasClick}
                           className="text-sm font-medium text-gray-300 hover:text-[#C2AE82] hover:bg-[#C2AE82]/10 px-3 py-1 rounded-lg transition-colors flex items-center"
                         >
                           {cat.nome}
@@ -143,7 +162,7 @@ export default function Header() {
                   )}
 
                   <div className="border-t border-neutral-800 mt-6 pt-5 flex justify-center">
-                    <Link href="/produtos" className="inline-flex items-center px-6 py-2 border border-[#C2AE82] text-xs font-bold text-[#C2AE82] hover:bg-[#C2AE82] hover:text-black rounded-full uppercase tracking-wider transition-all">
+                    <Link href="/produtos" onClick={handleCategoriasClick} className="inline-flex items-center px-6 py-2 border border-[#C2AE82] text-xs font-bold text-[#C2AE82] hover:bg-[#C2AE82] hover:text-black rounded-full uppercase tracking-wider transition-all">
                       Ver Toda a Coleção
                     </Link>
                   </div>
@@ -243,7 +262,7 @@ export default function Header() {
               <Link
                 href="/#lancamentos"
 
-                onClick={() => setMenuMobileAberto(false),handleLancamentosClick}
+                onClick={handleLancamentosClick}
                 className="block text-xl font-bold text-white hover:text-[#C2AE82] transition-colors"
               >
                 Lançamentos
@@ -254,7 +273,7 @@ export default function Header() {
                 <div className="flex items-center justify-between w-full">
                   <Link
                     href="/produtos"
-                    onClick={() => setMenuMobileAberto(false)}
+                    onClick={handleCategoriasClick}
                     className="text-xl font-bold text-white hover:text-[#C2AE82] transition-colors focus:outline-none"
                   >
                     Categorias
@@ -281,7 +300,7 @@ export default function Header() {
                     ))}
                     <Link
                       href="/produtos"
-                      onClick={() => setMenuMobileAberto(false)}
+                      onClick={handleCategoriasClick}
                       className="text-base font-bold text-[#C2AE82] pt-2"
                     >
                       Ver Tudo &rarr;

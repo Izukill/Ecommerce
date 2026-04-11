@@ -96,10 +96,10 @@ function ConteudoProdutos() {
   useEffect(() => {
     const catUrl = searchParams.get("categoria");
     const promoUrl = searchParams.get("emOferta");
-    if (catUrl) setCategoriaSelecionada(catUrl);
-    if (promoUrl === "true") setSomenteOfertas(true);
 
-    if (catUrl || promoUrl) setPaginaAtiva(0);
+    setCategoriaSelecionada(catUrl || "");
+    setSomenteOfertas(promoUrl === "true");
+    setPaginaAtiva(0);
   }, [searchParams]);
 
   // Muda filtro

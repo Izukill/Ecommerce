@@ -55,12 +55,11 @@ export default function VitrineProdutos({ vitrine, onProdutoClick }: VitrineProd
       {/* div de rolagem */}
       <div
         ref={carrosselRef}
-        className="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 pt-2 px-2 items-stretch [scrollbar-width:'none'] [&::-webkit-scrollbar]:hidden scroll-smooth"
-      >
+        className="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-8 pt-2 items-stretch [scrollbar-width:none] [&::-webkit-scrollbar]:hidden scroll-smooth-mx-4 px-4 sm:mx-0 sm:px-2">
         {vitrine.produtos.map((produto) => (
           <div
             key={produto.lookupId}
-            className="w-[85vw] sm:w-[280px] lg:w-[300px] h-full snap-start shrink-0 cursor-pointer transition-transform hover:-translate-y-2 duration-300"
+            className="w-[72vw] sm:w-[280px] lg:w-[300px] h-full snap-start shrink-0 cursor-pointer transition-transform hover:-translate-y-2 duration-300"
             onClick={() => onProdutoClick(produto.lookupId)}
           >
             <div className="w-full h-full [&>div]:h-full">
