@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from "next/link";
 import { useAuth } from "@/app/contexts/AuthContext";
 import { useCart } from "@/app/contexts/CartContext";
@@ -9,6 +9,8 @@ import { api } from "@/lib/api";
 import {
   User,
   ChevronDown,
+  Tags,
+  Sparkles,
   Package,
   LayoutDashboard,
   Percent,
@@ -30,18 +32,30 @@ export default function Header() {
   const [menuAberto, setMenuAberto] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
 
   const [categorias, setCategorias] = useState<CategoriaNav[]>([]);
 
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [categoriasMobileAberto, setCategoriasMobileAberto] = useState(false);
 
+  const handleLancamentosClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMenuMobileAberto(false);
+
+    if (pathname === '/') {
+      document.getElementById('lancamentos')?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      router.push('/?scrollTo=lancamentos');
+    }
+  };
+
   useEffect(() => {
     const carregarCategoriasMenu = async () => {
       try {
-        const response = await api.get('/categorias?sort=ordemExibicao,asc');
+        const response = await api.get('/categorias?sort=asc');
         const dados = response.data?.content || response.data || [];
-        setCategorias(dados.filter((c: any) => c.mostrarNaHome !== false));
+        setCategorias(dados);
       } catch (error) {
         console.error("Erro ao carregar categorias no Header", error);
       }
@@ -90,11 +104,10 @@ export default function Header() {
               <Menu size={28} strokeWidth={2.5} />
             </button>
 
-            {/* Logo */}
+            {/* logo */}
             <div className="flex-shrink-0 flex items-center">
               <Link href="/" className="flex items-center gap-2 cursor-pointer">
                 <img src="/logoMirle.png" alt="Logo MirlleFitness" className="h-16 md:h-20 w-auto object-contain" />
-                {/* Oculta o texto no celular muito pequeno para dar espaço */}
                 <span className="hidden sm:block text-2xl font-extrabold tracking-tighter text-black">
                   MIRLLE<span className="text-black/70">FITNESS</span>
                 </span>
@@ -102,12 +115,15 @@ export default function Header() {
             </div>
 
             {/* navegação no pc */}
-            <nav className="hidden md:flex items-center space-x-8 ml-30">
-              <Link href="/#lancamentos" className="text-black font-semibold hover:text-white transition-colors">Lançamentos</Link>
+            <nav className="hidden md:flex items-center space-x-8 ml-20">
+              <Link href="/#lancamentos" onClick={handleLancamentosClick} className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1">
+                <Sparkles size={16}/> Lançamentos
+              </Link>
+
               <div className="relative group py-6">
-                <button className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1 focus:outline-none">
-                  Categorias <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
-                </button>
+                <Link href="/produtos" className="text-black font-semibold hover:text-white transition-colors flex items-center gap-1 focus:outline-none">
+                  <Tags size={16} /> Categorias <ChevronDown size={16} className="transition-transform duration-200 group-hover:rotate-180" />
+                </Link>
 
                 <div className="absolute top-16 left-1/2 -translate-x-1/2 w-[500px] lg:w-[600px] bg-neutral-950 border border-neutral-800 rounded-xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 p-6">
                   {categorias.length === 0 ? (
@@ -222,25 +238,34 @@ export default function Header() {
               </button>
             </div>
 
-            {/* corpo com os Links */}
+            {/* link pra lançamento */}
             <div className="flex-1 overflow-y-auto p-6 space-y-6">
               <Link
                 href="/#lancamentos"
-                onClick={() => setMenuMobileAberto(false)}
+
+                onClick={() => setMenuMobileAberto(false),handleLancamentosClick}
                 className="block text-xl font-bold text-white hover:text-[#C2AE82] transition-colors"
               >
                 Lançamentos
               </Link>
 
-              {/* lista expansível para as categorias */}
+              {/* filtro pra categorias */}
               <div className="border-y border-neutral-800 py-4">
-                <button
-                  onClick={() => setCategoriasMobileAberto(!categoriasMobileAberto)}
-                  className="flex items-center justify-between w-full text-xl font-bold text-white hover:text-[#C2AE82] transition-colors focus:outline-none"
-                >
-                  Categorias
-                  <ChevronDown size={24} className={`transition-transform duration-300 ${categoriasMobileAberto ? 'rotate-180 text-[#C2AE82]' : 'text-gray-500'}`} />
-                </button>
+                <div className="flex items-center justify-between w-full">
+                  <Link
+                    href="/produtos"
+                    onClick={() => setMenuMobileAberto(false)}
+                    className="text-xl font-bold text-white hover:text-[#C2AE82] transition-colors focus:outline-none"
+                  >
+                    Categorias
+                  </Link>
+                  <button
+                    onClick={() => setCategoriasMobileAberto(!categoriasMobileAberto)}
+                    className="p-2 text-gray-500 focus:outline-none"
+                  >
+                    <ChevronDown size={24} className={`transition-transform duration-300 ${categoriasMobileAberto ? 'rotate-180 text-[#C2AE82]' : ''}`} />
+                  </button>
+                </div>
 
                 <div className={`overflow-hidden transition-all duration-300 ease-in-out ${categoriasMobileAberto ? 'max-h-[500px] mt-4 opacity-100' : 'max-h-0 opacity-0'}`}>
                   <div className="flex flex-col space-y-4 pl-4 border-l-2 border-[#C2AE82]/30">
@@ -266,7 +291,7 @@ export default function Header() {
               </div>
 
               <Link
-                href="/produtos/emOferta=true"
+                href="/produtos?emOferta=true"
                 onClick={() => setMenuMobileAberto(false)}
                 className="flex items-center gap-2 text-xl font-extrabold text-red-500 hover:text-red-400 transition-colors bg-red-950/20 p-3 rounded-xl border border-red-900/30"
               >

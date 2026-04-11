@@ -7,7 +7,6 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import toast from "react-hot-toast";
-import CardPromocoesAdmin from "@/app/components/layout/CardPromocoesAdmin";
 import {
   Shirt,
   Tags,
@@ -183,10 +182,15 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
+      {/* 👇 Seção de Configurações Atualizada */}
       <div>
         <h3 className="text-xl font-bold text-white mb-4">Configurações da Loja</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl shadow-lg">
+
+        {/* A propriedade items-start alinha os itens no topo, impedindo o stretch */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+
+          {/* A classe h-fit garante que o card só ocupe a altura necessária */}
+          <div className="bg-neutral-900 border border-neutral-800 p-6 rounded-xl shadow-lg h-fit">
             <div className="flex items-center gap-3 mb-4">
               <div className="p-3 bg-[#C2AE82]/20 text-[#C2AE82] rounded-lg">
                 <Truck size={24} />
@@ -214,14 +218,12 @@ export default function AdminDashboardPage() {
               <button
                 onClick={handleSalvarFrete}
                 disabled={salvandoFrete}
-                className="px-4 py-2 bg-[#C2AE82] hover:bg-[#a8956b] text-black font-extrabold rounded-lg transition-colors disabled:opacity-50"
+                className="px-4 py-2 bg-[#C2AE82] hover:bg-[#a8956b] text-black font-extrabold rounded-lg transition-colors disabled:opacity-50 flex-shrink-0"
               >
                 {salvandoFrete ? "Salvando..." : "Salvar"}
               </button>
             </div>
           </div>
-
-          <CardPromocoesAdmin />
 
         </div>
       </div>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from "react";
+import { useSearchParams } from 'next/navigation';
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { Percent, Tag, Sparkles } from "lucide-react";
@@ -25,6 +26,15 @@ export default function HomePage() {
   const [promocoes, setPromocoes] = useState<Produto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [produtoVisualizado, setProdutoVisualizado] = useState<string | null>(null);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (!carregando && searchParams.get('scrollTo') === 'lancamentos') {
+      setTimeout(() => {
+        document.getElementById('lancamentos')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [carregando, searchParams]);
 
   useEffect(() => {
     const carregarDadosHome = async () => {
@@ -130,10 +140,10 @@ export default function HomePage() {
 
               {/* Lançamentos */}
               {lancamentos.length > 0 && (
-                <div id="lancamentos" className="vitrine-section relative">
+                <div className="vitrine-section relative">
                   <div className="flex items-end justify-between mb-8 border-b border-[#C2AE82]/30 pb-4">
                     <div>
-                      <h2 className="text-3xl font-extrabold text-[#C2AE82] tracking-tight sm:text-4xl flex items-center gap-3">
+                      <h2 id="lancamentos" className="text-3xl font-extrabold text-[#C2AE82] scroll-mt-24 tracking-tight sm:text-4xl flex items-center gap-3">
                         <Sparkles size={28} className="animate-pulse filter drop-shadow-[0_0_8px_rgba(194,174,130,0.8)]" />
                         Lançamentos Recentes
                       </h2>
