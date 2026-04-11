@@ -29,6 +29,10 @@ public class ProdutoSalvarRequestDTO {
     @Positive
     private BigDecimal preco;
 
+    @Schema(description = "Preço de promoção do produto", example = "120.90")
+    @Positive
+    private BigDecimal precoPromocional;
+
     @Schema(description = "Imagem do produto")
     @NotBlank(message = "A imagem é obrigatória")
     private String imagemUrl;

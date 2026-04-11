@@ -59,13 +59,11 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
     if (editandoIndex !== null) novasVars[editandoIndex] = novaVar;
     else novasVars.push(novaVar);
 
-    // 👇 2. A MÁGICA: Ordenamos a lista antes de salvar!
+    //ordena a lista antes de salvar
     novasVars.sort((a, b) => {
-      // Primeiro agrupa as mesmas cores juntas (Alfabético)
       if (a.cor < b.cor) return -1;
       if (a.cor > b.cor) return 1;
 
-      // Se a cor for igual, ordena os tamanhos pelo Mapa de Pesos!
       const pesoA = ORDEM_TAMANHOS[a.tamanho];
       const pesoB = ORDEM_TAMANHOS[b.tamanho];
       return pesoA - pesoB;
@@ -106,8 +104,12 @@ export default function GerenciadorVariacoes({ variacoes, setVariacoes }: Gerenc
         <div className="col-span-2">
           <label className="block text-[10px] font-bold text-gray-500 uppercase mb-1">Qtd</label>
           <input
-            type="number" value={estoqueAtual} onChange={(e) => setEstoqueAtual(e.target.value)}
-            placeholder="0" className="w-full px-2 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-[#C2AE82] outline-none"
+            type="number"
+            value={estoqueAtual}
+            onChange={(e) => setEstoqueAtual(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            placeholder="0"
+            className="w-full px-2 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-white focus:ring-1 focus:ring-[#C2AE82] outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
           />
         </div>
         <div className="col-span-2">

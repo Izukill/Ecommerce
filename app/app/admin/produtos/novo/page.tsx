@@ -4,6 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { Tag } from "lucide-react";
 import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
 import GerenciadorVariacoes, { Variacao } from "@/app/components/produto/GerenciadorVariacoes";
 import FotosPorCor from "@/app/components/produto/FotosPorCor";
@@ -18,6 +19,7 @@ export default function NovoProdutoPage() {
 
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
+  const [precoPromocional, setPrecoPromocional] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [descricao, setDescricao] = useState("");
 
@@ -52,7 +54,20 @@ export default function NovoProdutoPage() {
 
     if (!nome || !preco || !categoriaId) {
       setErro("Por favor, preencha todos os campos obrigatórios.");
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
+    }
+
+    const precoNumerico = parseFloat(preco.toString().replace(",", "."));
+    let precoPromoNumerico = null;
+
+    if (precoPromocional) {
+      precoPromoNumerico = parseFloat(precoPromocional.toString().replace(",", "."));
+      if (precoPromoNumerico >= precoNumerico) {
+        setErro("O preço promocional deve ser estritamente menor que o preço original.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
     }
 
     setSalvando(true);
@@ -60,7 +75,8 @@ export default function NovoProdutoPage() {
     try {
       const payload = {
         nome,
-        preco: parseFloat(preco.replace(",", ".")),
+        preco: precoNumerico,
+        precoPromocional: precoPromoNumerico,
         descricao,
         imagemUrl,
         categoria: { lookupId: categoriaId },
@@ -75,7 +91,7 @@ export default function NovoProdutoPage() {
       }, 2000);
 
     } catch (error: any) {
-      setErro("Erro ao cadastrar o produto.");
+      setErro(error.response?.data?.detail || "Erro ao cadastrar o produto.");
     } finally {
       setSalvando(false);
     }
@@ -101,13 +117,11 @@ export default function NovoProdutoPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
-            {/* LADO ESQUERDO: COMPONENTE DE IMAGEM */}
             <div className="lg:col-span-1 space-y-17">
               <CapaProdutoUpload imagemUrl={imagemUrl} setImagemUrl={setImagemUrl} />
               <FotosPorCor variacoes={variacoes} setVariacoes={setVariacoes} />
             </div>
 
-            {/* LADO DIREITO: COMPONENTES DE DADOS E VARIAÇÕES */}
             <div className="lg:col-span-2 space-y-6">
 
               <div className="space-y-6 bg-neutral-900/50 p-6 rounded-xl border border-neutral-800">
@@ -115,34 +129,60 @@ export default function NovoProdutoPage() {
 
                 <div>
                   <label className="block text-sm font-bold text-gray-100">Nome do Produto *</label>
-                  <input type="text" required value={nome} onChange={(e) => setNome(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82]" />
+                  <input type="text" required value={nome} onChange={(e) => setNome(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] outline-none" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-bold text-gray-100">Categoria *</label>
-                    <select required value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} disabled={carregandoCategorias} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] appearance-none">
+                    <select required value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} disabled={carregandoCategorias} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] appearance-none outline-none">
                       <option value="">Selecione...</option>
                       {categorias.map(cat => <option key={cat.lookupId} value={cat.lookupId}>{cat.nome}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-100">Preço (R$) *</label>
-                    <input type="number" step="0.01" required value={preco} onChange={(e) => setPreco(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82]" />
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={preco}
+                      onChange={(e) => setPreco(e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // 👈 Classes adicionadas
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 text-sm font-bold text-gray-100">
+                      Preço Promo <Tag size={14} className="text-red-500" />
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Opcional"
+                      value={precoPromocional}
+                      onChange={(e) => setPrecoPromocional(e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-red-500 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" // 👈 Classes adicionadas
+                    />
                   </div>
                 </div>
 
+                <p className="text-[11px] text-gray-500 mt-2 italic flex items-start gap-1">
+                  <span className="text-[#C2AE82] font-bold">*</span>
+                  Atenção: Se a categoria deste produto possuir uma promoção em massa ativa (%), ela terá prioridade e substituirá o preço promocional digitado acima.
+                </p>
+
                 <div>
                   <label className="block text-sm font-bold text-gray-100">Descrição</label>
-                  <textarea rows={2} value={descricao} onChange={(e) => setDescricao(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] resize-none" />
+                  <textarea rows={2} value={descricao} onChange={(e) => setDescricao(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] resize-none outline-none" />
                 </div>
               </div>
 
-              {/* COMPONENTE DE VARIAÇÕES */}
               <GerenciadorVariacoes variacoes={variacoes} setVariacoes={setVariacoes} />
 
               <div className="pt-4">
-                <button type="submit" disabled={salvando} className="w-full py-4 px-8 rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] font-extrabold disabled:opacity-50">
+                <button type="submit" disabled={salvando} className="w-full py-4 px-8 rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] font-extrabold disabled:opacity-50 transition-colors shadow-lg">
                   {salvando ? "Salvando Produto..." : "Salvar Produto Completo"}
                 </button>
               </div>

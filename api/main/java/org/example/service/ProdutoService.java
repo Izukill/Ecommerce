@@ -17,6 +17,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,13 +38,12 @@ public class ProdutoService {
 
 
     @Transactional
-    public Produto criar(Produto produto) {
+    public Produto criar(Produto produto) throws RegraNegocioException {
 
-        UUID categoriaLookupId = produto.getCategoria().getLookupId();
-        Categoria categoriaReal = categoriaRepository.findByLookupId(categoriaLookupId)
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada!"));
+        Categoria categoriaReal = categoriaRepository.findByLookupId(produto.getCategoria().getLookupId())
+                .orElseThrow(() -> new RegraNegocioException("Categoria não encontrada!"));
 
-        //seta cada variacao o produto a qual ela pertence
+        //seta cada variação para o produto ao qual ela pertence
         if (produto.getVariacaoProduto() != null && !produto.getVariacaoProduto().isEmpty()) {
             produto.getVariacaoProduto().forEach(variacao -> variacao.setProduto(produto));
         }
@@ -51,22 +51,22 @@ public class ProdutoService {
         produto.setCategoria(categoriaReal);
         produto.setAtivo(true);
 
+        aplicarRegraDePrecoPromocional(produto, categoriaReal, produto.getPrecoPromocional());
+
         return produtoRepository.save(produto);
     }
-
 
     public Produto recuperarPor(UUID lookupId) throws RegraNegocioException {
         return produtoRepository.findByLookupId(lookupId)
                 .orElseThrow(() -> new RegraNegocioException("Produto não encontrado no catálogo."));
     }
 
-
     @Transactional
     public Produto atualizar(UUID lookupId, ProdutoSalvarRequestDTO dto) throws RegraNegocioException {
         Produto produtoExistente = recuperarPor(lookupId);
 
         Categoria categoriaReal = categoriaRepository.findByLookupId(dto.getCategoria().getLookupId())
-                .orElseThrow(() -> new RuntimeException("Categoria não encontrada!"));
+                .orElseThrow(() -> new RegraNegocioException("Categoria não encontrada!"));
 
         produtoExistente.setNome(dto.getNome());
         produtoExistente.setPreco(dto.getPreco());
@@ -75,63 +75,9 @@ public class ProdutoService {
         produtoExistente.setAtivo(dto.isAtivo());
         produtoExistente.setDescricao(dto.getDescricao());
 
-        // Lista para rastrear quais variações o Front-end mandou (ou seja, quais devem ficar ativas)
-        List<UUID> variacoesRecebidas = new ArrayList<>();
+        aplicarRegraDePrecoPromocional(produtoExistente, categoriaReal, dto.getPrecoPromocional());
 
-        //Processa apenas o que veio do front
-        for (VariacaoProdutoSalvarRequestDTO varDto : dto.getVariacaoProduto()) {
-
-            if (varDto.getLookupId() != null) {
-
-                VariacaoProduto varExistente = produtoExistente.getVariacaoProduto().stream()
-                        .filter(v -> v.getLookupId().equals(varDto.getLookupId()))
-                        .findFirst()
-                        .orElseThrow(() -> new RegraNegocioException("Variação não pertence a este produto"));
-
-                varExistente.setCor(varDto.getCor());
-                varExistente.setTamanho(varDto.getTamanho());
-                varExistente.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
-                varExistente.setImagemUrl(varDto.getImagemUrl());
-                varExistente.setAtivo(true);
-
-                variacoesRecebidas.add(varExistente.getLookupId());
-
-            } else {
-                // B) O front acha que é nova, vamos verificar se já existe uma "inativa" no banco
-                Optional<VariacaoProduto> varDesativada = produtoExistente.getVariacaoProduto().stream()
-                        .filter(v -> v.getCor().equalsIgnoreCase(varDto.getCor()) &&
-                                v.getTamanho().equals(varDto.getTamanho()))
-                        .findFirst();
-
-                if (varDesativada.isPresent()) {
-                    VariacaoProduto ressuscitada = varDesativada.get();
-                    ressuscitada.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
-                    ressuscitada.setImagemUrl(varDto.getImagemUrl());
-                    ressuscitada.setAtivo(true);
-
-                    variacoesRecebidas.add(ressuscitada.getLookupId());
-
-                } else {
-                    //Se realmente for inédita
-                    VariacaoProduto novaVar = new VariacaoProduto();
-                    novaVar.setCor(varDto.getCor());
-                    novaVar.setTamanho(varDto.getTamanho());
-                    novaVar.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
-                    novaVar.setImagemUrl(varDto.getImagemUrl());
-                    novaVar.setAtivo(true);
-
-                    novaVar.setProduto(produtoExistente);
-                    produtoExistente.getVariacaoProduto().add(novaVar);
-                }
-            }
-        }
-
-        // 2. SEGUNDO LOOP: Desativa as variações que não vieram do front (O Soft Delete perfeito)
-        for (VariacaoProduto varAntiga : produtoExistente.getVariacaoProduto()) {
-            if (varAntiga.getLookupId() != null && !variacoesRecebidas.contains(varAntiga.getLookupId())) {
-                varAntiga.setAtivo(false);
-            }
-        }
+        sincronizarVariacoes(produtoExistente, dto.getVariacaoProduto());
 
         return produtoRepository.save(produtoExistente);
     }
@@ -140,11 +86,10 @@ public class ProdutoService {
     public void remover(UUID lookupId) throws RegraNegocioException {
         Produto produto = recuperarPor(lookupId);
 
-        // 1. Pergunta ao banco se esse produto já tem alguma venda no histórico
         boolean jaFoiVendido = produtoRepository.isProdutoVendido(produto);
 
         if (jaFoiVendido) {
-            produto.setAtivo(false); // Esconde o produto
+            produto.setAtivo(false); //soft delete
 
             if (produto.getVariacaoProduto() != null) {
                 for (VariacaoProduto variacao : produto.getVariacaoProduto()) {
@@ -177,4 +122,130 @@ public class ProdutoService {
         produto.setAtivo(true);
         produtoRepository.save(produto);
     }
+
+    //métodos auxiliares
+
+    @Transactional
+    public void aplicarPromocaoCategoria(UUID categoriaId, BigDecimal percentualDesconto) throws RegraNegocioException {
+
+        if (percentualDesconto.compareTo(BigDecimal.ZERO) <= 0 || percentualDesconto.compareTo(new BigDecimal("100")) >= 0) {
+            throw new RegraNegocioException("O desconto deve estar entre 1% e 99%.");
+        }
+
+        Categoria categoria = categoriaRepository.findByLookupId(categoriaId)
+                .orElseThrow(() -> new RegraNegocioException("Categoria não encontrada."));
+
+        categoria.setPercentualDesconto(percentualDesconto);
+        categoriaRepository.save(categoria);
+
+        //busca todos os produtos dessa categoria
+        List<Produto> produtos = produtoRepository.findByCategoria(categoria);
+
+        for (Produto produto : produtos) {
+            //calcula o valor
+            BigDecimal valorDesconto = produto.getPreco().multiply(percentualDesconto).divide(new BigDecimal("100"));
+
+            BigDecimal precoNovo = produto.getPreco().subtract(valorDesconto);
+
+            produto.setPrecoPromocional(precoNovo);
+        }
+
+        produtoRepository.saveAll(produtos);
+    }
+
+    @Transactional
+    public void removerPromocaoCategoria(UUID categoriaId) throws RegraNegocioException {
+        Categoria categoria = categoriaRepository.findByLookupId(categoriaId)
+                .orElseThrow(() -> new RegraNegocioException("Categoria não encontrada."));
+
+        categoria.setPercentualDesconto(null);
+        categoriaRepository.save(categoria);
+
+        List<Produto> produtos = produtoRepository.findByCategoria(categoria);
+
+        for (Produto produto : produtos) {
+            produto.setPrecoPromocional(null);
+        }
+
+        produtoRepository.saveAll(produtos);
+    }
+
+    private void aplicarRegraDePrecoPromocional(Produto produto, Categoria categoria, BigDecimal precoPromocionalManual) throws RegraNegocioException {
+        if (categoria.getPercentualDesconto() != null && categoria.getPercentualDesconto().compareTo(BigDecimal.ZERO) > 0) {
+
+            // Se a categoria tem desconto, o sistema calcula e força o preço
+            BigDecimal valorDesconto = produto.getPreco().multiply(categoria.getPercentualDesconto()).divide(new BigDecimal("100"));
+            BigDecimal precoCalculado = produto.getPreco().subtract(valorDesconto);
+            produto.setPrecoPromocional(precoCalculado);
+
+        } else {
+
+            //se não tem desconto da categoria valida o desconto manual do usuário
+            if (precoPromocionalManual != null) {
+                if (precoPromocionalManual.compareTo(produto.getPreco()) >= 0) {
+                    throw new RegraNegocioException("O preço promocional deve ser menor que o preço original");
+                }
+            }
+            produto.setPrecoPromocional(precoPromocionalManual);
+        }
+    }
+
+    private void sincronizarVariacoes(Produto produtoExistente, List<VariacaoProdutoSalvarRequestDTO> variacoesDto) throws RegraNegocioException {
+        List<UUID> variacoesRecebidas = new ArrayList<>();
+
+        for (VariacaoProdutoSalvarRequestDTO varDto : variacoesDto) {
+            if (varDto.getLookupId() != null) {
+
+                VariacaoProduto varExistente = produtoExistente.getVariacaoProduto().stream()
+                        .filter(v -> v.getLookupId().equals(varDto.getLookupId()))
+                        .findFirst()
+                        .orElseThrow(() -> new RegraNegocioException("Variação não pertence a este produto"));
+
+                varExistente.setCor(varDto.getCor());
+                varExistente.setTamanho(varDto.getTamanho());
+                varExistente.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
+                varExistente.setImagemUrl(varDto.getImagemUrl());
+                varExistente.setAtivo(true);
+                variacoesRecebidas.add(varExistente.getLookupId());
+
+            } else {
+
+                //verifica se já existe uma inativa no banco
+                Optional<VariacaoProduto> varDesativada = produtoExistente.getVariacaoProduto().stream()
+                        .filter(v -> v.getCor().equalsIgnoreCase(varDto.getCor()) &&
+                                v.getTamanho().equals(varDto.getTamanho()))
+                        .findFirst();
+
+                if (varDesativada.isPresent()) {
+                    VariacaoProduto ressuscitada = varDesativada.get();
+                    ressuscitada.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
+                    ressuscitada.setImagemUrl(varDto.getImagemUrl());
+                    ressuscitada.setAtivo(true);
+                    variacoesRecebidas.add(ressuscitada.getLookupId());
+
+                } else {
+                    // Realmente é nova
+                    VariacaoProduto novaVar = new VariacaoProduto();
+                    novaVar.setCor(varDto.getCor());
+                    novaVar.setTamanho(varDto.getTamanho());
+                    novaVar.setQuantidadeEstoque(varDto.getQuantidadeEstoque());
+                    novaVar.setImagemUrl(varDto.getImagemUrl());
+                    novaVar.setAtivo(true);
+                    novaVar.setProduto(produtoExistente);
+
+                    produtoExistente.getVariacaoProduto().add(novaVar);
+                }
+            }
+        }
+
+        //desativa as variações que não vieram do front
+        for (VariacaoProduto varAntiga : produtoExistente.getVariacaoProduto()) {
+            if (varAntiga.getLookupId() != null && !variacoesRecebidas.contains(varAntiga.getLookupId())) {
+                varAntiga.setAtivo(false);
+            }
+        }
+    }
+
+
+
 }

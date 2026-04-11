@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Tag } from "lucide-react";
 
 export interface CategoriaCard {
   lookupId?: string;
@@ -20,6 +21,7 @@ export interface Produto {
   nome: string;
   categoria: CategoriaCard | string;
   preco: number;
+  precoPromocional?: number;
   ativo?: boolean;
   imagemUrl?: string;
   variacoes?: Variacao[];
@@ -100,6 +102,15 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
     if (corAchada) imagemExibicao = corAchada.imagem;
   }
 
+  //lógica de promoção
+  const emPromocao = produto.precoPromocional !== undefined && produto.precoPromocional !== null && produto.precoPromocional < produto.preco;
+
+  const porcentagemDesconto = emPromocao
+    ? Math.round(((produto.preco - produto.precoPromocional!) / produto.preco) * 100)
+    : 0;
+
+  const precoExibicao = emPromocao ? produto.precoPromocional! : produto.preco;
+
   return (
     <div className={`group relative bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#C2AE82]/50 transition-all duration-300 ${!isAtivo ? 'opacity-70 grayscale-[30%]' : ''}`}>
 
@@ -112,7 +123,15 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
 
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-300"></div>
 
-        {produto.ativo !== undefined && (
+        {/* faixa de desconto se em promoção */}
+        {emPromocao && (
+          <div className="absolute top-3 left-3 bg-red-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1 z-10">
+            <Tag size={12} fill="currentColor" />
+            {porcentagemDesconto}% OFF
+          </div>
+        )}
+
+        {isAdmin && produto.ativo !== undefined && (
           <div className="absolute top-3 right-3 z-10">
             {isAtivo ? (
               <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-500/90 text-white shadow-lg backdrop-blur-sm uppercase tracking-wider">
@@ -185,13 +204,21 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
         </h3>
 
         <div className="mt-auto pt-4 flex items-center justify-between relative z-20">
-          <p className="text-xl font-extrabold text-white">
-            {formatarPreco(produto.preco)}
-          </p>
+
+          <div className="flex flex-col">
+            {emPromocao && (
+              <span className="text-xs text-gray-500 line-through font-medium">
+                De {formatarPreco(produto.preco)}
+              </span>
+            )}
+            <p className="text-xl font-extrabold text-white">
+              {emPromocao ? `Por ${formatarPreco(precoExibicao)}` : formatarPreco(precoExibicao)}
+            </p>
+          </div>
 
           {!isAdmin && (
             <button
-              className="h-10 w-10 bg-[#C2AE82] hover:bg-[#a8956b] text-black rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+              className="h-10 w-10 bg-[#C2AE82] hover:bg-[#a8956b] text-black rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 flex-shrink-0"
               title="Adicionar ao Carrinho"
             >
               <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

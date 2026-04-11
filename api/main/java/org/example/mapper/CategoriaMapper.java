@@ -27,6 +27,7 @@ public class CategoriaMapper {
         dto.setMostrarNaHome(entity.getMostrarNaHome());
         dto.setOrdemExibicao(entity.getOrdemExibicao());
         dto.setAtivo(entity.isAtivo());
+        dto.setPercentualDesconto(entity.getPercentualDesconto());
 
         return dto;
 

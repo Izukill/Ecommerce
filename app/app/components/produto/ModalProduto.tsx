@@ -5,6 +5,7 @@ import { api } from "@/lib/api";
 import GaleriaProduto from "./GaleriaProduto";
 import SeletorVariacoes, { Variacao } from "./SeletorVariacoes";
 import { useCart } from "@/app/contexts/CartContext";
+import { Tag } from "lucide-react";
 
 interface ModalProdutoProps {
   produtoId: string;
@@ -22,9 +23,8 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
   const [corAtiva, setCorAtiva] = useState<string | null>(null);
   const [quantidade, setQuantidade] = useState(1);
 
-  // Referências para o scroll suave
   const seletorRef = useRef<HTMLDivElement>(null);
-  const acaoRef = useRef<HTMLDivElement>(null); // 👇 Nova referência para o rodapé de ação
+  const acaoRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const carregarProduto = async () => {
@@ -44,7 +44,6 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
     setQuantidade(1);
   }, [variacaoSelecionada]);
 
-  // Efeito 1: Desce para os tamanhos ao escolher a cor
   useEffect(() => {
     if (corAtiva && seletorRef.current) {
       setTimeout(() => {
@@ -53,7 +52,6 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
     }
   }, [corAtiva]);
 
-  // 👇 Efeito 2: Desce para o botão de Adicionar ao Carrinho ao escolher o tamanho
   useEffect(() => {
     if (variacaoSelecionada && acaoRef.current) {
       setTimeout(() => {
@@ -68,11 +66,14 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
       return;
     }
 
+    //define qual preço aparece no carrinho (é recalculado no back)
+    const precoFinal = produto.precoPromocional ? produto.precoPromocional : produto.preco;
+
     adicionarAoCarrinho({
       produtoId: produto.lookupId,
       variacaoId: variacaoSelecionada.lookupId,
       nome: produto.nome,
-      preco: produto.preco,
+      preco: precoFinal,
       cor: variacaoSelecionada.cor,
       tamanho: variacaoSelecionada.tamanho,
       quantidade: quantidade,
@@ -84,6 +85,9 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
   };
 
   const temEstoqueGeral = produto?.variacoes?.some((v: any) => v.quantidadeEstoque > 0);
+  const emPromocao = produto && produto.precoPromocional !== undefined && produto.precoPromocional !== null && produto.precoPromocional < produto.preco;
+  const porcentagemDesconto = emPromocao ? Math.round(((produto.preco - produto.precoPromocional) / produto.preco) * 100) : 0;
+  const precoExibicao = emPromocao ? produto.precoPromocional : produto?.preco;
 
   return (
     <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-md sm:p-4">
@@ -108,7 +112,15 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
               <p className="text-gray-400">Este produto não foi encontrado ou foi removido.</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-10 relative">
+
+              {/* selo de promoção no modal */}
+              {emPromocao && (
+                <div className="absolute top-0 left-0 lg:-left-4 lg:-top-4 z-70 bg-red-600 text-white text-sm font-extrabold px-3 py-1.5 rounded-lg shadow-xl flex items-center gap-1.5 animate-in slide-in-from-top fade-in">
+                  <Tag size={16} fill="currentColor" />
+                  {porcentagemDesconto}% OFF
+                </div>
+              )}
 
               <div className="w-full">
                 {(() => {
@@ -129,10 +141,22 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
                 <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-2 pr-10">
                   {produto.nome}
                 </h1>
-
-                <p className="text-xl sm:text-2xl font-light text-[#C2AE82] mb-3 sm:mb-4">
-                  R$ {produto.preco.toFixed(2).replace('.', ',')}
-                </p>
+                <div className="mb-4 sm:mb-5">
+                  {emPromocao ? (
+                    <div className="flex flex-col">
+                      <span className="text-sm sm:text-base text-gray-500 line-through font-medium">
+                        De R$ {produto.preco.toFixed(2).replace('.', ',')}
+                      </span>
+                      <span className="text-2xl sm:text-3xl font-black text-[#C2AE82]">
+                        Por R$ {precoExibicao.toFixed(2).replace('.', ',')}
+                      </span>
+                    </div>
+                  ) : (
+                    <p className="text-xl sm:text-2xl font-light text-[#C2AE82]">
+                      R$ {precoExibicao.toFixed(2).replace('.', ',')}
+                    </p>
+                  )}
+                </div>
 
                 {produto.descricao && (
                   <p className="text-gray-400 text-sm leading-relaxed mb-5 sm:mb-6">
@@ -152,7 +176,7 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
 
                     {variacaoSelecionada && (
                       <div
-                        ref={acaoRef} // 👇 Referência adicionada aqui para o scroll descer pra cá
+                        ref={acaoRef}
                         className="sticky bottom-0 sm:static bg-neutral-950 sm:bg-transparent pt-4 pb-2 sm:pt-2 sm:pb-0 border-t border-neutral-800 sm:border-transparent mt-auto animate-in fade-in slide-in-from-bottom-4 duration-300"
                       >
 

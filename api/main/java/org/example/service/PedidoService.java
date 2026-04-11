@@ -33,6 +33,9 @@ public class PedidoService {
     private PedidoRepository pedidoRepository;
 
     @Autowired
+    private EnderecoRepository enderecoRepository;
+
+    @Autowired
     private ClienteRepository clienteRepository;
 
     @Autowired
@@ -54,85 +57,33 @@ public class PedidoService {
     @Transactional
     public CheckoutResponseDTO processarCheckout(PedidoCheckoutRequestDTO dto) throws RegraNegocioException {
 
-        //busca ou cria o cliente
-        Cliente cliente = clienteRepository.findByEmail(dto.getCliente().getEmail())
-                .orElseGet(() -> {
-                    Cliente novoCliente = new Cliente();
-                    novoCliente.setNome(dto.getCliente().getNome());
-                    novoCliente.setEmail(dto.getCliente().getEmail());
-                    novoCliente.setCpf(dto.getCliente().getCpf());
-                    novoCliente.setTelefone(dto.getCliente().getTelefone());
-                    return clienteRepository.save(novoCliente);
-                });
+        Cliente cliente = obterOuCriarCliente(dto);
+        Endereco endereco = processarEnderecoEntrega(dto, cliente);
 
-        CheckoutFrete checkoutFrete = checkoutFreteService.obterConfiguracoes();
-        BigDecimal freteCobrado = checkoutFrete.getFrete();
+        BigDecimal freteCobrado = checkoutFreteService.obterConfiguracoes().getFrete();
 
-        //monta o pedido
         Pedido pedido = new Pedido();
         pedido.setItens(new ArrayList<>());
         pedido.setCliente(cliente);
+        pedido.setEnderecoEntrega(endereco);
         pedido.setFreteFixo(freteCobrado);
-
-        //seta status do pedido, endereço e a data limite de pagamento
         pedido.setStatus(EnumStatusPedido.AGUARDANDO_PAGAMENTO);
         pedido.setDataHora(LocalDateTime.now());
         pedido.setDataExpiracao(LocalDateTime.now().plusMinutes(30));
 
+        BigDecimal valorTotalItens = processarItensBaixarEstoque(dto, pedido);
+        pedido.setValorTotal(valorTotalItens.add(freteCobrado));
 
-        Endereco endereco = new Endereco();
-        endereco.setCep(dto.getEnderecoEntrega().getCep());
-        endereco.setRua(dto.getEnderecoEntrega().getRua());
-        endereco.setNumero(dto.getEnderecoEntrega().getNumero());
-        endereco.setComplemento(dto.getEnderecoEntrega().getComplemento());
-        endereco.setBairro(dto.getEnderecoEntrega().getBairro());
-        endereco.setCidade(dto.getEnderecoEntrega().getCidade());
-        endereco.setEstado(dto.getEnderecoEntrega().getEstado());
-
-        endereco.setCliente(cliente);
-        pedido.setEnderecoEntrega(endereco);
-
-        //processa os itens e abaixo no estoque
-        BigDecimal valorTotalCarrinho = BigDecimal.ZERO;
-
-        for (ItemPedidoSalvarRequestDTO itemDto : dto.getItens()) {
-            VariacaoProduto variacaoProduto = variacaoProdutoRepository.findByLookupId(itemDto.getVariacaoProdutoId())
-                    .orElseThrow(() -> new RegraNegocioException("Variação de produto não encontrada."));
-
-            if (variacaoProduto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
-                throw new RegraNegocioException("Estoque insuficiente para o produto: " + variacaoProduto.getProduto().getNome());
-            }
-
-            variacaoProduto.setQuantidadeEstoque(variacaoProduto.getQuantidadeEstoque() - itemDto.getQuantidade());
-
-            ItemPedido novoItem = new ItemPedido();
-            novoItem.setProduto(variacaoProduto);
-            novoItem.setQuantidade(itemDto.getQuantidade());
-
-            BigDecimal precoReal = variacaoProduto.getProduto().getPreco();
-            novoItem.setPrecoUnitario(precoReal);
-
-            BigDecimal subtotalItem = precoReal.multiply(BigDecimal.valueOf(novoItem.getQuantidade()));
-            valorTotalCarrinho = valorTotalCarrinho.add(subtotalItem);
-
-            novoItem.setPedido(pedido);
-            pedido.getItens().add(novoItem);
-        }
-
-        //valor total valor do itens + frete
-        pedido.setValorTotal(valorTotalCarrinho.add(freteCobrado));
-
-        //gera o pix e salva o id no pedido para o mercado pago
         PixResponseDTO pixResponse = pixService.gerarPix(pedido.getValorTotal(), pedido.getCliente());
         pedido.setPagamentoMercadoPagoId(pixResponse.getIdPagamentoMercadoPago());
 
-
         Pedido pedidoSalvo = pedidoRepository.save(pedido);
         emailService.enviarEmailNovoPedido(pedidoSalvo, pixResponse);
+
         PedidoResponseDTO pedidoDTO = pedidoMapper.from(pedidoSalvo);
 
-
         return new CheckoutResponseDTO(pedidoDTO, pixResponse);
+
     }
 
 
@@ -261,7 +212,8 @@ public class PedidoService {
 
 
 
-    //metodo auxiliar
+    //metodos auxiliares
+
     private Cliente obterClienteLogado() throws RegraNegocioException {
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = ((UserDetails) principal).getUsername();
@@ -269,6 +221,89 @@ public class PedidoService {
 
         return clienteRepository.findByEmail(email)
                 .orElseThrow(() -> new RegraNegocioException("Cliente não autorizado ou não encontrado."));
+    }
+
+
+    private Cliente obterOuCriarCliente(PedidoCheckoutRequestDTO dto) {
+        return clienteRepository.findByEmail(dto.getCliente().getEmail())
+                .orElseGet(() -> {
+                    Cliente novoCliente = new Cliente();
+                    novoCliente.setNome(dto.getCliente().getNome());
+                    novoCliente.setEmail(dto.getCliente().getEmail());
+                    novoCliente.setCpf(dto.getCliente().getCpf());
+                    novoCliente.setTelefone(dto.getCliente().getTelefone());
+                    return clienteRepository.save(novoCliente);
+                });
+    }
+
+    private Endereco processarEnderecoEntrega(PedidoCheckoutRequestDTO dto, Cliente cliente) throws RegraNegocioException {
+
+        if (dto.getEnderecoEntrega().getLookupId() != null) {
+            return enderecoRepository.findByLookupId(dto.getEnderecoEntrega().getLookupId())
+                    .orElseThrow(() -> new RegraNegocioException("Endereço selecionado não encontrado."));
+        }
+
+        //se n tem id ve se já existe no banco
+        Optional<Endereco> enderecoDuplicado = enderecoRepository.findByClienteAndCepAndNumero(
+                cliente,
+                dto.getEnderecoEntrega().getCep(),
+                dto.getEnderecoEntrega().getNumero()
+        );
+
+        if (enderecoDuplicado.isPresent()) {
+            return enderecoDuplicado.get();
+        }
+
+        //se for novo cria e salva
+        Endereco novoEndereco = new Endereco();
+        novoEndereco.setCep(dto.getEnderecoEntrega().getCep());
+        novoEndereco.setRua(dto.getEnderecoEntrega().getRua());
+        novoEndereco.setNumero(dto.getEnderecoEntrega().getNumero());
+        novoEndereco.setComplemento(dto.getEnderecoEntrega().getComplemento());
+        novoEndereco.setBairro(dto.getEnderecoEntrega().getBairro());
+        novoEndereco.setCidade(dto.getEnderecoEntrega().getCidade());
+        novoEndereco.setEstado(dto.getEnderecoEntrega().getEstado());
+        novoEndereco.setCliente(cliente);
+
+        return enderecoRepository.save(novoEndereco);
+    }
+
+    private BigDecimal processarItensBaixarEstoque(PedidoCheckoutRequestDTO dto, Pedido pedido) throws RegraNegocioException {
+        BigDecimal valorTotalCarrinho = BigDecimal.ZERO;
+
+        for (ItemPedidoSalvarRequestDTO itemDto : dto.getItens()) {
+            VariacaoProduto variacaoProduto = variacaoProdutoRepository.findByLookupId(itemDto.getVariacaoProdutoId())
+                    .orElseThrow(() -> new RegraNegocioException("Variação de produto não encontrada."));
+
+            if (variacaoProduto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
+                throw new RegraNegocioException("Estoque insuficiente para o produto: " + variacaoProduto.getProduto().getNome());
+            }
+
+            //subtrai do estoque
+            variacaoProduto.setQuantidadeEstoque(variacaoProduto.getQuantidadeEstoque() - itemDto.getQuantidade());
+
+            ItemPedido novoItem = new ItemPedido();
+            novoItem.setProduto(variacaoProduto);
+            novoItem.setQuantidade(itemDto.getQuantidade());
+
+            Produto produtoCatalogo = variacaoProduto.getProduto();
+            BigDecimal precoReal = produtoCatalogo.getPreco();
+
+            if (produtoCatalogo.getPrecoPromocional() != null) {
+                precoReal = produtoCatalogo.getPrecoPromocional();
+            }
+
+            novoItem.setPrecoUnitario(precoReal);
+
+            //calculo do valor
+            BigDecimal subtotalItem = precoReal.multiply(BigDecimal.valueOf(novoItem.getQuantidade()));
+            valorTotalCarrinho = valorTotalCarrinho.add(subtotalItem);
+
+            novoItem.setPedido(pedido);
+            pedido.getItens().add(novoItem);
+        }
+
+        return valorTotalCarrinho;
     }
 
 

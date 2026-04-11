@@ -2,6 +2,7 @@ package org.example.rest.dto.Categoria;
 
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Data
@@ -16,4 +17,7 @@ public class CategoriaReponseDTO {
     private Boolean mostrarNaHome;
 
     private Integer ordemExibicao;
+
+    private BigDecimal percentualDesconto;
+
 }

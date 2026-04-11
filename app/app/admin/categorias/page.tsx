@@ -4,13 +4,16 @@ import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
-import { Tags, Eye, EyeOff, GripVertical } from "lucide-react";
+import ModalPromocaoCategoria from "@/app/components/admin/ModalPromocaoCategoria";
+import toast from "react-hot-toast";
+import { Eye, EyeOff, GripVertical, Tag, Percent } from "lucide-react";
 
 interface Categoria {
   lookupId: string;
   nome: string;
   mostrarNaHome?: boolean;
   ordemExibicao?: number;
+  percentualDesconto?: number;
 }
 
 export default function CategoriasPage() {
@@ -19,7 +22,6 @@ export default function CategoriasPage() {
   const [erroCarregar, setErroCarregar] = useState("");
 
   const [nomeNovaCategoria, setNomeNovaCategoria] = useState("");
-
   const [mostrarNaHome, setMostrarNaHome] = useState(false);
   const [ordemExibicao, setOrdemExibicao] = useState<number | string>(1);
 
@@ -31,6 +33,11 @@ export default function CategoriasPage() {
 
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
   const [categoriaParaExcluir, setCategoriaParaExcluir] = useState<Categoria | null>(null);
+
+  // Estados apenas de controle do Modal de Promoções
+  const [isModalPromocaoAberto, setIsModalPromocaoAberto] = useState(false);
+  const [categoriaParaPromocao, setCategoriaParaPromocao] = useState<Categoria | null>(null);
+  const [salvandoPromocao, setSalvandoPromocao] = useState(false);
 
   const carregarCategorias = async () => {
     try {
@@ -44,20 +51,13 @@ export default function CategoriasPage() {
       }
 
       const categoriasOrdenadas = dados.sort((a: Categoria, b: Categoria) => {
-        //quem tá ativo sempre no topo
         if (a.mostrarNaHome && !b.mostrarNaHome) return -1;
         if (!a.mostrarNaHome && b.mostrarNaHome) return 1;
-
-        if (a.mostrarNaHome && b.mostrarNaHome) {
-          return (a.ordemExibicao || 0) - (b.ordemExibicao || 0);
-        }
-
-        //quem tá inativo sempre abaixo e por ordem de nome
+        if (a.mostrarNaHome && b.mostrarNaHome) return (a.ordemExibicao || 0) - (b.ordemExibicao || 0);
         return a.nome.localeCompare(b.nome);
       });
 
       setCategorias(categoriasOrdenadas);
-
     } catch (error) {
       setErroCarregar("Não foi possível carregar as categorias.");
     } finally {
@@ -95,7 +95,6 @@ export default function CategoriasPage() {
     }
 
     setSalvando(true);
-
     const payload = {
       nome: nomeFormatado,
       mostrarNaHome,
@@ -108,7 +107,6 @@ export default function CategoriasPage() {
       } else {
         await api.post("/categorias", payload);
       }
-
       setSucesso(true);
       cancelarEdicao();
       carregarCategorias();
@@ -148,10 +146,59 @@ export default function CategoriasPage() {
       setCategorias(categorias.filter(c => c.lookupId !== categoriaParaExcluir.lookupId));
       fecharModalExclusao();
     } catch (error) {
-      setErroCarregar("Erro ao excluir a categoria");
+      toast.error("Erro ao excluir a categoria.");
       fecharModalExclusao();
     }
   };
+
+  const abrirModalPromocao = (categoria: Categoria) => {
+    setCategoriaParaPromocao(categoria);
+    setIsModalPromocaoAberto(true);
+  };
+
+  const fecharModalPromocao = () => {
+    setIsModalPromocaoAberto(false);
+    setCategoriaParaPromocao(null);
+  };
+
+  const aplicarPromocao = async (valorDesconto: number) => {
+    if (!categoriaParaPromocao) return;
+
+    if (isNaN(valorDesconto) || valorDesconto <= 0 || valorDesconto >= 100) {
+      toast.error("O desconto deve ser entre 1% e 99%.");
+      return;
+    }
+
+    setSalvandoPromocao(true);
+    try {
+      await api.post(`/produtos/categoria/${categoriaParaPromocao.lookupId}/promocao?desconto=${valorDesconto}`);
+      toast.success(`Desconto de ${valorDesconto}% aplicado em ${categoriaParaPromocao.nome}!`);
+      carregarCategorias();
+      fecharModalPromocao();
+    } catch (error) {
+      toast.error("Erro ao aplicar promoção.");
+    } finally {
+      setSalvandoPromocao(false);
+    }
+  };
+
+  const removerPromocao = async () => {
+    if (!categoriaParaPromocao) return;
+
+    setSalvandoPromocao(true);
+    try {
+      await api.delete(`/produtos/categoria/${categoriaParaPromocao.lookupId}/promocao`);
+      toast.success("Promoção removida com sucesso!");
+      carregarCategorias();
+      fecharModalPromocao();
+    } catch (error) {
+      toast.error("Erro ao remover promoção.");
+    } finally {
+      setSalvandoPromocao(false);
+    }
+  };
+
+  const categoriasEmPromocao = categorias.filter(c => c.percentualDesconto && c.percentualDesconto > 0);
 
   return (
     <div className="space-y-8 max-w-5xl mx-auto relative">
@@ -161,7 +208,8 @@ export default function CategoriasPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* formulário */}
+
+        {/* formulario */}
         <div className="lg:col-span-1">
           <div className="bg-black p-6 rounded-xl shadow-2xl border-t-4 border-[#C2AE82] sticky top-8">
             <h3 className="text-lg font-bold text-white mb-4">
@@ -226,8 +274,37 @@ export default function CategoriasPage() {
           </div>
         </div>
 
-        {/* tabela */}
         <div className="lg:col-span-2">
+
+          {/* painel de promoções ativas */}
+          {categoriasEmPromocao.length > 0 && (
+            <div className="bg-red-950/20 border border-red-900/50 rounded-xl p-5 mb-8 shadow-lg animate-in fade-in slide-in-from-top-4">
+              <div className="flex items-center gap-2 mb-4">
+                <Percent className="text-red-500" size={20} />
+                <h3 className="text-lg font-bold text-white tracking-wide">Ofertas Ativas</h3>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {categoriasEmPromocao.map(cat => (
+                  <div key={cat.lookupId} className="bg-black border border-red-900/30 p-4 rounded-lg flex justify-between items-center group hover:border-red-500/50 transition-colors">
+                    <div>
+                      <p className="font-bold text-gray-200 truncate pr-2">{cat.nome}</p>
+                      <p className="text-sm font-extrabold text-red-500 mt-0.5 flex items-center gap-1">
+                        <Tag size={12} fill="currentColor" /> {cat.percentualDesconto}% OFF
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => abrirModalPromocao(cat)}
+                      className="p-2 bg-neutral-900 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-md transition-colors"
+                      title="Editar Promoção"
+                    >
+                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {erroCarregar && <div className="bg-red-950/50 border-l-4 border-red-500 p-4 rounded-md mb-4"><p className="text-sm text-red-200 font-semibold">{erroCarregar}</p></div>}
           <div className="bg-black rounded-xl shadow-2xl border border-neutral-800 overflow-hidden">
             {carregando ? (
@@ -247,7 +324,14 @@ export default function CategoriasPage() {
                   {categorias.map((categoria) => (
                     <tr key={categoria.lookupId} className="hover:bg-neutral-900/50 transition-colors">
                       <td className="px-6 py-4">
-                        <Link href={`/admin/produtos?categoria=${categoria.nome}`} className="text-lg font-bold text-gray-100 hover:text-[#C2AE82] transition-colors">{categoria.nome}</Link>
+                        <Link href={`/admin/produtos?categoria=${categoria.lookupId}`} className="text-lg font-bold text-gray-100 hover:text-[#C2AE82] transition-colors flex items-center gap-2">
+                          {categoria.nome}
+                          {categoria.percentualDesconto && categoria.percentualDesconto > 0 && (
+                            <span className="bg-red-600 text-white text-[9px] px-1.5 py-0.5 rounded-sm font-bold flex items-center gap-0.5">
+                              <Tag size={8} fill="currentColor" /> %
+                            </span>
+                          )}
+                        </Link>
                       </td>
                       <td className="px-6 py-4 text-center">
                         {categoria.mostrarNaHome ? (
@@ -260,9 +344,10 @@ export default function CategoriasPage() {
                           </div>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-right space-x-3">
-                        <button onClick={() => iniciarEdicao(categoria)} className="text-gray-400 hover:text-white"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                        <button onClick={() => abrirModalExclusao(categoria)} className="text-red-500 hover:text-red-400"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                      <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                        <button onClick={() => abrirModalPromocao(categoria)} title="Aplicar promo" className="text-red-500 hover:text-red-400 p-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-md transition-colors"><Tag size={16} /></button>
+                        <button onClick={() => iniciarEdicao(categoria)} title="Editar" className="text-gray-400 hover:text-white p-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
+                        <button onClick={() => abrirModalExclusao(categoria)} title="Excluir" className="text-red-500 hover:text-red-400 p-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
                       </td>
                     </tr>
                   ))}
@@ -273,7 +358,22 @@ export default function CategoriasPage() {
         </div>
       </div>
 
-      <ModalExclusao isOpen={isModalExclusaoAberto} onClose={fecharModalExclusao} onConfirm={confirmarExclusao} titulo="Excluir Categoria?" mensagem={<>Tem certeza que deseja excluir a categoria <span className="text-white font-bold">"{categoriaParaExcluir?.nome}"</span>?</>} />
+      <ModalExclusao
+        isOpen={isModalExclusaoAberto}
+        onClose={fecharModalExclusao}
+        onConfirm={confirmarExclusao}
+        titulo="Excluir Categoria?"
+        mensagem={<>Tem certeza que deseja excluir a categoria <span className="text-white font-bold">"{categoriaParaExcluir?.nome}"</span>?</>}
+      />
+      <ModalPromocaoCategoria
+        isOpen={isModalPromocaoAberto}
+        categoria={categoriaParaPromocao}
+        onClose={fecharModalPromocao}
+        onAplicar={aplicarPromocao}
+        onRemover={removerPromocao}
+        salvandoPromocao={salvandoPromocao}
+      />
+
     </div>
   );
 }

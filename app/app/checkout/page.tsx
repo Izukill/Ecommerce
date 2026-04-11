@@ -113,6 +113,7 @@ export default function CheckoutPage() {
           nome: formData.nome, email: formData.email, cpf: formData.cpf, telefone: formData.telefone
         },
         enderecoEntrega: {
+          lookupId: enderecoSelecionado === 'novo' ? null : enderecoSelecionado,
           cep: formData.cep, rua: formData.rua, numero: formData.numero,
           complemento: formData.complemento, bairro: formData.bairro, cidade: formData.cidade, estado: formData.estado
         },

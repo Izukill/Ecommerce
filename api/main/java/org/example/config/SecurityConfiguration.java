@@ -61,9 +61,10 @@ public class SecurityConfiguration {
 
                         //rotas pra ADM
                         .requestMatchers(HttpMethod.GET, "/pedidos").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/produtos").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.POST, "/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PUT, "/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/produtos/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE,"/produtos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/pedidos/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET,"/admin/dashboard").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/admin/**").hasRole("ADMIN")

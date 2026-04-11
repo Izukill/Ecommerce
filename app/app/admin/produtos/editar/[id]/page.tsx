@@ -4,7 +4,7 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
-import { AlertTriangle } from "lucide-react";
+import { AlertTriangle, Tag } from "lucide-react";
 import toast from "react-hot-toast";
 
 import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
@@ -22,17 +22,15 @@ export default function EditarProdutoPage() {
   const params = useParams();
   const produtoId = params.id as string;
 
-
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
+  const [precoPromocional, setPrecoPromocional] = useState("");
   const [categoriaId, setCategoriaId] = useState("");
   const [descricao, setDescricao] = useState("");
   const [imagemUrl, setImagemUrl] = useState("");
   const [variacoes, setVariacoes] = useState<Variacao[]>([]);
 
-
   const [ativo, setAtivo] = useState(true);
-
 
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [carregandoDados, setCarregandoDados] = useState(true);
@@ -40,10 +38,8 @@ export default function EditarProdutoPage() {
   const [sucesso, setSucesso] = useState(false);
   const [salvando, setSalvando] = useState(false);
 
-
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
   const [excluindo, setExcluindo] = useState(false);
-
 
   useEffect(() => {
     if (!produtoId) return;
@@ -61,10 +57,10 @@ export default function EditarProdutoPage() {
         const prod = resProduto.data;
         setNome(prod.nome);
         setPreco(prod.preco.toString());
+        setPrecoPromocional(prod.precoPromocional ? prod.precoPromocional.toString() : "");
         setDescricao(prod.descricao || "");
         setImagemUrl(prod.imagemUrl || "");
 
-        //carrega o status do banco (se não existir, assume como ativo)
         setAtivo(prod.ativo !== false);
 
         if (prod.variacoes) {
@@ -103,15 +99,25 @@ export default function EditarProdutoPage() {
       return;
     }
 
+    const precoNumerico = parseFloat(preco.toString().replace(",", "."));
+    let precoPromoNumerico = null;
+
+    if (precoPromocional) {
+      precoPromoNumerico = parseFloat(precoPromocional.toString().replace(",", "."));
+      if (precoPromoNumerico >= precoNumerico) {
+        setErro("O preço promocional deve ser menor que o preço original.");
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+    }
+
     setSalvando(true);
 
     try {
-      const precoLimpo = preco.toString().replace(",", ".");
-      const precoNumerico = parseFloat(precoLimpo);
-
       const payload = {
         nome,
         preco: precoNumerico,
+        precoPromocional: precoPromoNumerico,
         descricao,
         imagemUrl,
         categoria: { lookupId: categoriaId },
@@ -121,6 +127,7 @@ export default function EditarProdutoPage() {
 
       await api.put(`/produtos/${produtoId}`, payload);
       setSucesso(true);
+      toast.success("Produto atualizado com sucesso");
 
       setTimeout(() => {
         router.push("/admin/produtos");
@@ -128,9 +135,8 @@ export default function EditarProdutoPage() {
 
     } catch (error: any) {
       console.error("Erro na atualização:", error.response?.data || error.message);
-      toast.error("Erro ao atualizar o produto");
+      toast.error(error.response?.data?.detail || "Erro ao atualizar o produto");
     } finally {
-      toast.success("Produto atualizado com sucesso");
       setSalvando(false);
     }
   };
@@ -140,12 +146,12 @@ export default function EditarProdutoPage() {
     try {
       await api.delete(`/produtos/${produtoId}`);
       setModalExcluirAberto(false);
-      router.push("/admin/produtos"); //volta para a lista após excluir
+      toast.success("Produto excluido com sucesso");
+      router.push("/admin/produtos");
     } catch (error) {
       setModalExcluirAberto(false);
       toast.error("Erro ao excluir o produto");
     } finally {
-      toast.success("Produto excluido com sucesso");
       setExcluindo(false);
     }
   };
@@ -169,7 +175,6 @@ export default function EditarProdutoPage() {
         </div>
 
         <div className="flex items-center gap-3">
-
           <button
             type="button"
             onClick={() => setModalExcluirAberto(true)}
@@ -177,7 +182,6 @@ export default function EditarProdutoPage() {
           >
             Excluir Produto
           </button>
-
           <Link href="/admin/produtos" className="px-4 py-2 text-sm font-bold text-gray-300 bg-neutral-800 rounded-lg hover:bg-neutral-700 transition-colors border border-neutral-700 shadow-md">
             Voltar
           </Link>
@@ -207,7 +211,7 @@ export default function EditarProdutoPage() {
                   <input type="text" required value={nome} onChange={(e) => setNome(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] outline-none transition-colors" />
                 </div>
 
-                <div className="grid grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
                   <div>
                     <label className="block text-sm font-bold text-gray-100">Categoria *</label>
                     <select required value={categoriaId} onChange={(e) => setCategoriaId(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] appearance-none outline-none transition-colors">
@@ -217,9 +221,39 @@ export default function EditarProdutoPage() {
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-100">Preço (R$) *</label>
-                    <input type="number" step="0.01" required value={preco} onChange={(e) => setPreco(e.target.value)} className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] outline-none transition-colors" />
+                    <input
+                      type="number"
+                      step="0.01"
+                      required
+                      value={preco}
+                      onChange={(e) => {
+                        setPreco(e.target.value);
+                        setPrecoPromocional("");
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-[#C2AE82] outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                  </div>
+                  <div>
+                    <label className="flex items-center gap-1.5 text-sm font-bold text-gray-100">
+                      Preço Promo <Tag size={14} className="text-red-500" />
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      placeholder="Opcional"
+                      value={precoPromocional}
+                      onChange={(e) => setPrecoPromocional(e.target.value)}
+                      onFocus={(e) => e.target.select()}
+                      className="mt-1 w-full px-4 py-3 rounded-lg border border-neutral-700 bg-neutral-900 text-gray-100 focus:ring-2 focus:ring-red-500 outline-none transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
                   </div>
                 </div>
+
+                <p className="text-[11px] text-gray-500 mt-2 italic flex items-start gap-1">
+                  <span className="text-[#C2AE82] font-bold">*</span>
+                  Obs: Se a categoria deste produto possuir uma promoção em massa ativa (%), ela terá prioridade e substituirá o preço promocional digitado acima.
+                </p>
 
                 <div>
                   <label className="block text-sm font-bold text-gray-100">Descrição</label>
@@ -229,7 +263,6 @@ export default function EditarProdutoPage() {
 
               <GerenciadorVariacoes variacoes={variacoes} setVariacoes={setVariacoes} />
 
-              {/* ativar/desativar */}
               <div className="pt-6 space-y-4">
                 <button
                   type="button"

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @RestController
@@ -76,6 +77,25 @@ public class ProdutoRestController implements ProdutoRestControllerAPI{
     @PatchMapping("/{lookupId}/ativar")
     public ResponseEntity<Void> ativar(@PathVariable("lookupId") UUID lookupId) throws MirlleException {
         service.ativar(lookupId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @PostMapping("/categoria/{categoriaId}/promocao")
+    public ResponseEntity<Void> aplicarPromocaoCategoria(
+            @PathVariable("categoriaId") UUID categoriaId,
+            @RequestParam("desconto") BigDecimal percentualDesconto) throws MirlleException {
+
+        service.aplicarPromocaoCategoria(categoriaId, percentualDesconto);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @DeleteMapping("/categoria/{categoriaId}/promocao")
+    public ResponseEntity<Void> removerPromocaoCategoria(
+            @PathVariable("categoriaId") UUID categoriaId) throws MirlleException {
+
+        service.removerPromocaoCategoria(categoriaId);
         return ResponseEntity.noContent().build();
     }
 

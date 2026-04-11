@@ -19,9 +19,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Tag(name = "Produtos", description = "Gerenciamento de Produtos")
@@ -133,6 +133,33 @@ public interface ProdutoRestControllerAPI {
     })
     @PatchMapping("/{lookupId}/ativar")
     ResponseEntity<Void> ativar(@PathVariable("lookupId") UUID lookupId) throws MirlleException;
+
+    @Operation(summary = "Aplicar promoção em uma categoria inteira.",
+            description = "Aplica um percentual de desconto a todos os produtos de uma categoria específica.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Promoção aplicada com sucesso."),
+            @ApiResponse(responseCode = "400", description = "Erro de validação (ex: desconto fora de 1 a 99).",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @PostMapping("/categoria/{categoriaId}/promocao")
+    ResponseEntity<Void> aplicarPromocaoCategoria(
+            @Parameter(description = "LookupId da categoria.") @PathVariable("categoriaId") UUID categoriaId,
+            @Parameter(description = "Percentual do desconto (Ex: 15 para 15%).") @RequestParam("desconto") BigDecimal percentualDesconto) throws MirlleException;
+
+    @Operation(summary = "Remover promoção de uma categoria.",
+            description = "Remove o preço promocional de todos os produtos vinculados a esta categoria, voltando ao preço original.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Promoção removida com sucesso."),
+            @ApiResponse(responseCode = "500", description = "Erro inesperado.",
+                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = ProblemDetail.class))),
+    })
+    @SecurityRequirement(name = "bearerAuth")
+    @DeleteMapping("/categoria/{categoriaId}/promocao")
+    ResponseEntity<Void> removerPromocaoCategoria(
+            @Parameter(description = "LookupId da categoria.") @PathVariable("categoriaId") UUID categoriaId) throws MirlleException;
 
 
 }

@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useAdminDashboard } from "../hooks/useAdminDashboard";
 import toast from "react-hot-toast";
+import CardPromocoesAdmin from "@/app/components/layout/CardPromocoesAdmin";
 import {
   Shirt,
   Tags,
@@ -219,8 +220,12 @@ export default function AdminDashboardPage() {
               </button>
             </div>
           </div>
+
+          <CardPromocoesAdmin />
+
         </div>
       </div>
+
 
     </div>
   );

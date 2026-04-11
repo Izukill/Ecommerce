@@ -22,6 +22,8 @@ public class ProdutoResponseDTO {
 
     private BigDecimal preco;
 
+    private BigDecimal precoPromocional;
+
     private String status;
 
     private boolean ativo;

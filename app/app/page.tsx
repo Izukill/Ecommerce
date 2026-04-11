@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { Percent, Tag, Sparkles } from "lucide-react";
 
 import ProdutoCard, { Produto } from "./components/produto/ProdutoCard";
 import ModalProduto from "./components/produto/ModalProduto";
@@ -15,21 +16,33 @@ interface VitrineCategoria {
   nome: string;
   ordem: number;
   produtos: Produto[];
+  percentualDesconto?: number;
 }
 
 export default function HomePage() {
   const [vitrines, setVitrines] = useState<VitrineCategoria[]>([]);
   const [lancamentos, setLancamentos] = useState<Produto[]>([]);
+  const [promocoes, setPromocoes] = useState<Produto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [produtoVisualizado, setProdutoVisualizado] = useState<string | null>(null);
 
   useEffect(() => {
     const carregarDadosHome = async () => {
       try {
+        //busca dos lançamentos
         const resLancamentos = await api.get("/produtos?page=0&size=8&sort=dataCriacao,desc");
         const dadosLancamentos = resLancamentos.data?.content || resLancamentos.data || [];
         setLancamentos(dadosLancamentos.filter((p: Produto) => p.ativo === true));
 
+        //busca das promo
+        const resPromocoes = await api.get("/produtos?page=0&size=10&sort=dataCriacao,desc");
+        const dadosGerais = resPromocoes.data?.content || resPromocoes.data || [];
+        const itensComDesconto = dadosGerais
+          .filter((p: any) => p.ativo === true && p.precoPromocional !== null && p.precoPromocional < p.preco)
+          .slice(0, 8);
+        setPromocoes(itensComDesconto);
+
+        //busca as categorias
         const resCategorias = await api.get("/categorias?sort=ordemExibicao,asc");
         const categoriasDb = resCategorias.data?.content || resCategorias.data || [];
         const categoriasAtivasNaHome = categoriasDb.filter((c: any) => c.mostrarNaHome === true);
@@ -46,7 +59,8 @@ export default function HomePage() {
               id: cat.lookupId,
               nome: cat.nome,
               ordem: cat.ordemExibicao || 0,
-              produtos: produtosAtivos.slice(0, 8)
+              produtos: produtosAtivos.slice(0, 8),
+              percentualDesconto: cat.percentualDesconto
             });
           }
         }
@@ -82,7 +96,6 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* vitrine */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 space-y-32">
 
           {carregando ? (
@@ -92,16 +105,36 @@ export default function HomePage() {
             </div>
           ) : (
             <>
-              {/* sessão fixa de lançamentos (sempre no topo) */}
+              {/* fixa de promos */}
+              {promocoes.length > 0 && (
+                <div id="ofertas" className="vitrine-section relative bg-red-950/5 p-8 rounded-3xl border border-red-900/20">
+                  <div className="flex items-end justify-between mb-8 border-b border-red-600/30 pb-4">
+                    <div>
+                      <h2 className="text-3xl font-extrabold text-red-500 tracking-tight sm:text-4xl flex items-center gap-3">
+                        <Percent className="animate-bounce" size={32} />
+                        Ofertas Imperdíveis
+                      </h2>
+                      <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Preços especiais por tempo limitado!</p>
+                    </div>
+                    <Link href="/produtos?emOferta=true" className="text-sm font-bold text-red-400 hover:text-red-300 transition-colors">
+                      Ver todas as ofertas &rarr;
+                    </Link>
+                  </div>
+
+                  <VitrineProdutos
+                    vitrine={{ id: 'promocoes', nome: 'Ofertas', ordem: -1, produtos: promocoes }}
+                    onProdutoClick={setProdutoVisualizado}
+                  />
+                </div>
+              )}
+
+              {/* Lançamentos */}
               {lancamentos.length > 0 && (
                 <div id="lancamentos" className="vitrine-section relative">
                   <div className="flex items-end justify-between mb-8 border-b border-[#C2AE82]/30 pb-4">
                     <div>
                       <h2 className="text-3xl font-extrabold text-[#C2AE82] tracking-tight sm:text-4xl flex items-center gap-3">
-                        <span className="relative flex h-4 w-4">
-                          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#C2AE82] opacity-75"></span>
-                          <span className="relative inline-flex rounded-full h-4 w-4 bg-[#C2AE82]"></span>
-                        </span>
+                        <Sparkles size={28} className="animate-pulse filter drop-shadow-[0_0_8px_rgba(194,174,130,0.8)]" />
                         Lançamentos Recentes
                       </h2>
                       <p className="text-sm text-gray-400 font-bold uppercase tracking-widest mt-2">Acabaram de chegar na loja!</p>
@@ -115,15 +148,25 @@ export default function HomePage() {
                 </div>
               )}
 
-              {/* 6. vitrines de categorias dinamicas */}
+              {/* vitrine das categorias */}
               {vitrines.length > 0 && vitrines.map((vitrine) => (
                 <div key={vitrine.id} className="vitrine-section">
                   <div className="flex items-end justify-between mb-8 border-b border-neutral-800 pb-4">
-                    <div>
-                      <h2 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
-                        {vitrine.nome}
-                      </h2>
-                      <p className="text-sm text-[#C2AE82] font-bold uppercase tracking-widest mt-2">Destaques da Coleção</p>
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center gap-3">
+                        <h2 className="text-3xl font-extrabold text-white tracking-tight sm:text-4xl">
+                          {vitrine.nome}
+                        </h2>
+
+                        {/* selo de promoção em categoria */}
+                        {vitrine.percentualDesconto && vitrine.percentualDesconto > 0 && (
+                          <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-600 text-white text-[12px] font-black rounded-full shadow-lg animate-pulse">
+                            <Tag size={12} fill="currentColor" />
+                            {vitrine.percentualDesconto}% OFF
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-sm text-[#C2AE82] font-bold uppercase tracking-widest">Destaques da Coleção</p>
                     </div>
 
                     <Link

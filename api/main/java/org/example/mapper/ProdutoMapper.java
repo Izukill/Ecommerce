@@ -21,6 +21,7 @@ public class ProdutoMapper {
                 .nome(dto.getNome())
                 .categoria(dto.getCategoria())
                 .preco(dto.getPreco())
+                .precoPromocional(dto.getPrecoPromocional())
                 .imagemUrl(dto.getImagemUrl())
                 .descricao(dto.getDescricao())
                 .ativo(dto.isAtivo())
@@ -62,6 +63,7 @@ public class ProdutoMapper {
         dto.setImagemUrl(entity.getImagemUrl());
         dto.setDescricao(entity.getDescricao());
         dto.setPreco(entity.getPreco());
+        dto.setPrecoPromocional(entity.getPrecoPromocional());
 
         //convertendo a lista de entidades para VariaçãoProdutoResponseDTO
         if (entity.getVariacaoProduto() != null) {

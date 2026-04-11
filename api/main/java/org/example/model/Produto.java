@@ -40,6 +40,8 @@ public class Produto {
     @Column(nullable = false)
     private BigDecimal preco;
 
+    private BigDecimal precoPromocional;
+
     private String descricao;
 
     @Builder.Default

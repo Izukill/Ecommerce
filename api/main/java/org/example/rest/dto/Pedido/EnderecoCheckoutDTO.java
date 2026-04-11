@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class EnderecoCheckoutDTO {
 
@@ -33,5 +35,8 @@ public class EnderecoCheckoutDTO {
 
     @Schema(description = "Complemento do endereço do cliente em pedido")
     private String complemento;
+
+    @Schema(description = "lookupId do endereço escolhido pela cliente")
+    private UUID lookupId;
 
 }

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,6 +47,8 @@ public class Categoria {
     @JsonIgnore
     @OneToMany(mappedBy = "categoria")
     private List<Produto> produtos;
+
+    private BigDecimal percentualDesconto;
 
 
 
