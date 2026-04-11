@@ -22,6 +22,7 @@ interface Produto {
   ativo: boolean;
   imagemUrl?: string;
   dataCriacao?: string;
+  precoPromocional?: number;
 }
 
 export default function ListaProdutosPage() {
@@ -38,6 +39,8 @@ export default function ListaProdutosPage() {
   const [filtroCategoria, setFiltroCategoria] = useState(searchParams.get("categoria") || "");
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
   const [filtroPreco, setFiltroPreco] = useState("");
+
+  // (Removido o state isolado de apenasEmOferta)
 
   const [produtoParaExcluir, setProdutoParaExcluir] = useState<Produto | null>(null);
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
@@ -89,8 +92,8 @@ export default function ListaProdutosPage() {
       } else if (filtroAtivo === "inativos") {
         params.append("ativo", "false");
       }
-
-      // 3. só depois busca os produtos já com os parâmetros cravados
+      // Nota: Se filtroAtivo for "oferta", não enviamos o status de "ativo" para a API,
+      // recebemos todos e deixamos o filtro do front-end fazer o trabalho fino abaixo.
       const resProdutos = await api.get(`/produtos?${params.toString()}`);
       const pageData = resProdutos.data;
       const dadosProdutos = pageData.content || pageData || [];
@@ -159,6 +162,10 @@ export default function ListaProdutosPage() {
 
     if (filtroPreco && produto.preco > parseFloat(filtroPreco)) return false;
 
+    if (filtroAtivo === "oferta" && (!produto.precoPromocional || produto.precoPromocional >= produto.preco)) {
+       return false;
+    }
+
     return true;
   });
 
@@ -218,6 +225,7 @@ export default function ListaProdutosPage() {
             <option value="todos">Todos</option>
             <option value="ativos">Apenas Ativos</option>
             <option value="inativos">Apenas Inativos</option>
+            <option value="oferta">Em Promoção</option>
           </select>
         </div>
 

@@ -23,32 +23,13 @@ function ConteudoProdutos() {
   const [ordenacao, setOrdenacao] = useState("dataCriacao,desc");
   const [menuMobileFiltros, setMenuMobileFiltros] = useState(false);
 
+  const [somenteOfertas, setSomenteOfertas] = useState(searchParams.get("emOferta") === "true");
+
   const [paginaAtiva, setPaginaAtiva] = useState(0);
   const [temMaisPaginas, setTemMaisPaginas] = useState(true);
   const [carregandoMais, setCarregandoMais] = useState(false);
-  const TAMANHO_PAGINA = 12; // Número de itens por página
+  const TAMANHO_PAGINA = 12;
 
-  useEffect(() => {
-    const carregarCategorias = async () => {
-      try {
-        const res = await api.get("/categorias");
-        setCategorias(res.data?.content || res.data || []);
-      } catch (err) {
-        console.error("Erro ao carregar categorias", err);
-      }
-    };
-    carregarCategorias();
-  }, []);
-
-  useEffect(() => {
-    const catUrl = searchParams.get("categoria");
-    if (catUrl) {
-      setCategoriaSelecionada(catUrl);
-      setPaginaAtiva(0);
-    }
-  }, [searchParams]);
-
-  //função pra carregar mais da paginação
   const buscarProdutos = useCallback(async (novaBusca: boolean) => {
     if (novaBusca) {
       setCarregando(true);
@@ -70,19 +51,24 @@ function ConteudoProdutos() {
       const res = await api.get(`/produtos?${params.toString()}`);
       const pageData = res.data;
       const itensRecebidos = pageData?.content || res.data || [];
-      const ativos = itensRecebidos.filter((p: Produto) => p.ativo !== false);
+      let filtrados = itensRecebidos.filter((p: Produto) => p.ativo !== false);
+
+      //faz o filtro pra somente em promoção
+      if (somenteOfertas) {
+        filtrados = filtrados.filter((p: Produto) => p.precoPromocional !== null && p.precoPromocional < p.preco);
+      }
 
       if (novaBusca) {
-        setProdutos(ativos);
+        setProdutos(filtrados);
       } else {
-        setProdutos(prev => [...prev, ...ativos]);
+        setProdutos(prev => [...prev, ...filtrados]);
       }
 
       //verifica se tem mais item
       if (pageData.last !== undefined) {
          setTemMaisPaginas(!pageData.last);
       } else {
-         //fallback se não vier metadados: se veio menos itens que o tamanho da página é a ultima
+         //fallback se não vier metadados
          setTemMaisPaginas(itensRecebidos.length === TAMANHO_PAGINA);
       }
 
@@ -93,18 +79,39 @@ function ConteudoProdutos() {
       setCarregando(false);
       setCarregandoMais(false);
     }
-  }, [categoriaSelecionada, filtroNome, ordenacao, paginaAtiva]);
+  }, [categoriaSelecionada, filtroNome, ordenacao, paginaAtiva, somenteOfertas]);
 
-  //muda filtro
+  useEffect(() => {
+    const carregarCategorias = async () => {
+      try {
+        const res = await api.get("/categorias");
+        setCategorias(res.data?.content || res.data || []);
+      } catch (err) {
+        console.error("Erro ao carregar categorias", err);
+      }
+    };
+    carregarCategorias();
+  }, []);
+
+  useEffect(() => {
+    const catUrl = searchParams.get("categoria");
+    const promoUrl = searchParams.get("emOferta");
+    if (catUrl) setCategoriaSelecionada(catUrl);
+    if (promoUrl === "true") setSomenteOfertas(true);
+
+    if (catUrl || promoUrl) setPaginaAtiva(0);
+  }, [searchParams]);
+
+  // Muda filtro
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
       buscarProdutos(true);
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [categoriaSelecionada, filtroNome, ordenacao, buscarProdutos]);
+  }, [categoriaSelecionada, filtroNome, ordenacao, somenteOfertas, buscarProdutos]); // A ordem não importa muito aqui, mas o eslint adora reclamar se não tiver tudo kkkk
 
-  //pagina muda
+  // Pagina muda
   useEffect(() => {
     if (paginaAtiva > 0) {
        buscarProdutos(false);
@@ -114,6 +121,7 @@ function ConteudoProdutos() {
   const limparFiltros = () => {
     setFiltroNome("");
     setCategoriaSelecionada("");
+    setSomenteOfertas(false);
     setPaginaAtiva(0);
     router.push("/produtos");
   };
@@ -172,6 +180,24 @@ function ConteudoProdutos() {
                 />
                 <Search size={16} className="absolute left-3 top-2.5 text-gray-500" />
               </div>
+            </div>
+
+            <div>
+              <h3 className="text-xs font-bold text-[#C2AE82] uppercase tracking-widest mb-4">Destaques</h3>
+              <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox" className="sr-only"
+                      checked={somenteOfertas}
+                      onChange={(e) => { setSomenteOfertas(e.target.checked); setPaginaAtiva(0); }}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${somenteOfertas ? 'bg-red-600' : 'bg-neutral-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${somenteOfertas ? 'translate-x-4' : ''}`}></div>
+                  </div>
+                  <span className={`text-sm font-bold transition-colors ${somenteOfertas ? 'text-red-500' : 'text-gray-400 group-hover:text-white'}`}>
+                    Apenas Promoções
+                  </span>
+              </label>
             </div>
 
             <div>
@@ -243,7 +269,6 @@ function ConteudoProdutos() {
               </div>
             )}
           </div>
-
         </div>
       </div>
 
@@ -262,6 +287,25 @@ function ConteudoProdutos() {
                   className="w-full bg-neutral-900 border border-neutral-800 rounded-lg p-3 text-sm focus:ring-1 focus:ring-[#C2AE82] outline-none"
                />
              </div>
+
+             <div className="space-y-4">
+                <p className="text-[#C2AE82] font-bold text-xs uppercase tracking-widest">Destaques</p>
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox" className="sr-only"
+                      checked={somenteOfertas}
+                      onChange={(e) => { setSomenteOfertas(e.target.checked); setPaginaAtiva(0); }}
+                    />
+                    <div className={`block w-10 h-6 rounded-full transition-colors ${somenteOfertas ? 'bg-red-600' : 'bg-neutral-700'}`}></div>
+                    <div className={`absolute left-1 top-1 bg-white w-4 h-4 rounded-full transition-transform ${somenteOfertas ? 'translate-x-4' : ''}`}></div>
+                  </div>
+                  <span className={`text-sm font-bold transition-colors ${somenteOfertas ? 'text-red-500' : 'text-gray-400 group-hover:text-white'}`}>
+                    Apenas Promoções
+                  </span>
+                </label>
+             </div>
+
              <div className="space-y-4">
                <p className="text-[#C2AE82] font-bold text-xs uppercase tracking-widest">Categorias</p>
                <div className="flex flex-wrap gap-2">

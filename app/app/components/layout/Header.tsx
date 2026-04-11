@@ -11,6 +11,7 @@ import {
   ChevronDown,
   Package,
   LayoutDashboard,
+  Percent,
   LogOut,
   Menu,
   X
@@ -133,7 +134,9 @@ export default function Header() {
                 </div>
               </div>
 
-              <Link href="#" className="text-black font-semibold hover:text-white transition-colors">Ofertas</Link>
+              <Link href="/produtos?emOferta=true" className="flex items-center gap-1 text-black font-extrabold hover:text-white transition-colors">
+                <Percent size={14} className="animate-pulse" /> Ofertas
+              </Link>
             </nav>
           </div>
           <div className="flex items-center space-x-4 sm:space-x-5">
@@ -263,10 +266,11 @@ export default function Header() {
               </div>
 
               <Link
-                href="#"
+                href="/produtos/emOferta=true"
                 onClick={() => setMenuMobileAberto(false)}
-                className="block text-xl font-bold text-white hover:text-[#C2AE82] transition-colors"
+                className="flex items-center gap-2 text-xl font-extrabold text-red-500 hover:text-red-400 transition-colors bg-red-950/20 p-3 rounded-xl border border-red-900/30"
               >
+                <Percent size={20} className="animate-pulse" />
                 Ofertas
               </Link>
             </div>
