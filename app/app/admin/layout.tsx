@@ -21,7 +21,9 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const { usuario, logout } = useAuth();
+  const { usuario, logout, atualizarNome } = useAuth();
+
+  console.log("usuario completo:", usuario);
 
   const [isDropdownAberto, setIsDropdownAberto] = useState(false);
   const [isModalPerfilAberto, setIsModalPerfilAberto] = useState(false);
@@ -255,7 +257,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           lookupId={usuario.lookupId}
           nomeAtual={usuario.nome || "Admin"}
           aoSalvarComSucesso={(novoNome) => {
-            window.location.reload();
+            atualizarNome(novoNome);
           }}
         />
       )}

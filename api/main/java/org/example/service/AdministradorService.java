@@ -59,6 +59,13 @@ public class AdministradorService {
     }
 
     @Transactional
+    public Administrador atualizarPerfil(UUID lookupId, String novoNome) throws EntidadeNaoEncontradaException {
+        Administrador admin = recuperarPor(lookupId);
+        admin.setNome(novoNome);
+        return administradorRepository.save(admin);
+    }
+
+    @Transactional
     public Administrador recuperarPor(UUID lookupId) throws EntidadeNaoEncontradaException {
         return administradorRepository.findByLookupId(lookupId).orElseThrow(() -> new EntidadeNaoEncontradaException("Entidade não encontrada"));
     }

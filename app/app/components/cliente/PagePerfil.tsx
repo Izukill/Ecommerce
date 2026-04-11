@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from "@/lib/api";
 import toast from 'react-hot-toast';
+import { useAuth } from "@/app/contexts/AuthContext";
 
 import ModalEditarPerfil from "@/app/components/cliente/ModalEditarPerfil";
 import ModalEditarEndereco, { Endereco } from "@/app/components/endereco/ModalEditarEndereco";
@@ -13,6 +14,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
   const [carregando, setCarregando] = useState(true);
   const [lookupId, setlookupId] = useState("");
+  const { atualizarNome } = useAuth();
 
   const [nome, setNome] = useState('');
   const [cpf, setCpf] = useState('');
@@ -145,6 +147,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
             setNome(dadosAtualizados.nome);
             setCpf(dadosAtualizados.cpf);
             setTelefone(dadosAtualizados.telefone);
+            atualizarNome(dadosAtualizados.nome);
          }}
       />
       <ModalEditarEndereco

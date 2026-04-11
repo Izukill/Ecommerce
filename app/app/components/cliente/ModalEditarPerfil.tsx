@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { api } from "@/lib/api";
 import toast from 'react-hot-toast';
+import { useAuth } from "@/app/contexts/AuthContext";
 
 interface ModalEditarPerfilProps {
   isOpen: boolean;
@@ -23,6 +24,8 @@ export default function ModalEditarPerfil({
   dadosAtuais,
   aoSalvarComSucesso
 }: ModalEditarPerfilProps) {
+
+  const { atualizarNome } = useAuth();
 
   const [tempNome, setTempNome] = useState('');
   const [tempCpf, setTempCpf] = useState('');
@@ -59,14 +62,21 @@ export default function ModalEditarPerfil({
     return v;
   };
 
+  const capitalizar = (texto: string) =>
+    texto
+      .trim()
+      .toLowerCase()
+      .replace(/(^|\s)\S/g, (c) => c.toUpperCase())
+
   const executarAtualizacaoPerfil = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-       const dadosAtualizados = { nome: tempNome, cpf: tempCpf, telefone: tempTelefone };
+       const dadosAtualizados = { nome: capitalizar(tempNome), cpf: tempCpf, telefone: tempTelefone };
        const response = await api.put(`/clientes/${lookupId}`, dadosAtualizados);
 
        if(response.status == 200 || response.status == 204){
            aoSalvarComSucesso(dadosAtualizados);
+           atualizarNome(dadosAtualizados.nome);
            toast.success("Perfil atualizado com sucesso!");
            onClose();
        }

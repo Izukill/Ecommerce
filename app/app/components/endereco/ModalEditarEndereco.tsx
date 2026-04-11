@@ -103,7 +103,7 @@ export default function ModalEditarEndereco({
                             </div>
                             <div className="sm:col-span-1">
                                 <label className="block text-sm font-bold text-gray-400 mb-1">Número</label>
-                                <input type="number" value={enderecoEditando.numero || ''} onChange={(e) => atualizarCampoEndereco('numero', Number(e.target.value))} required className="w-full px-4 py-3 bg-black border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none transition" />
+                                <input type="number" value={enderecoEditando.numero || ''} onChange={(e) => atualizarCampoEndereco('numero', Number(e.target.value))} required className="w-full px-4 py-3 bg-black border border-neutral-700 rounded-lg text-white focus:ring-2 focus:ring-[#C2AE82] outline-none transition [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none" />
                             </div>
                             <div className="sm:col-span-4">
                                 <label className="block text-sm font-bold text-gray-400 mb-1">Complemento (Opcional)</label>

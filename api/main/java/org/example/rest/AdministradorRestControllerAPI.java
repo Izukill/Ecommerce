@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import org.example.exception.EntidadeNaoEncontradaException;
 import org.example.exception.MirlleException;
+import org.example.rest.dto.Administrador.AdministradorAtualizarPerfilRequestDTO;
 import org.example.rest.dto.Administrador.AdministradorBuscarDTO;
 import org.example.rest.dto.Administrador.AdministradorResponseDTO;
 import org.example.rest.dto.Administrador.AdministradorSalvarRequestDTO;
@@ -20,6 +22,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.UUID;
 
@@ -42,7 +45,7 @@ public interface AdministradorRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<AdministradorResponseDTO> criar(@RequestBody AdministradorSalvarRequestDTO dto) throws MirlleException;
+    ResponseEntity<AdministradorResponseDTO> criar(@Valid @RequestBody AdministradorSalvarRequestDTO dto) throws MirlleException;
 
     @Operation(summary = "Atualizar um administrador existente.",
             description = "Atualiza um administrador existente com base no seu lookupId, permitindo atualização dos seus dados.")
@@ -61,9 +64,23 @@ public interface AdministradorRestControllerAPI {
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
     ResponseEntity<AdministradorResponseDTO> atualizar(@Parameter(description = "LookupId do administrador a ser atualizado.")
-                                                       UUID lookupId,
+                                                       @PathVariable UUID lookupId,
+                                                       @Valid
                                                        @RequestBody(description = "Dados do administrador a ser atualizado.")
                                                        AdministradorSalvarRequestDTO dto) throws MirlleException, EntidadeNaoEncontradaException;
+
+    @Operation(summary = "Atualizar perfil do administrador", description = "Atualiza apenas o nome do administrador logado")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200",
+                    description = "Perfil atualizado com sucesso"),
+            @ApiResponse(responseCode = "404",
+                    description = "Administrador não encontrado"),
+            @ApiResponse(responseCode = "400",
+                    description = "Dados inválidos")
+    })
+    ResponseEntity<AdministradorResponseDTO> atualizarPerfil(@PathVariable UUID lookupId,
+                                                             @Valid
+                                                             @RequestBody AdministradorAtualizarPerfilRequestDTO dto) throws EntidadeNaoEncontradaException;
 
     @Operation(summary = "Remover um administrador existente.",
             description = "Remove um administrador existente com base no seu lookupId.")
@@ -79,7 +96,7 @@ public interface AdministradorRestControllerAPI {
                             schema = @Schema(implementation = ProblemDetail.class))),
     })
     ResponseEntity<Void> remover(@Parameter(description = "LookupId do administrador a ser removido.")
-                                 UUID lookupId) throws MirlleException, EntidadeNaoEncontradaException;
+                                 @PathVariable UUID lookupId) throws MirlleException, EntidadeNaoEncontradaException;
 
     @Operation(summary = "Recuperar um administrador existente.",
             description = "Recupera um administrador existente com base no seu lookupId.")
@@ -97,7 +114,7 @@ public interface AdministradorRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class)))}
     )
-    ResponseEntity<AdministradorResponseDTO> recuperarPor(@Parameter(description = "UUID do Admin") UUID lookupId) throws MirlleException, EntidadeNaoEncontradaException;
+    ResponseEntity<AdministradorResponseDTO> recuperarPor(@Parameter(description = "UUID do Admin")@PathVariable UUID lookupId) throws MirlleException, EntidadeNaoEncontradaException;
 
     @Operation(summary = "Alterar senha do administrador.",
             description = "Exige a senha atual para cadastrar uma nova.")
@@ -113,7 +130,7 @@ public interface AdministradorRestControllerAPI {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = ProblemDetail.class)))
     })
-    ResponseEntity<Void> alterarSenha(@Parameter(description = "LookupId do administrador.") UUID lookupId,
+    ResponseEntity<Void> alterarSenha(@Parameter(description = "LookupId do administrador.")@PathVariable UUID lookupId,
                                       @RequestBody AlterarSenhaSalvarRequestDTO dto) throws Exception;
 
     @Operation(summary = "Recuperar administradores existentes.",

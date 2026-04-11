@@ -2,14 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { toast } from "react-hot-toast";
-import { api } from "@/lib/api"; // Ajuste o caminho conforme o seu projeto
+import { api } from "@/lib/api";
 import { X, User, Save } from "lucide-react";
 
 interface ModalEditarPerfilProps {
   isOpen: boolean;
   onClose: () => void;
   lookupId: string;
-  nomeAtual: string; // Como admin só muda o nome, simplificamos aqui
+  nomeAtual: string; //como admin só muda o nome, não precisa passar mais nada
   aoSalvarComSucesso: (novoNome: string) => void;
 }
 
@@ -21,11 +21,15 @@ export default function ModalEditarPerfil({
   aoSalvarComSucesso
 }: ModalEditarPerfilProps) {
 
-  // Usamos tempNome igual você fez no cliente
   const [tempNome, setTempNome] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  // O useEffect garante que o input sempre tenha o nome correto quando o modal abrir
+  const capitalizar = (texto: string) =>
+    texto
+      .trim()
+      .toLowerCase()
+      .replace(/(^|\s)\S/g, (c) => c.toUpperCase())
+
   useEffect(() => {
     if (isOpen) {
       setTempNome(nomeAtual);
@@ -37,21 +41,26 @@ export default function ModalEditarPerfil({
   const executarAtualizacaoPerfil = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!lookupId) {
+      toast.error("Erro interno: ID do administrador não encontrado.");
+      return;
+    }
+
     if (!tempNome.trim() || tempNome.trim().length < 3) {
       toast.error("O nome deve ter no mínimo 3 caracteres.");
       return;
     }
 
+    const nomeFormatado = capitalizar(tempNome);
+
     setCarregando(true);
     const toastId = toast.loading("Salvando alterações...");
 
     try {
-      // Bate na API usando o tempNome
-      const response = await api.put(`/admin/${lookupId}`, { nome: tempNome });
+      const response = await api.patch(`/admin/${lookupId}/perfil`, { nome: nomeFormatado });
 
       if (response.status === 200 || response.status === 204) {
-        // Devolve o novo nome para a Header do AdminLayout atualizar
-        aoSalvarComSucesso(tempNome);
+        aoSalvarComSucesso(nomeFormatado);
         toast.success("Perfil atualizado com sucesso!", { id: toastId });
         onClose();
       }
@@ -66,8 +75,6 @@ export default function ModalEditarPerfil({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-neutral-900 border-t-4 border-t-[#C2AE82] rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden flex flex-col animate-in scale-in duration-200">
-
-        {/* Header do Modal */}
         <div className="p-6 border-b border-neutral-800 flex justify-between items-center">
           <div className="flex items-center gap-3 text-white">
             <User className="text-[#C2AE82]" />
@@ -81,7 +88,6 @@ export default function ModalEditarPerfil({
           </button>
         </div>
 
-        {/* Corpo do Modal */}
         <div className="p-6">
           <form id="form-perfil-admin" onSubmit={executarAtualizacaoPerfil} className="space-y-6">
             <div>
@@ -105,7 +111,6 @@ export default function ModalEditarPerfil({
           </form>
         </div>
 
-        {/* Footer do Modal */}
         <div className="p-6 border-t border-neutral-800 flex justify-end gap-3 bg-neutral-950">
           <button
             type="button"
@@ -118,7 +123,7 @@ export default function ModalEditarPerfil({
 
           <button
             type="submit"
-            form="form-perfil-admin" // Conecta este botão ao formulário acima
+            form="form-perfil-admin" //conecta este botão ao formulário em cima
             disabled={carregando}
             className="flex items-center gap-2 px-6 py-2.5 bg-[#C2AE82] text-black font-extrabold rounded-lg hover:bg-[#a8956b] transition-all disabled:opacity-70 disabled:cursor-not-allowed hover:scale-105 shadow-lg"
           >

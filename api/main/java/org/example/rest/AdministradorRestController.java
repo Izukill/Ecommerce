@@ -1,5 +1,6 @@
 package org.example.rest;
 
+import org.example.rest.dto.Administrador.AdministradorAtualizarPerfilRequestDTO;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 import org.example.exception.EntidadeNaoEncontradaException;
@@ -42,15 +43,22 @@ public class AdministradorRestController implements AdministradorRestControllerA
 
     @Override
     @PutMapping("/{lookupId}")
-    public ResponseEntity<AdministradorResponseDTO> atualizar(UUID lookupId, AdministradorSalvarRequestDTO dto) throws MirlleException, EntidadeNaoEncontradaException {
+    public ResponseEntity<AdministradorResponseDTO> atualizar(@PathVariable UUID lookupId, @Valid @RequestBody AdministradorSalvarRequestDTO dto) throws MirlleException, EntidadeNaoEncontradaException {
         Administrador adminNovosDados = mapper.from(dto);
         Administrador adminAtualizado = service.atualizar(lookupId, adminNovosDados);
         return ResponseEntity.ok(mapper.from(adminAtualizado));
     }
 
     @Override
+    @PatchMapping("/{lookupId}/perfil")
+    public ResponseEntity<AdministradorResponseDTO> atualizarPerfil(@PathVariable UUID lookupId, @RequestBody @Valid AdministradorAtualizarPerfilRequestDTO dto) throws EntidadeNaoEncontradaException {
+        Administrador adminAtualizado = service.atualizarPerfil(lookupId, dto.getNome());
+        return ResponseEntity.ok(mapper.from(adminAtualizado));
+    }
+
+    @Override
     @DeleteMapping("/{lookupId}")
-    public ResponseEntity<Void> remover(UUID lookupId) throws MirlleException, EntidadeNaoEncontradaException {
+    public ResponseEntity<Void> remover(@PathVariable UUID lookupId) throws MirlleException, EntidadeNaoEncontradaException {
         service.remover(lookupId);
         return ResponseEntity.noContent().build();
     }

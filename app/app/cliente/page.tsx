@@ -17,7 +17,7 @@ export default function MinhaContaPage() {
   const router = useRouter();
   const abaUrl = searchParams.get('aba') || 'perfil';
 
-  const { usuario, logout } = useAuth();
+  const { usuario, logout, atualizarNome } = useAuth();
   const [abaAtiva, setAbaAtiva] = useState(abaUrl);
 
   useEffect(() => {

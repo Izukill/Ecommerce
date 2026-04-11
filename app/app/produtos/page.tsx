@@ -111,7 +111,7 @@ function ConteudoProdutos() {
     return () => clearTimeout(delayDebounceFn);
   }, [categoriaSelecionada, filtroNome, ordenacao, somenteOfertas, buscarProdutos]); // A ordem não importa muito aqui, mas o eslint adora reclamar se não tiver tudo kkkk
 
-  // Pagina muda
+  //pagina muda
   useEffect(() => {
     if (paginaAtiva > 0) {
        buscarProdutos(false);
