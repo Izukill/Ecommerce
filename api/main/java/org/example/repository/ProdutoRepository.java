@@ -3,6 +3,7 @@ package org.example.repository;
 
 import org.example.model.Categoria;
 import org.example.model.Produto;
+import org.example.rest.dto.Dashboard.ProdutoMaisVendidoDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -56,6 +57,21 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             @Param("semCategoria") Boolean semCategoria,
             @Param("ativo") Boolean ativo,
             Pageable pageable);
+
+
+    @Query("""
+        SELECT new org.example.rest.dto.Dashboard.ProdutoMaisVendidoDTO(
+            ip.produto.produto.nome,
+            SUM(ip.quantidade),
+            SUM(ip.precoUnitario * ip.quantidade)
+        )
+        FROM ItemPedido ip
+        JOIN ip.pedido p
+        WHERE p.status = 'PAGO' OR p.status = 'ENVIADO'
+        GROUP BY ip.produto.produto.nome
+        ORDER BY SUM(ip.quantidade) DESC
+    """)
+    List<ProdutoMaisVendidoDTO> produtosMaisVendidos(Pageable pageable);
 
 
 }

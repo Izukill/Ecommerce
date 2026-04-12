@@ -49,6 +49,7 @@ public class EmailService {
         enviarEmail(destinatario, assunto, texto);
     }
 
+    @Async
     public void enviarEmailNovoPedido(Pedido pedido, PixResponseDTO pix) {
         String destinatario = pedido.getCliente().getEmail();
         String nome = pedido.getCliente().getNome().split(" ")[0];
@@ -67,6 +68,7 @@ public class EmailService {
         enviarEmail(destinatario, assunto, texto);
     }
 
+    @Async
     public void enviarEmailAtualizacaoStatus(Pedido pedido) {
         String destinatario = pedido.getCliente().getEmail();
         String nome = pedido.getCliente().getNome().split(" ")[0];

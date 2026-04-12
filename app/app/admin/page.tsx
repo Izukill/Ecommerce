@@ -10,7 +10,11 @@ import toast from "react-hot-toast";
 import {
   Shirt,
   Tags,
-  Truck
+  Truck,
+  BarChart2,
+  TrendingUp,
+  ShoppingCart,
+  Package
 } from "lucide-react";
 
 export default function AdminDashboardPage() {
@@ -78,41 +82,55 @@ export default function AdminDashboardPage() {
 
       {/* estatísticas */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-        <div className="bg-black p-6 rounded-xl shadow-lg border border-neutral-800 border-l-4 border-l-[#C2AE82]">
-          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Faturamento (Mês)</p>
+        <div className="bg-black p-6 rounded-xl border border-neutral-800 border-l-4 border-l-[#C2AE82]">
+          <div className="flex items-center gap-3 mb-3">
+            <TrendingUp size={18} className="text-[#C2AE82]" />
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Faturamento do Mês</p>
+          </div>
           <h3 className="text-3xl font-extrabold text-white">
-            R$ {(dashboard?.faturamentoMes ?? 0).toFixed(2).replace(".", ",")}
+            R$ {Number(dashboard.faturamentoMes ?? 0).toFixed(2).replace(".", ",")}
           </h3>
-          <p className="text-xs text-green-400 mt-2 font-bold flex items-center gap-1">
-            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 10l7-7m0 0l7 7m-7-7v18" /></svg>
-            +{(dashboard?.porcentagemPassada ?? 0)}% em relação ao mês passado
+          <p className="text-xs text-green-400 mt-2 font-bold">
+            +{Number(dashboard.porcentagemPassada ?? 0).toFixed(1)}% vs mês anterior
           </p>
         </div>
 
-        <div className="bg-black p-6 rounded-xl shadow-lg border border-neutral-800 border-l-4 border-l-blue-500">
-          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Produtos Ativos</p>
-          <h3 className="text-3xl font-extrabold text-white">
-            {dashboard.produtosAtivos}
-          </h3>
-          <p className="text-xs text-gray-400 mt-2">No seu catálogo</p>
-        </div>
-
-        <div className="bg-black p-6 rounded-xl shadow-lg border border-neutral-800 border-l-4 border-l-green-500">
-          <p className="text-sm font-bold text-gray-500 uppercase tracking-wider mb-2">Pedidos (Mês)</p>
-          <h3 className="text-3xl font-extrabold text-white">
-            {dashboard.pedidosMes}
-          </h3>
+        <div className="bg-black p-6 rounded-xl border border-neutral-800 border-l-4 border-l-blue-500">
+          <div className="flex items-center gap-3 mb-3">
+            <ShoppingCart size={18} className="text-blue-400" />
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Pedidos no Mês</p>
+          </div>
+          <h3 className="text-3xl font-extrabold text-white">{dashboard.pedidosMes ?? 0}</h3>
           <p className="text-xs text-yellow-400 mt-2 font-bold">
-            {dashboard.aguardandoEnvio} aguardando envio
+            {dashboard.aguardandoEnvio ?? 0} aguardando envio
           </p>
         </div>
+
+        <div className="bg-black p-6 rounded-xl border border-neutral-800 border-l-4 border-l-green-500">
+          <div className="flex items-center gap-3 mb-3">
+            <Package size={18} className="text-green-400" />
+            <p className="text-xs font-bold text-gray-500 uppercase tracking-wider">Produtos Ativos</p>
+          </div>
+          <h3 className="text-3xl font-extrabold text-white">{dashboard.produtosAtivos ?? 0}</h3>
+          <p className="text-xs text-gray-400 mt-2">No catálogo</p>
+        </div>
+      </div>
+
+      <div className="flex justify-end">
+        <Link
+          href="/admin/relatorios"
+          className="flex items-center gap-2 px-4 py-2 text-[#C2AE82] font-bold rounded-xl hover:bg-neutral-800 transition-colors text-sm"
+        >
+          <BarChart2 size={16} />
+          Ver Relatórios Completos →
+        </Link>
       </div>
 
       {/* lista dos 4 pedidos recentes */}
       <div>
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-bold text-white">Últimos Pedidos</h3>
-          <Link href="/admin/pedidos" className="text-sm font-bold text-[#C2AE82] hover:text-white transition-colors">
+          <Link href="/admin/pedidos" className="text-sm px-4 py-2 text-[#C2AE82] font-bold rounded-xl  hover:bg-neutral-800 transition-colors text-sm">
             Ver todos &rarr;
           </Link>
         </div>

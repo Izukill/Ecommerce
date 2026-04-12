@@ -4,8 +4,7 @@ package org.example.service;
 
 import org.example.repository.PedidoRepository;
 import org.example.repository.ProdutoRepository;
-import org.example.rest.dto.Dashboard.DashboardAdminDTO;
-import org.example.rest.dto.Dashboard.PedidoResumoDTO;
+import org.example.rest.dto.Dashboard.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -69,12 +68,24 @@ public class DashboardAdminService {
             percentualCrescimento = new BigDecimal("100");
         }
 
+        //6 meses atrás
+        LocalDateTime seisMesesAtras = LocalDate.now().minusMonths(5).withDayOfMonth(1).atStartOfDay();
+
+        List<ProdutoMaisVendidoDTO> maisVendidos = produtoRepository.produtosMaisVendidos(PageRequest.of(0, 8));
+
+        List<FaturamentoMensalDTO> faturamentoMensal = pedidoRepository.faturamentoUltimosMeses(seisMesesAtras);
+
+        List<PedidosPorStatusDTO> porStatus = pedidoRepository.pedidosPorStatus();
+
         dto.setFaturamentoMes(faturamentoAtual);
         dto.setPorcentagemPassada(percentualCrescimento);
         dto.setProdutosAtivos(produtosAtivos);
         dto.setAguardandoEnvio(aguardandoEnvio);
         dto.setPedidosMes(pedidosMes);
         dto.setUltimosPedidos(ultimosPedidos);
+        dto.setProdutosMaisVendidos(maisVendidos);
+        dto.setFaturamentoUltimosMeses(faturamentoMensal);
+        dto.setPedidosPorStatus(porStatus);
 
         return dto;
 

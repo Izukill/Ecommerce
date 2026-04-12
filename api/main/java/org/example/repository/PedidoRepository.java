@@ -4,7 +4,9 @@ package org.example.repository;
 import org.example.model.Cliente;
 import org.example.model.EnumStatusPedido;
 import org.example.model.Pedido;
+import org.example.rest.dto.Dashboard.FaturamentoMensalDTO;
 import org.example.rest.dto.Dashboard.PedidoResumoDTO;
+import org.example.rest.dto.Dashboard.PedidosPorStatusDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,14 +35,26 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Pedido> findByStatusAndDataExpiracaoBefore(EnumStatusPedido status, LocalDateTime dataAtual);
 
     @Query("""
-        SELECT COALESCE(SUM(i.precoUnitario * i.quantidade),0)
+        SELECT COALESCE(SUM(p.valorTotal), 0)
         FROM Pedido p
-        JOIN p.itens i
-        WHERE p.status = 'PAGO' OR p.status = 'ENVIADO'
+        WHERE (p.status = 'PAGO' OR p.status = 'ENVIADO')
         AND p.dataHora BETWEEN :inicio AND :fim
     """)
     BigDecimal faturamentoMes(LocalDateTime inicio, LocalDateTime fim);
 
+    @Query("""
+        SELECT new org.example.rest.dto.Dashboard.FaturamentoMensalDTO(
+            MONTH(p.dataHora),
+            YEAR(p.dataHora),
+            COALESCE(SUM(p.valorTotal), 0)
+        )
+        FROM Pedido p
+        WHERE (p.status = 'PAGO' OR p.status = 'ENVIADO')
+        AND p.dataHora >= :inicio
+        GROUP BY YEAR(p.dataHora), MONTH(p.dataHora)
+        ORDER BY YEAR(p.dataHora), MONTH(p.dataHora)
+    """)
+    List<FaturamentoMensalDTO> faturamentoUltimosMeses(LocalDateTime inicio);
 
     @Query("""
         SELECT COUNT(p)
@@ -48,6 +62,16 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
         WHERE p.dataHora BETWEEN :inicio AND :fim
     """)
     Long pedidosMes(LocalDateTime inicio, LocalDateTime fim);
+
+    @Query("""
+        SELECT new org.example.rest.dto.Dashboard.PedidosPorStatusDTO(
+            CAST(p.status AS string),
+            COUNT(p)
+        )
+        FROM Pedido p
+        GROUP BY p.status
+    """)
+    List<PedidosPorStatusDTO> pedidosPorStatus();
 
 
     @Query("""

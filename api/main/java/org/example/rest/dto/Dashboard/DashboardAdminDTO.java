@@ -20,6 +20,12 @@ public class DashboardAdminDTO {
 
     private List<PedidoResumoDTO> ultimosPedidos;
 
+    private List<ProdutoMaisVendidoDTO> produtosMaisVendidos;
+
+    private List<FaturamentoMensalDTO> faturamentoUltimosMeses;
+
+    private List<PedidosPorStatusDTO> pedidosPorStatus;
+
 
 
 

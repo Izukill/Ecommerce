@@ -16,7 +16,8 @@ import {
   LogOut,
   Menu,
   X,
-  Store
+  Store,
+  BarChart2
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -57,6 +58,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { nome: "Produtos", rota: "/admin/produtos", icone: Shirt },
     { nome: "Categorias", rota: "/admin/categorias", icone: Tags },
     { nome: "Clientes", rota: "/admin/clientes", icone: Users },
+    { nome: "Relatórios", rota: "/admin/relatorios", icone: BarChart2 },
   ];
 
   return (

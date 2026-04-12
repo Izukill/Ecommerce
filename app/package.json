@@ -11,11 +11,12 @@
   "dependencies": {
     "autoprefixer": "^10.4.27",
     "axios": "^1.13.6",
-    "next": "16.1.6",
+    "next": "^16.2.3",
     "next-cloudinary": "^6.17.5",
     "postcss": "^8.5.8",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "recharts": "^3.8.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
