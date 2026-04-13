@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState, useEffect, useCallback } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import ProdutoCard from "@/app/components/produto/ProdutoCard";
@@ -31,16 +31,15 @@ export default function ListaProdutosPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  //inicializacao do hook para ler os param da url
+  // Inicializacao dos hooks de navegação
   const searchParams = useSearchParams();
+  const router = useRouter(); // 👈 Adicionado para podermos navegar no clique da div
 
-  //valor inicial dos filtros
+  // Valor inicial dos filtros
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState(searchParams.get("categoria") || "");
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
   const [filtroPreco, setFiltroPreco] = useState("");
-
-  // (Removido o state isolado de apenasEmOferta)
 
   const [produtoParaExcluir, setProdutoParaExcluir] = useState<Produto | null>(null);
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
@@ -62,24 +61,27 @@ export default function ListaProdutosPage() {
   const [totalPaginas, setTotalPaginas] = useState(0);
   const tamanhoPagina = 12;
 
-  const carregarDados = async (pagina: number = 0) => {
+const carregarDados = useCallback(async () => {
     setCarregando(true);
     setErro("");
 
     try {
-      // 1. busca as categorias PRIMEIRO para servir de "dicionário de tradução"
       const resCategorias = await api.get("/categorias");
       const dadosCategorias = resCategorias.data?.content || resCategorias.data || [];
       setCategoriasDb(Array.isArray(dadosCategorias) ? dadosCategorias : []);
 
       const params = new URLSearchParams();
-      params.append("page", pagina.toString());
+      params.append("page", paginaAtual.toString());
       params.append("size", tamanhoPagina.toString());
-
       params.append("sort", "ativo,desc");
       params.append("sort", "dataCriacao,desc");
 
       if (filtroNome) params.append("nome", filtroNome);
+
+      if (filtroPreco) {
+        const valor = parseFloat(filtroPreco);
+        if (!isNaN(valor)) params.append("precoMaximo", valor.toFixed(2));
+      }
 
       if (filtroCategoria === "null") {
         params.append("semCategoria", "true");
@@ -92,8 +94,7 @@ export default function ListaProdutosPage() {
       } else if (filtroAtivo === "inativos") {
         params.append("ativo", "false");
       }
-      // Nota: Se filtroAtivo for "oferta", não enviamos o status de "ativo" para a API,
-      // recebemos todos e deixamos o filtro do front-end fazer o trabalho fino abaixo.
+
       const resProdutos = await api.get(`/produtos?${params.toString()}`);
       const pageData = resProdutos.data;
       const dadosProdutos = pageData.content || pageData || [];
@@ -109,12 +110,16 @@ export default function ListaProdutosPage() {
     } finally {
       setCarregando(false);
     }
-  };
+  }, [paginaAtual, filtroNome, filtroCategoria, filtroAtivo, filtroPreco]);
 
   useEffect(() => {
-    carregarDados(paginaAtual);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paginaAtual, filtroNome, filtroCategoria, filtroAtivo]);
+    const delayDebounceFn = setTimeout(() => {
+      carregarDados();
+    }, 500);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [carregarDados]);
+
 
   useEffect(() => {
     setPaginaAtual(0);
@@ -160,7 +165,6 @@ export default function ListaProdutosPage() {
   //filtragem e ordenação dos produtos
   const produtosFiltradosEOrdenados = produtos.filter(produto => {
 
-    if (filtroPreco && produto.preco > parseFloat(filtroPreco)) return false;
 
     if (filtroAtivo === "oferta" && (!produto.precoPromocional || produto.precoPromocional >= produto.preco)) {
        return false;
@@ -179,7 +183,7 @@ export default function ListaProdutosPage() {
         </div>
         <Link
           href="/admin/produtos/novo"
-          className="inline-flex items-center justify-center px-6 py-3 text-sm font-extrabold rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] shadow-lg transition-all"
+          className="inline-flex items-center justify-center h-15 sm:h-auto px-6 py-3 text-sm font-extrabold rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] shadow-lg transition-all"
         >
           <Plus size={20} className="mr-2" strokeWidth={2.5} /> Adicionar Produto
         </Link>
@@ -232,7 +236,7 @@ export default function ListaProdutosPage() {
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Preço Máximo (R$)</label>
           <input
-            type="number" min="0" step="10" placeholder="Ex: 150"
+            type="text" inputMode="decimal" pattern="[0-9]*" min="0" step="10" placeholder="Ex: 150"
             className="w-full px-3 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-gray-100 focus:ring-1 focus:ring-[#C2AE82] outline-none"
             value={filtroPreco} onChange={(e) => setFiltroPreco(e.target.value)}
           />
@@ -258,13 +262,20 @@ export default function ListaProdutosPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {produtosFiltradosEOrdenados.map((produto) => (
 
-                <div key={produto.lookupId} className="flex flex-col gap-3">
-                <ProdutoCard produto={produto} isAdmin={true} />
+              <div key={produto.lookupId} className="flex flex-col gap-3">
+                {/* 👇 AQUI: Wrapper com onClick para ir à tela de edição e hover interativo */}
+                <div
+                  onClick={() => router.push(`/admin/produtos/editar/${produto.lookupId}`)}
+                  className="cursor-pointer transition-transform duration-200 hover:scale-[1.02]"
+                  title="Editar Produto"
+                >
+                  <ProdutoCard produto={produto} isAdmin={true} />
+                </div>
 
-          <div className="flex gap-2">
+                <div className="flex gap-2">
                   <Link
                     href={`/admin/produtos/editar/${produto.lookupId}`}
-                    className="w-[70%] flex justify-center items-center gap-2 px-4 py-2 bg-neutral-800 text-gray-300 font-bold text-sm rounded-lg border border-neutral-700 hover:text-white hover:bg-neutral-700 transition-all shadow-md"
+                    className="w-[70%] flex justify-center items-center gap-2 px-6 sm:px-4 py-3 sm:py-2 bg-neutral-800 text-gray-300 font-bold text-base sm:text-sm rounded-lg border border-neutral-700 hover:text-white hover:bg-neutral-700 transition-all shadow-md"
                   >
                     Editar
                   </Link>
@@ -272,14 +283,14 @@ export default function ListaProdutosPage() {
                   {produto.ativo ? (
                     <button
                       onClick={() => abrirModalExclusao(produto)}
-                      className="w-[30%] flex justify-center items-center px-4 py-2 bg-red-950/30 text-red-500 font-bold text-sm rounded-lg border border-red-900/50 hover:bg-red-900/50 transition-all shadow-md"
+                      className="w-[30%] flex justify-center items-center px-6 sm:px-4 py-3 sm:py-2 bg-red-950/30 text-red-500 font-bold text-base sm:text-sm rounded-lg border border-red-900/50 hover:bg-red-900/50 transition-all shadow-md"
                     >
                       Excluir
                     </button>
                   ) : (
                     <button
                       onClick={() => abrirModalAtivacao(produto)}
-                      className="w-[30%] flex justify-center items-center px-4 py-2 bg-green-950/30 text-green-500 font-bold text-sm rounded-lg border border-green-900/50 hover:bg-green-900/50 transition-all shadow-md"
+                      className="w-[30%] flex justify-center items-center px-6 sm:px-4 py-3 sm:py-2 bg-green-950/30 text-green-500 font-bold text-base sm:text-sm rounded-lg border border-green-900/50 hover:bg-green-900/50 transition-all shadow-md"
                     >
                       Ativar
                     </button>
@@ -327,7 +338,7 @@ export default function ListaProdutosPage() {
             </p>
             <div className="text-[#C2AE82] font-semibold text-xs bg-[#C2AE82]/10 p-2 rounded border border-[#C2AE82]/20 flex items-start gap-2">
               <AlertTriangle size={16} className="flex-shrink-0 mt-0.5" />
-              <p>Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.</p>
+              <p className="text-[13px]  sm:text-[10px]">Aviso: Caso o produto já tenha sido vendido, ele não será apagado, será apenas desativado para preservar o histórico de compras dos clientes.</p>
             </div>
           </div>
         }

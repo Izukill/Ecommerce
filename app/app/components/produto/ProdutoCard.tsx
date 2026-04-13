@@ -112,7 +112,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
   const precoExibicao = emPromocao ? produto.precoPromocional! : produto.preco;
 
   return (
-    <div className={`group relative bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#C2AE82]/50 transition-all duration-300 ${!isAtivo ? 'opacity-70 grayscale-[30%]' : ''}`}>
+    <div className={`group relative bg-neutral-900 border border-neutral-800 rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl hover:border-[#C2AE82]/50 transition-all duration-300 flex flex-col h-full ${!isAtivo ? 'opacity-70 grayscale-[30%]' : ''}`}>
 
       <div className="relative aspect-[4/5] bg-black overflow-hidden">
         <img
@@ -125,8 +125,9 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
 
         {/* faixa de desconto se em promoção */}
         {emPromocao && (
-          <div className="absolute top-3 left-3 bg-red-600 text-white text-[11px] font-extrabold px-2.5 py-1 rounded-md shadow-lg flex items-center gap-1 z-10">
-            <Tag size={12} fill="currentColor" />
+          <div className="absolute top-3 left-3 bg-red-600 text-white text-[15px] sm:text-[11px] font-extrabold px-5 sm:px-2.5 py-2 sm:py-1 rounded-md shadow-lg flex items-center gap-2 sm:gap-1 z-10">
+            <Tag size={16} className="sm:hidden" fill="currentColor" />
+            <Tag size={12} className="hidden sm:block" fill="currentColor" />
             {porcentagemDesconto}% OFF
           </div>
         )}
@@ -134,21 +135,20 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
         {isAdmin && produto.ativo !== undefined && (
           <div className="absolute top-3 right-3 z-10">
             {isAtivo ? (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-green-500/90 text-white shadow-lg backdrop-blur-sm uppercase tracking-wider">
+              <span className="inline-flex items-center px-5 sm:px-2.5 py-2 sm:py-1 rounded-full text-[15px] sm:text-[10px] font-bold bg-green-500/90 text-white shadow-lg backdrop-blur-sm uppercase tracking-wider">
                 Ativo
               </span>
             ) : (
-              <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-600/90 text-white shadow-lg backdrop-blur-sm uppercase tracking-wider">
+              <span className="inline-flex items-center px-5 sm:px-2.5 py-2 sm:py-1 rounded-full text-[15px] sm:text-[10px] font-bold bg-red-600/90 text-white shadow-lg backdrop-blur-sm uppercase tracking-wider">
                 Inativo
               </span>
             )}
           </div>
         )}
-
         {tamanhosUnicos.length > 0 && (
           <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1">
             {tamanhosUnicos.map(tamanho => (
-              <span key={tamanho} className="w-6 h-6 rounded bg-neutral-900/80 backdrop-blur-md text-gray-200 border border-neutral-600 flex items-center justify-center text-[10px] font-extrabold shadow-md">
+              <span key={tamanho} className="w-10 h-10 sm:w-6 sm:h-6 rounded bg-neutral-900/80 backdrop-blur-md text-gray-200 border border-neutral-600 flex items-center justify-center text-[15px] sm:text-[10px] font-extrabold shadow-md">
                 {tamanho}
               </span>
             ))}
@@ -156,8 +156,9 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
         )}
 
         {coresUnicas.length > 0 && (
-          <div className="absolute bottom-3 right-3 z-20 flex flex-wrap gap-1.5 justify-end">
-            {coresUnicas.map(cor => {
+          <div className="absolute bottom-3 right-3 z-20 flex flex-col sm:flex-row flex-wrap gap-1.5 justify-end max-w-[55%]">
+
+            {coresUnicas.map((cor, index) => {
               const hexStyle = getCorHex(cor.nome);
               const isSelecionada = corFixada === cor.nome;
 
@@ -179,8 +180,10 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
                       setCorFixada(cor.nome);
                     }
                   }}
-                  className={`w-5 h-5 rounded-full border-2 shadow-lg transition-all focus:outline-none focus:border-[#C2AE82]
-                    ${isSelecionada ? 'border-[#C2AE82] scale-125' : 'border-neutral-400 hover:border-white hover:scale-125'}`}
+                  className={`w-8 h-8 sm:w-5 sm:h-5 rounded-full border-2 shadow-lg transition-all focus:outline-none focus:border-[#C2AE82]
+                    ${isSelecionada ? 'border-[#C2AE82] scale-125' : 'border-neutral-400 hover:border-white hover:scale-125'}
+                    ${index === 3 ? 'hidden sm:block' : ''}
+                    ${index >= 4 ? 'hidden' : ''}`}
                   style={{
                     background: hexStyle.includes('gradient') ? hexStyle : hexStyle,
                     backgroundColor: !hexStyle.includes('gradient') ? hexStyle : undefined
@@ -188,40 +191,61 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
                 />
               );
             })}
+
+            {/* lógica de cores no mobile */}
+            {coresUnicas.length > 3 && (
+              <div
+                className="flex sm:hidden w-8 h-8 rounded-full bg-black/70 backdrop-blur-md border border-neutral-500 text-white items-center justify-center text-xs font-bold shadow-lg"
+                title={`Mais ${coresUnicas.length - 3} cores disponíveis`}
+              >
+                +{coresUnicas.length - 3}
+              </div>
+            )}
+
+            {/* lógica de cores desktop */}
+            {coresUnicas.length > 4 && (
+              <div
+                className="hidden sm:flex w-5 h-5 rounded-full bg-black/70 backdrop-blur-md border border-neutral-500 text-white items-center justify-center text-[10px] font-bold shadow-lg"
+                title={`Mais ${coresUnicas.length - 4} cores disponíveis`}
+              >
+                +{coresUnicas.length - 4}
+              </div>
+            )}
+
           </div>
         )}
+
       </div>
 
-      <div className="p-5">
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-[10px] font-bold text-[#C2AE82] tracking-wider uppercase bg-neutral-950 px-2.5 py-1 rounded-md border border-neutral-800">
+      <div className="p-3.5 sm:p-4 flex flex-col h-[160px] sm:h-[140px]">
+        <div className="flex justify-between items-start mb-1.5">
+          <span className="text-[12px] sm:text-[10px] font-bold text-[#C2AE82] tracking-wider uppercase bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
             {nomeCategoria}
           </span>
         </div>
 
-        <h3 className="text-lg font-bold text-gray-100 mb-1 leading-tight line-clamp-2 min-h-[2.8rem] group-hover:text-[#C2AE82] transition-colors">
+        <h3 className="text-[19px] sm:text-lg font-bold text-gray-100 mb-1 leading-tight line-clamp-2 min-h-[2.5rem] group-hover:text-[#C2AE82] transition-colors">
           {produto.nome}
         </h3>
 
-        <div className="mt-auto pt-4 flex items-center justify-between relative z-20">
-
-          <div className="flex flex-col">
+        <div className="mt-auto pt-2.5 flex items-center justify-between relative z-20">
+          <div className="flex flex-col justify-end min-h-[42px] sm:min-h-[48px]">
             {emPromocao && (
-              <span className="text-xs text-gray-500 line-through font-medium">
+              <span className="text-[16px] sm:text-[13px] text-gray-500 line-through font-medium leading-none mb-1">
                 De {formatarPreco(produto.preco)}
               </span>
             )}
-            <p className="text-xl font-extrabold text-white">
+            <p className="text-[20px] sm:text-xl font-extrabold text-white leading-none">
               {emPromocao ? `Por ${formatarPreco(precoExibicao)}` : formatarPreco(precoExibicao)}
             </p>
           </div>
 
           {!isAdmin && (
             <button
-              className="h-10 w-10 bg-[#C2AE82] hover:bg-[#a8956b] text-black rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 flex-shrink-0"
+              className="h-9 w-9 sm:h-10 sm:w-10 bg-[#C2AE82] hover:bg-[#a8956b] text-black rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110 flex-shrink-0"
               title="Adicionar ao Carrinho"
             >
-              <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
             </button>

@@ -62,7 +62,7 @@ public class ClienteRestController implements ClienteRestControllerAPI {
 
     @Override
     @GetMapping
-    public ResponseEntity<Page<ClienteResponseDTO>> buscar(ClienteBuscarDTO dto) throws MirlleException {
+    public ResponseEntity<Page<ClienteResponseDTO>> buscar(@ModelAttribute ClienteBuscarDTO dto) throws MirlleException {
         Page<Cliente> pagina = service.buscar(dto);
         return ResponseEntity.ok(pagina.map(mapper::from));
     }

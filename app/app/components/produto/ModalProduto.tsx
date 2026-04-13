@@ -138,16 +138,16 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
               </div>
 
               <div className="flex flex-col">
-                <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mb-2 pr-10">
+                <h1 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight mb-2 pr-10">
                   {produto.nome}
                 </h1>
                 <div className="mb-4 sm:mb-5">
                   {emPromocao ? (
                     <div className="flex flex-col">
-                      <span className="text-sm sm:text-base text-gray-500 line-through font-medium">
+                      <span className="text-[16px] sm:text-base text-gray-500 line-through font-medium">
                         De R$ {produto.preco.toFixed(2).replace('.', ',')}
                       </span>
-                      <span className="text-2xl sm:text-3xl font-black text-[#C2AE82]">
+                      <span className="text-3xl sm:text-3xl font-black text-[#C2AE82]">
                         Por R$ {precoExibicao.toFixed(2).replace('.', ',')}
                       </span>
                     </div>

@@ -170,7 +170,7 @@ export default function NovoProdutoPage() {
 
                 <p className="text-[11px] text-gray-500 mt-2 italic flex items-start gap-1">
                   <span className="text-[#C2AE82] font-bold">*</span>
-                  Atenção: Se a categoria deste produto possuir uma promoção em massa ativa (%), ela terá prioridade e substituirá o preço promocional digitado acima.
+                  Obs: Se a categoria deste produto possuir uma promoção ativa (%), ela terá prioridade e substituirá o preço promocional digitado acima.
                 </p>
 
                 <div>

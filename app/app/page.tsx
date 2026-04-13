@@ -213,7 +213,7 @@ export default function HomePage() {
         </div>
         <Link
           href="/produtos"
-          className="fixed bottom-6 right-6 z-30 md:hidden flex items-center gap-2 bg-[#C2AE82] text-black font-extrabold px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(194,174,130,0.4)] active:scale-95 transition-all"
+          className="fixed bottom-6 right-6 z-30 lg:hidden flex items-center gap-2 bg-[#C2AE82] text-black font-extrabold px-5 py-3 rounded-full shadow-[0_4px_24px_rgba(194,174,130,0.4)] active:scale-95 transition-all"
         >
           <SlidersHorizontal size={18} strokeWidth={2.5} />
           Explorar produtos

@@ -119,10 +119,14 @@ public class ClienteService {
     }
 
 
-    public Page<Cliente> buscar(ClienteBuscarDTO dto){
-
-        Pageable paginacao = PageRequest.of(0, 10);
-        return clienteRepository.findAll(paginacao);
+    public Page<Cliente> buscar(ClienteBuscarDTO dto) {
+        Pageable pageable = PageRequest.of(dto.getPage(), dto.getSize());
+        return clienteRepository.buscarComFiltros(
+                dto.getNome(),
+                dto.getEmail(),
+                dto.getTelefone(),
+                pageable
+        );
     }
 
     @Transactional

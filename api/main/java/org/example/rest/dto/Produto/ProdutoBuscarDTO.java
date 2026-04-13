@@ -3,6 +3,7 @@ package org.example.rest.dto.Produto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -23,6 +24,9 @@ public class ProdutoBuscarDTO {
 
     @Schema(description = "Filtra pelo status")
     private Boolean ativo;
+
+    @Schema(description = "Filtra pelo preço máximo do produto")
+    private BigDecimal precoMaximo;
 
     @Schema(description = "Número da página a ser retornada. Começa com zero.")
     private Integer numeroPagina = 0;

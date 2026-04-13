@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -50,12 +51,18 @@ public interface ProdutoRepository extends JpaRepository<Produto, Long> {
             "(:nome IS NULL OR :nome = '' OR LOWER(p.nome) LIKE LOWER(CONCAT('%', :nome, '%'))) AND " +
             "(:categoriaId IS NULL OR c.lookupId = :categoriaId) AND " +
             "(:semCategoria IS NULL OR :semCategoria = false OR c IS NULL) AND " +
-            "(:ativo IS NULL OR p.ativo = :ativo)")
+            "(:ativo IS NULL OR p.ativo = :ativo) AND " +
+            "(:precoMaximo IS NULL OR " +
+            "  (CASE " +
+            "     WHEN p.precoPromocional IS NOT NULL AND p.precoPromocional > 0 AND p.precoPromocional < p.preco THEN p.precoPromocional " +
+            "     ELSE p.preco " +
+            "   END) <= :precoMaximo)")
     Page<Produto> buscarPorFiltros(
             @Param("nome") String nome,
             @Param("categoriaId") UUID categoriaId,
             @Param("semCategoria") Boolean semCategoria,
             @Param("ativo") Boolean ativo,
+            @Param("precoMaximo") BigDecimal precoMaximo,
             Pageable pageable);
 
 

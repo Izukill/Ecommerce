@@ -21,9 +21,9 @@ public class ClienteBuscarDTO {
     private String email;
 
     @Schema(description = "Número da página a ser retornada na paginação. Começa com zero.")
-    private Integer númeroPágina = 0;
+    private Integer page = 0;
 
     @Schema(description = "Quantidade de registros a serem retornados por página.")
-    private Integer tamanhoPágina = 10;
+    private Integer size = 10;
 
 }

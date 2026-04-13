@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { api } from "@/lib/api";
 import ModalDetalhesPedido, { Pedido } from "@/app/components/pedido/ModalDetalhesPedido";
 import { Package, Eye } from "lucide-react";
@@ -18,19 +18,30 @@ export default function PedidosAdminPage() {
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null);
   const [isModalAberto, setIsModalAberto] = useState(false);
 
-  // ==========================================
-  // ESTADOS DE FILTRO
-  // ==========================================
   const [filtroCliente, setFiltroCliente] = useState("");
   const [filtroStatus, setFiltroStatus] = useState("todos");
-  const [filtroData, setFiltroData] = useState(""); // Formato YYYY-MM-DD do input type="date"
+  const [filtroData, setFiltroData] = useState("");
   const [filtroPrecoMin, setFiltroPrecoMin] = useState("");
 
-  const carregarPedidos = async (pagina: number) => {
+  const carregarPedidos = useCallback(async () => {
     setCarregando(true);
     setErro("");
     try {
-      const response = await api.get(`/pedidos?page=${pagina}&size=${tamanhoPagina}&sort=dataHora,desc`);
+      const params = new URLSearchParams();
+      params.append("page", paginaAtual.toString());
+      params.append("size", tamanhoPagina.toString());
+      params.append("sort", "dataHora,desc");
+
+      if (filtroCliente) params.append("clienteNome", filtroCliente);
+      if (filtroStatus !== "todos") params.append("status", filtroStatus);
+      if (filtroPrecoMin) params.append("precoMin", filtroPrecoMin);
+
+      if (filtroData) {
+        params.append("dataInicial", `${filtroData}T00:00:00`);
+        params.append("dataFinal", `${filtroData}T23:59:59`);
+      }
+
+      const response = await api.get(`/pedidos?${params.toString()}`);
 
       const pageData = response.data;
       const listaExtraida = pageData.content || pageData;
@@ -45,11 +56,21 @@ export default function PedidosAdminPage() {
     } finally {
       setCarregando(false);
     }
-  };
+  }, [paginaAtual, filtroCliente, filtroStatus, filtroData, filtroPrecoMin]);
+
+  //useeffect de filtros
+  useEffect(() => {
+    setPaginaAtual(0);
+  }, [filtroCliente, filtroStatus, filtroData, filtroPrecoMin]);
 
   useEffect(() => {
-    carregarPedidos(paginaAtual);
-  }, [paginaAtual]);
+    const delayDebounceFn = setTimeout(() => {
+      carregarPedidos();
+    }, 500); //timeout de 500 pra não buscar no nome mt rápido e n lagar
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [carregarPedidos]);
+
 
   const abrirDetalhes = (pedido: Pedido) => {
     setPedidoSelecionado(pedido);
@@ -65,9 +86,8 @@ export default function PedidosAdminPage() {
       try {
         await api.put(`/pedidos/${pedidoId}/status`, { status: novoStatus });
 
-
         fecharModal();
-        carregarPedidos(paginaAtual);
+        carregarPedidos();
       } catch (error) {
         console.error("Erro ao atualizar status:", error);
         toast.error("Não foi possível atualizar o status do pedido.");
@@ -98,44 +118,9 @@ export default function PedidosAdminPage() {
     }
   };
 
-  // ==========================================
-  // LÓGICA DE FILTRAGEM (Front-end)
-  // ==========================================
-  const pedidosFiltrados = pedidos.filter(pedido => {
-    // Filtro por Nome do Cliente (Case Insensitive)
-    if (filtroCliente && !pedido.cliente?.nome?.toLowerCase().includes(filtroCliente.toLowerCase())) {
-      return false;
-    }
-
-    // Filtro por Status
-    if (filtroStatus !== "todos" && pedido.status !== filtroStatus) {
-      return false;
-    }
-
-    // Filtro por Preço Mínimo
-    if (filtroPrecoMin && pedido.valorTotal < parseFloat(filtroPrecoMin)) {
-      return false;
-    }
-
-    // Filtro por Data Específica
-    if (filtroData) {
-      // O input type="date" retorna "YYYY-MM-DD". Vamos comparar apenas a parte da data do pedido.
-      const dataDoPedido = pedido.dataHora.split("T")[0]; // Pega só a parte da data "YYYY-MM-DD"
-      if (dataDoPedido !== filtroData) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  // ==========================================
-  // RENDERIZAÇÃO
-  // ==========================================
   return (
     <div className="space-y-6 relative pb-10 max-w-7xl mx-auto">
 
-      {/* CABEÇALHO */}
       <div>
         <h2 className="text-3xl font-extrabold text-white tracking-tight">Painel de Pedidos</h2>
         <p className="text-sm text-gray-400 mt-1">Acompanhe as vendas e gerencie os status de entrega.</p>
@@ -147,9 +132,6 @@ export default function PedidosAdminPage() {
         </div>
       )}
 
-      {/* ========================================== */}
-      {/* BARRA DE FILTROS */}
-      {/* ========================================== */}
       <div className="bg-neutral-900 border border-neutral-800 p-4 rounded-xl shadow-lg grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Nome do Cliente</label>
@@ -168,7 +150,7 @@ export default function PedidosAdminPage() {
           >
             <option value="todos">Todos</option>
             <option value="PAGO">Pago</option>
-            <option value="AGUARDANDO_PAGAMENTO">Aguarando Pagamento</option>
+            <option value="AGUARDANDO_PAGAMENTO">Aguardando Pagamento</option>
             <option value="ENVIADO">Enviado</option>
             <option value="CANCELADO">Cancelado</option>
           </select>
@@ -193,15 +175,15 @@ export default function PedidosAdminPage() {
         </div>
       </div>
 
-      {/* TABELA DE PEDIDOS */}
+      {/* tabela de pedidos e card no mobile */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden">
 
         {carregando ? (
           <div className="py-20 flex justify-center items-center gap-3 text-[#C2AE82] font-bold tracking-widest uppercase">
             <div className="w-8 h-8 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
-            Carregando pedidos...
+            Buscando pedidos...
           </div>
-        ) : pedidosFiltrados.length === 0 ? (
+        ) : pedidos.length === 0 ? (
           <div className="py-20 text-center">
             <div className="flex justify-center mb-4 text-neutral-600">
               <Package size={56} strokeWidth={1.5} />
@@ -210,69 +192,101 @@ export default function PedidosAdminPage() {
             <p className="text-gray-500 text-sm mt-1">Nenhum pedido corresponde aos filtros aplicados.</p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm text-gray-400">
-              <thead className="bg-black/50 text-xs uppercase text-gray-500 border-b border-neutral-800">
-                <tr>
-                  <th className="px-6 py-4 font-bold">Data / Pedido</th>
-                  <th className="px-6 py-4 font-bold">Cliente</th>
-                  <th className="px-6 py-4 font-bold">Contato</th>
-                  <th className="px-6 py-4 font-bold text-center">Status</th>
-                  <th className="px-6 py-4 font-bold text-right">Valor Total</th>
-                  <th className="px-6 py-4 font-bold text-center">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-neutral-800">
-                {pedidosFiltrados.map((pedido) => (
-                  <tr key={pedido.lookupId} className="hover:bg-neutral-800/50 transition-colors group">
-
-                    {/* Data (Maior) e ID (Menor) */}
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-gray-200">{formatarData(pedido.dataHora)}</div>
-                      <div className="text-[10px] text-gray-500 mt-1 font-mono">#{pedido.lookupId.split("-")[0]}</div>
-                    </td>
-
-                    {/* Cliente */}
-                    <td className="px-6 py-4 font-bold text-white">
-                      {pedido.cliente?.nome || "Cliente Removido"}
-                    </td>
-
-                    {/* Contato (Telefone) */}
-                    <td className="px-6 py-4 text-gray-300">
-                      {pedido.cliente?.telefone || "Nenhum telefone"}
-                    </td>
-
-                    {/* Status (Badge Colorido) */}
-                    <td className="px-6 py-4 text-center">
-                      <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full border ${getStatusBadge(pedido.status)}`}>
+          <>
+            {/* mobile */}
+            <div className="md:hidden flex flex-col divide-y divide-neutral-800">
+              {pedidos.map((pedido) => (
+                <div
+                  key={pedido.lookupId}
+                  onClick={() => abrirDetalhes(pedido)}
+                  className="p-5 flex flex-col gap-4 active:bg-neutral-800/80 transition-colors cursor-pointer"
+                >
+                  <div className="flex justify-between items-start gap-2">
+                    <div>
+                      <span className={`px-2.5 py-1 text-[10px] font-bold uppercase rounded-full border ${getStatusBadge(pedido.status)}`}>
                         {pedido.status || "Desconhecido"}
                       </span>
-                    </td>
+                      <p className="text-white font-extrabold text-base mt-2 truncate">
+                        {pedido.cliente?.nome || "Cliente Removido"}
+                      </p>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="text-[#C2AE82] font-black text-lg">{formatarMoeda(pedido.valorTotal)}</p>
+                      <p className="text-[10px] text-gray-500 mt-0.5 font-mono">#{pedido.lookupId.split("-")[0]}</p>
+                    </div>
+                  </div>
 
-                    {/* Valor Total */}
-                    <td className="px-6 py-4 text-right font-extrabold text-[#C2AE82]">
-                      {formatarMoeda(pedido.valorTotal)}
-                    </td>
+                  <div className="flex items-center justify-between text-xs text-gray-400">
+                    <span className="font-medium">{formatarData(pedido.dataHora)}</span>
+                    <span className="flex items-center gap-1 text-gray-500">
+                      <Eye size={14} /> Ver Detalhes
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
 
-                    {/* Botão de Ver Detalhes */}
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => abrirDetalhes(pedido)}
-                        className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:text-white hover:bg-neutral-700 transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
-                        title="Ver Detalhes do Pedido"
-                      >
-                        <Eye size={20} strokeWidth={2} />
-                      </button>
-                    </td>
+            {/* desktop */}
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-left text-sm text-gray-400">
+                <thead className="bg-black/50 text-xs uppercase text-gray-500 border-b border-neutral-800">
+                  <tr>
+                    <th className="px-6 py-4 font-bold">Data / Pedido</th>
+                    <th className="px-6 py-4 font-bold">Cliente</th>
+                    <th className="px-6 py-4 font-bold">Contato</th>
+                    <th className="px-6 py-4 font-bold text-center">Status</th>
+                    <th className="px-6 py-4 font-bold text-right">Valor Total</th>
+                    <th className="px-6 py-4 font-bold text-center">Ações</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody className="divide-y divide-neutral-800">
+                  {pedidos.map((pedido) => (
+                    <tr
+                      key={pedido.lookupId}
+                      onClick={() => abrirDetalhes(pedido)}
+                      className="hover:bg-neutral-800/50 transition-colors group cursor-pointer"
+                    >
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-gray-200">{formatarData(pedido.dataHora)}</div>
+                        <div className="text-[10px] text-gray-500 mt-1 font-mono">#{pedido.lookupId.split("-")[0]}</div>
+                      </td>
+
+                      <td className="px-6 py-4 font-bold text-white">
+                        {pedido.cliente?.nome || "Cliente Removido"}
+                      </td>
+
+                      <td className="px-6 py-4 text-gray-300">
+                        {pedido.cliente?.telefone || "Nenhum telefone"}
+                      </td>
+
+                      <td className="px-6 py-4 text-center">
+                        <span className={`px-3 py-1 text-xs font-bold uppercase rounded-full border ${getStatusBadge(pedido.status)}`}>
+                          {pedido.status || "Desconhecido"}
+                        </span>
+                      </td>
+
+                      <td className="px-6 py-4 text-right font-extrabold text-[#C2AE82]">
+                        {formatarMoeda(pedido.valorTotal)}
+                      </td>
+
+                      <td className="px-6 py-4 text-center">
+                        <button
+                          className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:text-white hover:bg-neutral-700 transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
+                          title="Ver Detalhes do Pedido"
+                        >
+                          <Eye size={20} strokeWidth={2} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
         )}
       </div>
 
-      {/* CONTROLES DE PAGINAÇÃO */}
+      {/* controle das paginações */}
       {totalPaginas > 1 && (
         <div className="mt-8 flex items-center justify-center gap-4 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-lg">
           <button
@@ -294,8 +308,6 @@ export default function PedidosAdminPage() {
           </button>
         </div>
       )}
-
-      {/* modal de detalhes de pedido */}
       <ModalDetalhesPedido
         isOpen={isModalAberto}
         pedidoSelecionado={pedidoSelecionado}

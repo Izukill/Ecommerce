@@ -6,7 +6,7 @@ import { api } from "@/lib/api";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
 import ModalPromocaoCategoria from "@/app/components/admin/ModalPromocaoCategoria";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, GripVertical, Tag, Percent } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Tag, Percent, Trash2, Edit2, LayoutList } from "lucide-react";
 
 interface Categoria {
   lookupId: string;
@@ -34,7 +34,6 @@ export default function CategoriasPage() {
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
   const [categoriaParaExcluir, setCategoriaParaExcluir] = useState<Categoria | null>(null);
 
-  // Estados apenas de controle do Modal de Promoções
   const [isModalPromocaoAberto, setIsModalPromocaoAberto] = useState(false);
   const [categoriaParaPromocao, setCategoriaParaPromocao] = useState<Categoria | null>(null);
   const [salvandoPromocao, setSalvandoPromocao] = useState(false);
@@ -125,7 +124,10 @@ export default function CategoriasPage() {
     setOrdemExibicao(categoria.ordemExibicao || 0);
     setErroSalvar("");
     setSucesso(false);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const formElement = document.getElementById("form-categoria");
+    if (formElement) {
+      formElement.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
   };
 
   const cancelarEdicao = () => {
@@ -145,6 +147,7 @@ export default function CategoriasPage() {
       await api.delete(`/categorias/${categoriaParaExcluir.lookupId}`);
       setCategorias(categorias.filter(c => c.lookupId !== categoriaParaExcluir.lookupId));
       fecharModalExclusao();
+      toast.success("Categoria excluída com sucesso!");
     } catch (error) {
       toast.error("Erro ao excluir a categoria.");
       fecharModalExclusao();
@@ -201,17 +204,15 @@ export default function CategoriasPage() {
   const categoriasEmPromocao = categorias.filter(c => c.percentualDesconto && c.percentualDesconto > 0);
 
   return (
-    <div className="space-y-8 max-w-5xl mx-auto relative">
+    <div className="space-y-8 max-w-6xl mx-auto relative pb-10">
       <div>
         <h2 className="text-3xl font-extrabold text-white tracking-tight">Categorias</h2>
         <p className="text-sm text-gray-400 mt-1">Crie e gerencie as categorias e as vitrines da Home.</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-
-        {/* formulario */}
-        <div className="lg:col-span-1">
-          <div className="bg-black p-6 rounded-xl shadow-2xl border-t-4 border-[#C2AE82] sticky top-8">
+        <div id="form-categoria" className="lg:col-span-1 scroll-mt-24">
+          <div className="bg-black p-6 rounded-xl shadow-2xl border-1 border-[#666666] border-t-4 border-t-[#C2AE82] lg:sticky lg:top-8">
             <h3 className="text-lg font-bold text-white mb-4">
               {categoriaEditando ? "Editar Categoria" : "Nova Categoria"}
             </h3>
@@ -260,12 +261,21 @@ export default function CategoriasPage() {
                 </div>
               </div>
 
-              <div className="space-y-2 pt-2">
-                <button type="submit" disabled={salvando} className="w-full py-3 text-sm font-extrabold rounded-lg text-black bg-[#C2AE82] hover:bg-[#a8956b] transition-all shadow-lg">
-                  {salvando ? "Salvando..." : (categoriaEditando ? "Atualizar" : "Criar Categoria")}
+              <div className="space-y-3 pt-4">
+                <button
+                  type="submit"
+                  disabled={salvando}
+                  className="w-full py-4 text-base font-extrabold rounded-xl text-black bg-[#C2AE82] hover:bg-[#a8956b] transition-all shadow-lg disabled:opacity-70"
+                >
+                  {salvando ? "Salvando..." : (categoriaEditando ? "Atualizar Categoria" : "Criar Categoria")}
                 </button>
+
                 {categoriaEditando && (
-                  <button type="button" onClick={cancelarEdicao} className="w-full py-3 text-sm font-bold rounded-lg text-gray-300 hover:bg-neutral-800 transition-all border border-neutral-700">
+                  <button
+                    type="button"
+                    onClick={cancelarEdicao}
+                    className="w-full py-4 text-base font-bold rounded-xl text-gray-300 hover:bg-neutral-800 transition-all border border-neutral-700"
+                  >
                     Cancelar Edição
                   </button>
                 )}
@@ -274,9 +284,10 @@ export default function CategoriasPage() {
           </div>
         </div>
 
+        {/* area da lista */}
         <div className="lg:col-span-2">
 
-          {/* painel de promoções ativas */}
+            {/* promoções ativas */}
           {categoriasEmPromocao.length > 0 && (
             <div className="bg-red-950/20 border border-red-900/50 rounded-xl p-5 mb-8 shadow-lg animate-in fade-in slide-in-from-top-4">
               <div className="flex items-center gap-2 mb-4">
@@ -285,7 +296,11 @@ export default function CategoriasPage() {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {categoriasEmPromocao.map(cat => (
-                  <div key={cat.lookupId} className="bg-black border border-red-900/30 p-4 rounded-lg flex justify-between items-center group hover:border-red-500/50 transition-colors">
+                  <div
+                    key={cat.lookupId}
+                    onClick={() => abrirModalPromocao(cat)}
+                    className="bg-black border border-red-900/30 p-4 rounded-lg flex justify-between items-center group hover:border-red-500/50 transition-colors cursor-pointer"
+                  >
                     <div>
                       <p className="font-bold text-gray-200 truncate pr-2">{cat.nome}</p>
                       <p className="text-sm font-extrabold text-red-500 mt-0.5 flex items-center gap-1">
@@ -293,11 +308,10 @@ export default function CategoriasPage() {
                       </p>
                     </div>
                     <button
-                      onClick={() => abrirModalPromocao(cat)}
-                      className="p-2 bg-neutral-900 hover:bg-red-500/20 text-gray-400 hover:text-red-400 rounded-md transition-colors"
+                      className="p-2 bg-neutral-900 group-hover:bg-red-500/20 text-gray-400 group-hover:text-red-400 rounded-md transition-colors"
                       title="Editar Promoção"
                     >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                      <Edit2 className="h-5 w-5" strokeWidth={2} />
                     </button>
                   </div>
                 ))}
@@ -306,58 +320,161 @@ export default function CategoriasPage() {
           )}
 
           {erroCarregar && <div className="bg-red-950/50 border-l-4 border-red-500 p-4 rounded-md mb-4"><p className="text-sm text-red-200 font-semibold">{erroCarregar}</p></div>}
-          <div className="bg-black rounded-xl shadow-2xl border border-neutral-800 overflow-hidden">
+
+          <div className="bg-neutral-900 rounded-xl shadow-2xl border border-neutral-800 overflow-hidden">
             {carregando ? (
-              <div className="p-10 text-center text-[#C2AE82] font-bold tracking-widest uppercase animate-pulse">Carregando categorias...</div>
+              <div className="p-10 text-center text-[#C2AE82] font-bold tracking-widest uppercase animate-pulse flex items-center justify-center gap-3">
+                <div className="w-6 h-6 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
+                Carregando categorias...
+              </div>
             ) : categorias.length === 0 ? (
-              <div className="p-10 text-center"><p className="text-gray-300 font-bold text-lg">Nenhuma categoria</p></div>
+              <div className="p-16 text-center flex flex-col items-center">
+                <div className="mb-4 text-neutral-600">
+                  <LayoutList size={56} strokeWidth={1.5} />
+                </div>
+                <p className="text-gray-300 font-bold text-lg">Nenhuma categoria encontrada</p>
+                <p className="text-gray-500 text-sm mt-1">Crie sua primeira categoria usando o formulário.</p>
+              </div>
             ) : (
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-neutral-900 border-b border-neutral-800 text-xs font-bold text-gray-400 uppercase tracking-wider">
-                    <th className="px-6 py-4">Nome</th>
-                    <th className="px-6 py-4 text-center">Vitrine Home</th>
-                    <th className="px-6 py-4 text-right">Ações</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-800">
+              <>
+                {/* mobile */}
+                <div className="md:hidden flex flex-col divide-y divide-neutral-800">
                   {categorias.map((categoria) => (
-                    <tr key={categoria.lookupId} className="hover:bg-neutral-900/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <Link href={`/admin/produtos?categoria=${categoria.lookupId}`} className="text-lg font-bold text-gray-100 hover:text-[#C2AE82] transition-colors flex items-center gap-2">
-                          {categoria.nome}
-                          {categoria.percentualDesconto && categoria.percentualDesconto > 0 && (
-                            <span className="bg-red-600 text-white text-[9px] px-1.5 py-0.5 rounded-sm font-bold flex items-center gap-0.5">
-                              <Tag size={8} fill="currentColor" /> %
-                            </span>
-                          )}
-                        </Link>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        {categoria.mostrarNaHome ? (
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#C2AE82]/10 border border-[#C2AE82]/30 rounded-md text-[#C2AE82] text-xs font-bold">
-                            <Eye size={14} /> Ativa (Pos: {categoria.ordemExibicao || 0})
+                    <div
+                      key={categoria.lookupId}
+                      onClick={() => iniciarEdicao(categoria)}
+                      className="p-5 flex flex-col gap-4 active:bg-neutral-800/80 transition-colors cursor-pointer group"
+                    >
+                      <div className="flex justify-between items-start gap-2">
+                        <div>
+                          <Link
+                            href={`/admin/produtos?categoria=${categoria.lookupId}`}
+                            onClick={(e) => e.stopPropagation()}
+                            className="text-white font-extrabold text-base flex flex-wrap items-center gap-2 hover:text-[#C2AE82] transition-colors"
+                          >
+                            {categoria.nome}
+                            {categoria.percentualDesconto && categoria.percentualDesconto > 0 && (
+                              <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-black flex items-center gap-0.5">
+                                <Tag size={10} fill="currentColor" /> {categoria.percentualDesconto}%
+                              </span>
+                            )}
+                          </Link>
+                          <div className="mt-2">
+                            {categoria.mostrarNaHome ? (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#C2AE82]/10 border border-[#C2AE82]/30 rounded-md text-[#C2AE82] text-[10px] font-bold">
+                                <Eye size={12} /> Vitrine Ativa (Pos: {categoria.ordemExibicao || 0})
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-800 border border-neutral-700 rounded-md text-gray-500 text-[10px] font-bold">
+                                <EyeOff size={12} /> Oculta na Home
+                              </span>
+                            )}
                           </div>
-                        ) : (
-                          <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-800 border border-neutral-700 rounded-md text-gray-500 text-xs font-bold">
-                            <EyeOff size={14} /> Oculta
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-right space-x-2 whitespace-nowrap">
-                        <button onClick={() => abrirModalPromocao(categoria)} title="Aplicar promo" className="text-red-500 hover:text-red-400 p-1.5 bg-red-500/10 hover:bg-red-500/20 rounded-md transition-colors"><Tag size={16} /></button>
-                        <button onClick={() => iniciarEdicao(categoria)} title="Editar" className="text-gray-400 hover:text-white p-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg></button>
-                        <button onClick={() => abrirModalExclusao(categoria)} title="Excluir" className="text-red-500 hover:text-red-400 p-1.5 bg-neutral-800 hover:bg-neutral-700 rounded-md transition-colors"><svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
-                      </td>
-                    </tr>
+                        </div>
+
+                        <div className="flex items-center gap-2 flex-shrink-0">
+                          <button
+                            onClick={(e) => { e.stopPropagation(); abrirModalPromocao(categoria); }}
+                            className="p-2 text-neutral-400 hover:text-red-400 hover:bg-red-950/30 rounded-lg transition-colors border border-transparent hover:border-red-900/50"
+                            title="Aplicar Promoção"
+                          >
+                            <Tag size={18} />
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); abrirModalExclusao(categoria); }}
+                            className="p-2 text-neutral-500 hover:text-red-500 hover:bg-red-950/30 rounded-lg transition-colors border border-transparent hover:border-red-900/50"
+                            title="Excluir Categoria"
+                          >
+                            <Trash2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-neutral-800/50">
+                        <span className="font-mono">ID: {categoria.lookupId.split("-")[0]}</span>
+                        <span className="flex items-center gap-1 text-gray-500 group-hover:text-[#C2AE82] transition-colors">
+                          <Edit2 size={14} /> Editar Categoria
+                        </span>
+                      </div>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </div>
+
+                {/* desktop */}
+                <div className="hidden md:block overflow-x-auto">
+                  <table className="w-full text-left text-sm text-gray-400 border-collapse">
+                    <thead className="bg-black/50 text-xs uppercase text-gray-500 border-b border-neutral-800">
+                      <tr>
+                        <th className="px-6 py-4 font-bold">Nome da Categoria</th>
+                        <th className="px-6 py-4 text-center font-bold">Vitrine Home</th>
+                        <th className="px-6 py-4 text-center font-bold">Ações</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-neutral-800">
+                      {categorias.map((categoria) => (
+                        <tr
+                          key={categoria.lookupId}
+                          onClick={() => iniciarEdicao(categoria)}
+                          className="hover:bg-neutral-800/50 transition-colors group cursor-pointer"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <Link
+                              href={`/admin/produtos?categoria=${categoria.lookupId}`}
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-base font-bold text-gray-100 hover:text-[#C2AE82] hover:underline transition-colors flex items-center gap-2 w-fit"
+                            >
+                              {categoria.nome}
+                              {categoria.percentualDesconto && categoria.percentualDesconto > 0 && (
+                                <span className="bg-red-600 text-white text-[10px] px-1.5 py-0.5 rounded-sm font-black flex items-center gap-0.5 no-underline">
+                                  <Tag size={10} fill="currentColor" /> {categoria.percentualDesconto}%
+                                </span>
+                              )}
+                            </Link>
+                          </td>
+                          <td className="px-6 py-4 text-center whitespace-nowrap">
+                            {categoria.mostrarNaHome ? (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-[#C2AE82]/10 border border-[#C2AE82]/30 rounded-md text-[#C2AE82] text-xs font-bold">
+                                <Eye size={14} /> Ativa (Pos: {categoria.ordemExibicao || 0})
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-neutral-800 border border-neutral-700 rounded-md text-gray-500 text-xs font-bold">
+                                <EyeOff size={14} /> Oculta
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-center whitespace-nowrap space-x-2">
+                            <button
+                              onClick={(e) => { e.stopPropagation(); abrirModalPromocao(categoria); }}
+                              title="Aplicar Promoção"
+                              className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors border border-neutral-700 hover:border-red-900/50 shadow-sm"
+                            >
+                              <Tag size={18} strokeWidth={2} />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); iniciarEdicao(categoria); }}
+                              title="Editar Categoria"
+                              className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:bg-neutral-700 hover:text-white transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
+                            >
+                              <Edit2 size={18} strokeWidth={2} />
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); abrirModalExclusao(categoria); }}
+                              title="Excluir Categoria"
+                              className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors border border-neutral-700 hover:border-red-900/50 shadow-sm"
+                            >
+                              <Trash2 size={18} strokeWidth={2} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </>
             )}
           </div>
         </div>
       </div>
-
       <ModalExclusao
         isOpen={isModalExclusaoAberto}
         onClose={fecharModalExclusao}
@@ -373,7 +490,6 @@ export default function CategoriasPage() {
         onRemover={removerPromocao}
         salvandoPromocao={salvandoPromocao}
       />
-
     </div>
   );
 }

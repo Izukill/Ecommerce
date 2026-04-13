@@ -195,15 +195,19 @@ export default function CheckoutPage() {
               </form>
             </div>
             <div className="lg:col-span-5 xl:col-span-4 relative">
-              <div className="sticky top-24 flex flex-col gap-6">
+              {/* 👇 FIX: max-h limita o tamanho e overflow-y-auto cria o scroll interno invisível */}
+              <div className="sticky top-24 flex flex-col gap-6 max-h-[calc(100vh-7rem)] overflow-y-auto pb-4 custom-scrollbar">
 
-                {/* não coloca fixed ou sticky dentro de resumopedido se n buga tudo */}
-                <ResumoPedido processando={processando} />
+                {/* 👇 FIX 3: Envolvemos o ResumoPedido com flex-shrink-0 para ele não ser "esmagado" e vazar por cima do outro módulo */}
+                <div className="flex-shrink-0 w-full">
+                  <ResumoPedido processando={processando} />
+                </div>
 
-                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 flex items-start gap-4 shadow-lg animate-in fade-in duration-500">
+                {/* Caixa do Pix */}
+                <div className="bg-neutral-900 border border-neutral-800 rounded-xl p-5 flex items-start gap-4 shadow-lg animate-in fade-in duration-500 flex-shrink-0">
                   <div className="flex-shrink-0 bg-[#C2AE82]/10 p-2.5 rounded-full">
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-[#C2AE82]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>

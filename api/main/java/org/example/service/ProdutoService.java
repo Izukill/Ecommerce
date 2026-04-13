@@ -112,6 +112,7 @@ public class ProdutoService {
                 dto.getCategoriaId(),
                 dto.getSemCategoria(),
                 dto.getAtivo(),
+                dto.getPrecoMaximo(),
                 pageable
         );
     }
