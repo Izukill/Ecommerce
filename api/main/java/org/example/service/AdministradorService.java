@@ -10,6 +10,7 @@ import org.example.rest.dto.Autenticacao.AlterarSenhaSalvarRequestDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +36,8 @@ public class AdministradorService {
 
         admin.setSenha(passwordEncoder.encode(admin.getSenha()));
         admin.setTipoPerfil(EnumPerfil.ADM);
-        admin.setPermissaoTotal(true);
+        admin.setCargo(admin.getCargo());
+        admin.setPermissaoTotal(admin.isPermissaoTotal());
 
         return administradorRepository.save(admin);
     }
@@ -50,9 +52,18 @@ public class AdministradorService {
         Administrador administradorAtulizar= recuperarPor(lookupId);
 
         administradorAtulizar.setNome(novosDadosAdmin.getNome());
+        administradorAtulizar.setEmail(novosDadosAdmin.getEmail());
+        if(novosDadosAdmin.getSenha() != null && !novosDadosAdmin.getSenha().equals("ignore")){
+            administradorAtulizar.setSenha(passwordEncoder.encode(novosDadosAdmin.getSenha()));
+        }
         administradorAtulizar.setPermissaoTotal(novosDadosAdmin.isPermissaoTotal());
         administradorAtulizar.setTipoPerfil(novosDadosAdmin.getTipoPerfil());
         administradorAtulizar.setCargo(novosDadosAdmin.getCargo());
+        administradorAtulizar.setCategoriasPage(novosDadosAdmin.isCategoriasPage());
+        administradorAtulizar.setClientePage(novosDadosAdmin.isClientePage());
+        administradorAtulizar.setPedidosPage(novosDadosAdmin.isPedidosPage());
+        administradorAtulizar.setProdutosPage(novosDadosAdmin.isProdutosPage());
+        administradorAtulizar.setRelatoriosPage(novosDadosAdmin.isRelatoriosPage());
 
         return administradorRepository.save(administradorAtulizar);
 

@@ -3,10 +3,12 @@
 import { useState, useEffect, FormEvent } from "react";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/contexts/AuthContext";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
 import ModalPromocaoCategoria from "@/app/components/admin/ModalPromocaoCategoria";
 import toast from "react-hot-toast";
-import { Eye, EyeOff, GripVertical, Tag, Percent, Trash2, Edit2, LayoutList } from "lucide-react";
+import { Eye, EyeOff, GripVertical, Tag, Percent, Trash2, Edit, LayoutList } from "lucide-react";
 
 interface Categoria {
   lookupId: string;
@@ -20,6 +22,9 @@ export default function CategoriasPage() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erroCarregar, setErroCarregar] = useState("");
+
+  const router = useRouter();
+  const { usuario } = useAuth();
 
   const [nomeNovaCategoria, setNomeNovaCategoria] = useState("");
   const [mostrarNaHome, setMostrarNaHome] = useState(false);
@@ -63,6 +68,13 @@ export default function CategoriasPage() {
       setCarregando(false);
     }
   };
+
+  useEffect(() => {
+      if (usuario && !usuario.permissaoTotal && !usuario.categoriasPage) {
+        toast.error("Você não tem permissão para acessar esta página.");
+        router.push("/admin");
+      }
+  }, [usuario, router]);
 
   useEffect(() => {
     carregarCategorias();
@@ -206,7 +218,9 @@ export default function CategoriasPage() {
   return (
     <div className="space-y-8 max-w-6xl mx-auto relative pb-10">
       <div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">Categorias</h2>
+        <h2 className="flex items-center gap-3 text-3xl font-extrabold text-white tracking-tight">
+           <Tag className="text-[#C2AE82]" size={32}/>Categorias
+        </h2>
         <p className="text-sm text-gray-400 mt-1">Crie e gerencie as categorias e as vitrines da Home.</p>
       </div>
 
@@ -311,7 +325,7 @@ export default function CategoriasPage() {
                       className="p-2 bg-neutral-900 group-hover:bg-red-500/20 text-gray-400 group-hover:text-red-400 rounded-md transition-colors"
                       title="Editar Promoção"
                     >
-                      <Edit2 className="h-5 w-5" strokeWidth={2} />
+                      <Edit className="h-5 w-5" strokeWidth={2} />
                     </button>
                   </div>
                 ))}
@@ -393,7 +407,7 @@ export default function CategoriasPage() {
                       <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-neutral-800/50">
                         <span className="font-mono">ID: {categoria.lookupId.split("-")[0]}</span>
                         <span className="flex items-center gap-1 text-gray-500 group-hover:text-[#C2AE82] transition-colors">
-                          <Edit2 size={14} /> Editar Categoria
+                          <Edit size={14} /> Editar Categoria
                         </span>
                       </div>
                     </div>
@@ -455,7 +469,7 @@ export default function CategoriasPage() {
                               title="Editar Categoria"
                               className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:bg-neutral-700 hover:text-white transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
                             >
-                              <Edit2 size={18} strokeWidth={2} />
+                              <Edit size={18} strokeWidth={2} />
                             </button>
                             <button
                               onClick={(e) => { e.stopPropagation(); abrirModalExclusao(categoria); }}

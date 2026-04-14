@@ -4,6 +4,7 @@ package org.example.rest.dto.Administrador;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import org.example.model.EnumCargo;
 
@@ -24,12 +25,32 @@ public class AdministradorSalvarRequestDTO {
     private String senha;
 
     @Schema(description = "Cargo ocupado pelo administrador", example = "FUNCIONARIO")
-    @NotBlank(message = "O cargo é obrigatório")
+    @NotNull(message = "O cargo é obrigatório")
     private EnumCargo cargo;
 
     @Schema(description = "Caso seja ativado o ADM possui permissão total ao sistema", example = "true")
-    @NotBlank(message = "A permissão ou negação é obrigatória")
-    private boolean permissaoTotal;
+    @NotNull(message = "A permissão ou negação é obrigatória")
+    private Boolean permissaoTotal;
+
+    @Schema(description = "Permissão pra página de pedidos", example = "true")
+    @NotNull
+    private Boolean pedidosPage;
+
+    @Schema(description = "Permissão pra página de produtos", example = "true")
+    @NotNull
+    private Boolean produtosPage;
+
+    @Schema(description = "Permissão pra página de categorias", example = "true")
+    @NotNull
+    private Boolean categoriasPage;
+
+    @Schema(description = "Permissão pra página de clientes", example = "true")
+    @NotNull
+    private Boolean clientePage;
+
+    @Schema(description = "Permissão pra página de relatórios", example = "true")
+    @NotNull
+    private Boolean relatoriosPage;
 
 
 

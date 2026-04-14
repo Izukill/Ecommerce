@@ -17,4 +17,14 @@ public class AdministradorResponseDTO {
     private EnumCargo cargo;
 
     private boolean permissaoTotal;
+
+    private boolean pedidosPage;
+
+    private boolean produtosPage;
+
+    private boolean categoriasPage;
+
+    private boolean clientePage;
+
+    private boolean relatoriosPage;
 }

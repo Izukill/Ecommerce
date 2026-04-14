@@ -71,7 +71,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
 
   const variacoes = produto.variacoes || [];
   const ORDEM_TAMANHOS: Record<string, number> = {
-    "P": 1, "M": 2, "G": 3, "GG": 4, "G1": 5, "G2": 6, "G3": 7, "U": 8
+    "P": 1, "M": 2, "G": 3, "GG": 4
   };
 
   const tamanhosUnicos = Array.from(new Set(variacoes.map(v => v.tamanho)))
@@ -125,8 +125,8 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
 
         {/* faixa de desconto se em promoção */}
         {emPromocao && (
-          <div className="absolute top-3 left-3 bg-red-600 text-white text-[15px] sm:text-[11px] font-extrabold px-5 sm:px-2.5 py-2 sm:py-1 rounded-md shadow-lg flex items-center gap-2 sm:gap-1 z-10">
-            <Tag size={16} className="sm:hidden" fill="currentColor" />
+          <div className="absolute top-3 left-3 bg-red-600 text-white text-[13px] sm:text-[11px] font-extrabold px-5 sm:px-2.5 py-2 sm:py-1 rounded-md shadow-lg flex items-center gap-2 sm:gap-1 z-10">
+            <Tag size={15} className="sm:hidden" fill="currentColor" />
             <Tag size={12} className="hidden sm:block" fill="currentColor" />
             {porcentagemDesconto}% OFF
           </div>
@@ -148,7 +148,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
         {tamanhosUnicos.length > 0 && (
           <div className="absolute bottom-3 left-3 z-10 flex flex-wrap gap-1">
             {tamanhosUnicos.map(tamanho => (
-              <span key={tamanho} className="w-10 h-10 sm:w-6 sm:h-6 rounded bg-neutral-900/80 backdrop-blur-md text-gray-200 border border-neutral-600 flex items-center justify-center text-[15px] sm:text-[10px] font-extrabold shadow-md">
+              <span key={tamanho} className="w-8 h-8 sm:w-6 sm:h-6 rounded bg-neutral-900/80 backdrop-blur-md text-gray-200 border border-neutral-600 flex items-center justify-center text-[13px] sm:text-[10px] font-extrabold shadow-md">
                 {tamanho}
               </span>
             ))}
@@ -180,7 +180,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
                       setCorFixada(cor.nome);
                     }
                   }}
-                  className={`w-8 h-8 sm:w-5 sm:h-5 rounded-full border-2 shadow-lg transition-all focus:outline-none focus:border-[#C2AE82]
+                  className={`w-7 h-7 sm:w-5 sm:h-5 rounded-full border-2 shadow-lg transition-all focus:outline-none focus:border-[#C2AE82]
                     ${isSelecionada ? 'border-[#C2AE82] scale-125' : 'border-neutral-400 hover:border-white hover:scale-125'}
                     ${index === 3 ? 'hidden sm:block' : ''}
                     ${index >= 4 ? 'hidden' : ''}`}
@@ -195,7 +195,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
             {/* lógica de cores no mobile */}
             {coresUnicas.length > 3 && (
               <div
-                className="flex sm:hidden w-8 h-8 rounded-full bg-black/70 backdrop-blur-md border border-neutral-500 text-white items-center justify-center text-xs font-bold shadow-lg"
+                className="flex sm:hidden w-7 h-7 rounded-full bg-black/70 backdrop-blur-md border border-neutral-500 text-white items-center justify-center text-xs font-bold shadow-lg"
                 title={`Mais ${coresUnicas.length - 3} cores disponíveis`}
               >
                 +{coresUnicas.length - 3}
@@ -219,7 +219,7 @@ export default function ProdutoCard({ produto, isAdmin = false }: ProdutoCardPro
 
       <div className="p-3.5 sm:p-4 flex flex-col h-[160px] sm:h-[140px]">
         <div className="flex justify-between items-start mb-1.5">
-          <span className="text-[12px] sm:text-[10px] font-bold text-[#C2AE82] tracking-wider uppercase bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
+          <span className="text-[11px] sm:text-[10px] font-bold text-[#C2AE82] tracking-wider uppercase bg-neutral-950 px-2 py-0.5 rounded border border-neutral-800">
             {nomeCategoria}
           </span>
         </div>

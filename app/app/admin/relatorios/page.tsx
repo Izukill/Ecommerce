@@ -1,8 +1,11 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAdminDashboard } from "@/app/hooks/useAdminDashboard";
 import jsPDF from "jspdf";
 import { toPng } from "html-to-image";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { toast } from "react-hot-toast";
+import { useRouter } from "next/navigation";
 import {
   BarChart,
   Bar,
@@ -23,7 +26,8 @@ import { TrendingUp,
     Package,
     ShoppingCart,
     PieChart as PieIcon,
-    Download
+    Download,
+    BarChart2
 } from "lucide-react";
 
 const MESES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
@@ -64,7 +68,16 @@ const TooltipEscuro = ({ active, payload, label }: any) => {
 
 export default function RelatoriosPage() {
   const { dashboard, carregando } = useAdminDashboard();
+  const { usuario } = useAuth();
+  const router = useRouter();
   const [baixandoPdf, setBaixandoPdf] = useState(false);
+
+  useEffect(() => {
+        if (usuario && !usuario.permissaoTotal && !usuario.relatoriosPage) {
+          toast.error("Você não tem permissão para acessar esta página.");
+          router.push("/admin");
+        }
+  }, [usuario, router]);
 
   if (carregando || !dashboard) {
     return (
@@ -161,11 +174,11 @@ export default function RelatoriosPage() {
     <div className="space-y-10 select-none">
      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
        <div>
-         <h2 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-           Relatórios & <span className="text-[#C2AE82]">Análises</span>
+         <h2 className="flex items-center gap-3 text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+           <BarChart2 className="text-[#C2AE82]" size={32}/> Relatórios & <span className="text-[#C2AE82]">Análises</span>
          </h2>
          <p className="text-sm text-gray-400 mt-1">
-           Visão consolidada do desempenho da loja.
+           Visão dos gráficos e desempenho da loja.
          </p>
        </div>
        <button

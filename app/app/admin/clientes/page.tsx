@@ -2,8 +2,10 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/contexts/AuthContext";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
-import { Users, Mail, Phone, Trash2, Edit2 } from "lucide-react";
+import { Users, Mail, Phone, Trash2, Edit } from "lucide-react";
 import toast from "react-hot-toast";
 
 export interface Cliente {
@@ -19,6 +21,9 @@ export default function ListaClientesPage() {
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  const router = useRouter();
+  const { usuario } = useAuth();
 
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroEmail, setFiltroEmail] = useState("");
@@ -69,6 +74,13 @@ export default function ListaClientesPage() {
       setCarregando(false);
     }
   };
+
+  useEffect(() => {
+        if (usuario && !usuario.permissaoTotal && !usuario.clientePage) {
+          toast.error("Você não tem permissão para acessar esta página.");
+          router.push("/admin");
+        }
+  }, [usuario, router]);
 
   useEffect(() => {
     carregarClientes(paginaAtual);
@@ -139,7 +151,9 @@ export default function ListaClientesPage() {
   return (
     <div className="space-y-6 relative pb-10 max-w-7xl mx-auto">
       <div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">Clientes</h2>
+        <h2 className="flex items-center gap-3 text-3xl font-extrabold text-white tracking-tight">
+           <Users className="text-[#C2AE82]" size={32}/>Clientes
+        </h2>
         <p className="text-sm text-gray-400 mt-1">Gerencie os cadastros e informações de contato.</p>
       </div>
 
@@ -234,7 +248,7 @@ export default function ListaClientesPage() {
                   <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-neutral-800/50">
                     <span className="font-medium">Cadastrado em: {cliente.dataCadastro ? new Date(cliente.dataCadastro).toLocaleDateString('pt-BR') : '-'}</span>
                     <span className="flex items-center gap-1 text-gray-500 group-hover:text-[#C2AE82] transition-colors">
-                      <Edit2 size={14} /> Editar
+                      <Edit size={14} /> Editar
                     </span>
                   </div>
                 </div>
@@ -295,7 +309,7 @@ export default function ListaClientesPage() {
                           className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:text-white hover:bg-neutral-700 transition-colors border border-neutral-700 shadow-sm group-hover:border-[#C2AE82]/50 group-hover:text-[#C2AE82]"
                           title="Editar Cliente"
                         >
-                          <Edit2 size={18} strokeWidth={2} />
+                          <Edit size={18} strokeWidth={2} />
                         </button>
 
                         <button

@@ -77,7 +77,7 @@ export default function AdminDashboardPage() {
         <h2 className="text-3xl font-extrabold text-white tracking-tight">
           Olá, <span className="text-[#C2AE82] capitalize">{primeiroNome}</span>
         </h2>
-        <p className="text-sm text-gray-400 mt-1">Aqui está o resumo do seu negócio hoje.</p>
+        <p className="text-sm text-gray-400 mt-1">Aqui está o resumo da loja atualmente.</p>
       </div>
 
       {/* estatísticas */}

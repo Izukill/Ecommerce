@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { toast } from "react-hot-toast";
+import { useAuth } from "@/app/contexts/AuthContext";
 import ProdutoCard from "@/app/components/produto/ProdutoCard";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
 import ModalAtivacao from "@/app/components/layout/ModalAtivacao";
@@ -31,11 +33,10 @@ export default function ListaProdutosPage() {
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
 
-  // Inicializacao dos hooks de navegação
   const searchParams = useSearchParams();
-  const router = useRouter(); // 👈 Adicionado para podermos navegar no clique da div
+  const router = useRouter();
+  const { usuario } = useAuth();
 
-  // Valor inicial dos filtros
   const [filtroNome, setFiltroNome] = useState("");
   const [filtroCategoria, setFiltroCategoria] = useState(searchParams.get("categoria") || "");
   const [filtroAtivo, setFiltroAtivo] = useState("todos");
@@ -61,7 +62,7 @@ export default function ListaProdutosPage() {
   const [totalPaginas, setTotalPaginas] = useState(0);
   const tamanhoPagina = 12;
 
-const carregarDados = useCallback(async () => {
+  const carregarDados = useCallback(async () => {
     setCarregando(true);
     setErro("");
 
@@ -111,6 +112,14 @@ const carregarDados = useCallback(async () => {
       setCarregando(false);
     }
   }, [paginaAtual, filtroNome, filtroCategoria, filtroAtivo, filtroPreco]);
+
+
+  useEffect(() => {
+        if (usuario && !usuario.permissaoTotal && !usuario.produtosPage) {
+          toast.error("Você não tem permissão para acessar esta página.");
+          router.push("/admin");
+        }
+  }, [usuario, router]);
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -178,8 +187,10 @@ const carregarDados = useCallback(async () => {
 
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold text-white tracking-tight">Produtos</h2>
-          <p className="text-sm text-gray-400 mt-1">Gerencie o catálogo da sua loja.</p>
+          <h2 className="flex items-center gap-3 text-3xl font-extrabold text-white tracking-tight">
+            <Shirt className="text-[#C2AE82]" size={32}/>Produtos
+          </h2>
+          <p className="text-sm text-gray-400 mt-1">Gerencie o catálogo da loja.</p>
         </div>
         <Link
           href="/admin/produtos/novo"
@@ -263,7 +274,6 @@ const carregarDados = useCallback(async () => {
             {produtosFiltradosEOrdenados.map((produto) => (
 
               <div key={produto.lookupId} className="flex flex-col gap-3">
-                {/* 👇 AQUI: Wrapper com onClick para ir à tela de edição e hover interativo */}
                 <div
                   onClick={() => router.push(`/admin/produtos/editar/${produto.lookupId}`)}
                   className="cursor-pointer transition-transform duration-200 hover:scale-[1.02]"

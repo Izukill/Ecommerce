@@ -4,10 +4,12 @@ import { useState, useEffect, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
+import { useAuth } from "@/app/contexts/AuthContext";
 import { Tag } from "lucide-react";
 import CapaProdutoUpload from "@/app/components/produto/CapaProdutoUpload";
 import GerenciadorVariacoes, { Variacao } from "@/app/components/produto/GerenciadorVariacoes";
 import FotosPorCor from "@/app/components/produto/FotosPorCor";
+import toast from 'react-hot-toast';
 
 interface Categoria {
   lookupId: string;
@@ -16,6 +18,7 @@ interface Categoria {
 
 export default function NovoProdutoPage() {
   const router = useRouter();
+  const { usuario } = useAuth();
 
   const [nome, setNome] = useState("");
   const [preco, setPreco] = useState("");
@@ -96,6 +99,13 @@ export default function NovoProdutoPage() {
       setSalvando(false);
     }
   };
+
+  useEffect(() => {
+          if (usuario && !usuario.permissaoTotal && !usuario.produtosPage) {
+            toast.error("Você não tem permissão para acessar esta página.");
+            router.push("/admin");
+          }
+  }, [usuario, router]);
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">

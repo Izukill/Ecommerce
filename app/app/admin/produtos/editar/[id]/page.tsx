@@ -2,6 +2,7 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useAuth } from "@/app/contexts/AuthContext";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import { AlertTriangle, Tag } from "lucide-react";
@@ -19,6 +20,7 @@ interface Categoria {
 
 export default function EditarProdutoPage() {
   const router = useRouter();
+  const { usuario } = useAuth();
   const params = useParams();
   const produtoId = params.id as string;
 
@@ -140,6 +142,13 @@ export default function EditarProdutoPage() {
       setSalvando(false);
     }
   };
+
+  useEffect(() => {
+          if (usuario && !usuario.permissaoTotal && !usuario.produtosPage) {
+            toast.error("Você não tem permissão para acessar esta página.");
+            router.push("/admin");
+          }
+  }, [usuario, router]);
 
   const confirmarExclusao = async () => {
     setExcluindo(true);

@@ -2,14 +2,23 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { api } from "@/lib/api";
+import { useAuth } from "@/app/contexts/AuthContext";
+import { useRouter } from "next/navigation";
 import ModalDetalhesPedido, { Pedido } from "@/app/components/pedido/ModalDetalhesPedido";
-import { Package, Eye } from "lucide-react";
+import {
+    Package,
+    Eye,
+    ShoppingBag
+} from "lucide-react";
 import toast from 'react-hot-toast';
 
 export default function PedidosAdminPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState("");
+
+  const router = useRouter();
+  const { usuario } = useAuth();
 
   const [paginaAtual, setPaginaAtual] = useState(0);
   const [totalPaginas, setTotalPaginas] = useState(0);
@@ -57,6 +66,13 @@ export default function PedidosAdminPage() {
       setCarregando(false);
     }
   }, [paginaAtual, filtroCliente, filtroStatus, filtroData, filtroPrecoMin]);
+
+  useEffect(() => {
+        if (usuario && !usuario.permissaoTotal && !usuario.pedidosPage) {
+          toast.error("Você não tem permissão para acessar esta página.");
+          router.push("/admin");
+        }
+  }, [usuario, router]);
 
   //useeffect de filtros
   useEffect(() => {
@@ -122,7 +138,9 @@ export default function PedidosAdminPage() {
     <div className="space-y-6 relative pb-10 max-w-7xl mx-auto">
 
       <div>
-        <h2 className="text-3xl font-extrabold text-white tracking-tight">Painel de Pedidos</h2>
+        <h2 className="flex items-center gap-3 text-3xl font-extrabold text-white tracking-tight">
+          <ShoppingBag className="text-[#C2AE82]" size={32}/>Pedidos
+        </h2>
         <p className="text-sm text-gray-400 mt-1">Acompanhe as vendas e gerencie os status de entrega.</p>
       </div>
 

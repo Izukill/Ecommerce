@@ -152,7 +152,7 @@ export default function ModalProduto({ produtoId, onClose }: ModalProdutoProps) 
                       </span>
                     </div>
                   ) : (
-                    <p className="text-xl sm:text-2xl font-light text-[#C2AE82]">
+                    <p className="text-3xl sm:text-3xl font-black text-[#C2AE82]">
                       R$ {precoExibicao.toFixed(2).replace('.', ',')}
                     </p>
                   )}

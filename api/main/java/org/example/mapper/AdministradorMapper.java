@@ -17,7 +17,12 @@ public class AdministradorMapper {
                 .email(dto.getEmail())
                 .senha(dto.getSenha())
                 .tipoPerfil(EnumPerfil.ADM)
-                .permissaoTotal(dto.isPermissaoTotal())
+                .permissaoTotal(dto.getPermissaoTotal())
+                .categoriasPage(dto.getCategoriasPage())
+                .clientePage(dto.getClientePage())
+                .pedidosPage(dto.getPedidosPage())
+                .produtosPage(dto.getProdutosPage())
+                .relatoriosPage(dto.getRelatoriosPage())
                 .build();
 
 
@@ -31,6 +36,12 @@ public class AdministradorMapper {
         dto.setNome(entity.getNome());
         dto.setCargo(entity.getCargo());
         dto.setEmail(entity.getEmail());
+        dto.setPermissaoTotal(entity.isPermissaoTotal());
+        dto.setClientePage(entity.isClientePage());
+        dto.setCategoriasPage(entity.isCategoriasPage());
+        dto.setPedidosPage(entity.isPedidosPage());
+        dto.setProdutosPage(entity.isProdutosPage());
+        dto.setRelatoriosPage(entity.isRelatoriosPage());
 
         return dto;
 

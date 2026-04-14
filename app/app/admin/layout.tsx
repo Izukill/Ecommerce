@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import ModalEditarPerfil from "../components/admin/ModalEditarPerfil";
+import ModalLogout from "@/app/components/layout/ModalLogout";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -17,17 +18,17 @@ import {
   Menu,
   X,
   Store,
-  BarChart2
+  BarChart2,
+  ShieldAlert
 } from "lucide-react";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { usuario, logout, atualizarNome } = useAuth();
 
-  console.log("usuario completo:", usuario);
-
   const [isDropdownAberto, setIsDropdownAberto] = useState(false);
   const [isModalPerfilAberto, setIsModalPerfilAberto] = useState(false);
+  const [isModalLogoutAberto, setIsModalLogoutAberto] = useState(false);
 
   const [isMobileMenuAberto, setIsMobileMenuAberto] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -53,13 +54,49 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   }, [isMobileMenuAberto]);
 
   const menuItens = [
-    { nome: "Visão Geral", rota: "/admin", icone: LayoutDashboard },
-    { nome: "Pedidos", rota: "/admin/pedidos", icone: ShoppingBag },
-    { nome: "Produtos", rota: "/admin/produtos", icone: Shirt },
-    { nome: "Categorias", rota: "/admin/categorias", icone: Tags },
-    { nome: "Clientes", rota: "/admin/clientes", icone: Users },
-    { nome: "Relatórios", rota: "/admin/relatorios", icone: BarChart2 },
-  ];
+    {
+      nome: "Visão Geral",
+      rota: "/admin",
+      icone: LayoutDashboard,
+      mostrar: true
+    },
+    {
+      nome: "Pedidos",
+      rota: "/admin/pedidos",
+      icone: ShoppingBag,
+      mostrar: usuario?.permissaoTotal || usuario?.pedidosPage
+    },
+    {
+      nome: "Produtos",
+      rota: "/admin/produtos",
+      icone: Shirt,
+      mostrar: usuario?.permissaoTotal || usuario?.produtosPage
+    },
+    {
+      nome: "Categorias",
+      rota: "/admin/categorias",
+      icone: Tags,
+      mostrar: usuario?.permissaoTotal || usuario?.categoriasPage
+    },
+    {
+      nome: "Clientes",
+      rota: "/admin/clientes",
+      icone: Users,
+      mostrar: usuario?.permissaoTotal || usuario?.clientePage
+    },
+    {
+      nome: "Relatórios",
+      rota: "/admin/relatorios",
+      icone: BarChart2,
+      mostrar: usuario?.permissaoTotal || usuario?.relatoriosPage
+    },
+    {
+      nome: "Permissões",
+      rota: "/admin/administradores",
+      icone: ShieldAlert,
+      mostrar: usuario?.permissaoTotal
+    }
+  ].filter(item => item.mostrar);
 
   return (
     <div className="min-h-screen flex bg-black">
@@ -107,7 +144,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Voltar para a Loja
           </Link>
           <button
-            onClick={logout}
+            onClick={() => setIsModalLogoutAberto(true)}
             className="flex items-center w-full px-4 py-3.5 text-base font-bold text-red-400 rounded-xl hover:bg-red-950/30 hover:text-red-300 transition-colors"
           >
             <LogOut size={22} className="mr-4" />
@@ -166,7 +203,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 </button>
 
                 <button
-                  onClick={logout}
+                  onClick={() => {
+                    setIsDropdownAberto(false);
+                    setIsModalLogoutAberto(true);
+                  }}
                   className="flex items-center gap-3 w-full px-3 py-2.5 text-sm font-semibold text-red-400 rounded-lg hover:bg-red-950/30 hover:text-red-300 transition-colors mt-1"
                 >
                   <LogOut size={18} />
@@ -207,7 +247,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               </button>
             </div>
 
-            {/* linksd */}
             <div className="flex-1 overflow-y-auto py-6 px-4 space-y-3">
               {menuItens.map((item) => {
                 const ativo = pathname === item.rota;
@@ -241,7 +280,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                 Voltar para a Loja
               </Link>
               <button
-                onClick={logout}
+                onClick={() => {
+                  setIsMobileMenuAberto(false);
+                  setIsModalLogoutAberto(true);
+                }}
                 className="flex items-center w-full px-4 py-3 text-sm font-bold text-red-400 rounded-xl hover:bg-red-950/30 transition-colors"
               >
                 <LogOut size={20} className="mr-4" />
@@ -251,7 +293,6 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </div>
         </div>
       )}
-
       {usuario && (
         <ModalEditarPerfil
           isOpen={isModalPerfilAberto}
@@ -263,6 +304,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           }}
         />
       )}
+      <ModalLogout
+        isOpen={isModalLogoutAberto}
+        onClose={() => setIsModalLogoutAberto(false)}
+        onConfirm={() => {
+          setIsModalLogoutAberto(false);
+          logout();
+        }}
+      />
+
     </div>
   );
 }

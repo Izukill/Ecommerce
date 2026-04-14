@@ -26,7 +26,7 @@ export default function ModalLogout({ isOpen, onClose, onConfirm }: ModalLogoutP
           <div>
             <h3 className="text-xl font-bold text-white tracking-tight">Sair da conta?</h3>
             <p className="text-sm text-gray-400 mt-2 leading-relaxed">
-              Tem certeza de que deseja encerrar sua sessão? Você precisará fazer login novamente para acompanhar seus pedidos.
+              Tem certeza de que deseja encerrar sua sessão? Você precisará fazer login novamente para acessar seus dados.
             </p>
           </div>
 
