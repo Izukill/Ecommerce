@@ -53,6 +53,16 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
     buscarDados();
   }, []);
 
+  const mascararCpf = (cpf: string | undefined) => {
+    if (!cpf) return "";
+
+    const cpfLimpo = cpf.replace(/\D/g, "");
+
+    if (cpfLimpo.length !== 11) return cpf;
+
+    return `***.***.${cpfLimpo.substring(6, 9)}-${cpfLimpo.substring(9, 11)}`;
+  };
+
   const excluirEndereco = async () => {
     if (!enderecoExcluindo) return;
 
@@ -102,7 +112,7 @@ export default function AbaPerfil({ usuarioAuth }: { usuarioAuth: any }) {
 
             <div>
               <label className="block text-sm font-bold text-gray-500 mb-1">CPF</label>
-              <p className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white">{cpf || '—'}</p>
+              <p className="w-full px-4 py-3 bg-neutral-900 border border-neutral-800 rounded-lg text-white">{mascararCpf(cpf) || '—'}</p>
             </div>
 
             <div>

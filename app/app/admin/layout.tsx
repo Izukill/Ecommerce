@@ -1,11 +1,12 @@
 'use client';
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useAuth } from "../contexts/AuthContext";
 import { useState, useRef, useEffect } from "react";
 import ModalEditarPerfil from "../components/admin/ModalEditarPerfil";
 import ModalLogout from "@/app/components/layout/ModalLogout";
+import { toast } from "react-hot-toast";
 import {
   LayoutDashboard,
   ShoppingBag,
@@ -24,6 +25,7 @@ import {
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const { usuario, logout, atualizarNome } = useAuth();
 
   const [isDropdownAberto, setIsDropdownAberto] = useState(false);
@@ -97,6 +99,24 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       mostrar: usuario?.permissaoTotal
     }
   ].filter(item => item.mostrar);
+
+  useEffect(() => {
+    if (usuario === null) {
+      router.push("/");
+    }
+    else if (usuario && usuario.perfil !== "ADM") {
+      toast.error("Você não tem permissão para acessar esta página.");
+      router.push("/");
+    }
+  }, [usuario, router]);
+
+  if (!usuario || usuario.perfil !== "ADM") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-black">
+        <div className="w-10 h-10 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-black">

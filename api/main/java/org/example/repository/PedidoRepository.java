@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -33,6 +34,21 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     Page<Pedido> findByDataHoraBetween(LocalDateTime dataInicio, LocalDateTime dataFinal, Pageable pageable);
 
     List<Pedido> findByStatusAndDataExpiracaoBefore(EnumStatusPedido status, LocalDateTime dataAtual);
+
+    @Query("SELECT p FROM Pedido p WHERE " +
+            "(:clienteNome IS NULL OR LOWER(p.cliente.nome) LIKE LOWER(CONCAT('%', CAST(:clienteNome AS String), '%'))) AND " +
+            "(:status IS NULL OR p.status = :status) AND " +
+            "(CAST(:precoMin AS BigDecimal) IS NULL OR p.valorTotal >= :precoMin) AND " +
+            "(CAST(:dataInicial AS timestamp) IS NULL OR p.dataHora >= :dataInicial) AND " +
+            "(CAST(:dataFinal AS timestamp) IS NULL OR p.dataHora <= :dataFinal)")
+    Page<Pedido> buscarComFiltros(
+            @Param("clienteNome") String clienteNome,
+            @Param("status") EnumStatusPedido status,
+            @Param("precoMin") BigDecimal precoMin,
+            @Param("dataInicial") LocalDateTime dataInicial,
+            @Param("dataFinal") LocalDateTime dataFinal,
+            Pageable pageable
+    );
 
     @Query("""
         SELECT COALESCE(SUM(p.valorTotal), 0)

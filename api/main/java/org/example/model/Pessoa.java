@@ -2,6 +2,7 @@ package org.example.model;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.example.security.CpfEncryptConverter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +39,7 @@ public abstract class Pessoa implements UserDetails {
     @Column(unique = true)
     private String email;
 
+    @Convert(converter = CpfEncryptConverter.class)
     @Column(unique = true)
     private String cpf;
 

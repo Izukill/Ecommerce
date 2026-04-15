@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from "react";
+import Link from "next/link";
 import {
   RotateCcw,
   Package,
@@ -186,7 +187,22 @@ export default function ModalDetalhesPedido({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="bg-black p-4 rounded-lg border border-neutral-800 overflow-hidden">
                 <p className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Cliente</p>
-                <p className="text-sm text-white truncate"><span className="font-semibold text-gray-400">Nome:</span> {pedidoSelecionado.cliente?.nome}</p>
+
+                <p className="text-sm text-white truncate flex items-center gap-1">
+                  <span className="font-semibold text-gray-400">Nome:</span>
+                  {isAdmin ? (
+                    <Link
+                      href={`/admin/clientes?nome=${encodeURIComponent(pedidoSelecionado.cliente?.nome || '')}&email=${encodeURIComponent(pedidoSelecionado.cliente?.email || '')}`}
+                      className="text-[#C2AE82] hover:text-white hover:underline transition-colors cursor-pointer ml-1"
+                      title="Ir para os dados do cliente"
+                      onClick={onClose} // Fecha o modal ao clicar para navegar!
+                    >
+                      {pedidoSelecionado.cliente?.nome}
+                    </Link>
+                  ) : (
+                    <span className="ml-1">{pedidoSelecionado.cliente?.nome}</span>
+                  )}
+                </p>
                 <p className="text-sm text-white truncate"><span className="font-semibold text-gray-400">Número:</span> {pedidoSelecionado.cliente?.telefone || "Sem telefone"}</p>
                 <p className="text-sm text-white truncate"><span className="font-semibold text-gray-400">E-mail:</span> {pedidoSelecionado.cliente?.email || "Sem e-mail"}</p>
               </div>

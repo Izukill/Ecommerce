@@ -5,6 +5,7 @@ import lombok.Data;
 import org.example.model.EnumStatusPedido;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -13,6 +14,12 @@ public class PedidoBuscarDTO {
 
     @Parameter(description = "Filtra os pedidos por um cliente específico")
     private UUID clienteId;
+    
+    @Parameter(description = "Filtra os pedidos pelo nome do cliente")
+    private String clienteNome;
+
+    @Parameter(description = "Filtra pelo preço mínimo do pedido")
+    private BigDecimal precoMin;
 
     @Parameter(description = "Filtra os pedidos pelo status atual")
     private EnumStatusPedido status;

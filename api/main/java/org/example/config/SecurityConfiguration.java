@@ -52,11 +52,12 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST,"/login/esqueci-senha", "/login/redefinir-senha").permitAll()
                         .requestMatchers(HttpMethod.POST, "/login").permitAll()
                         .requestMatchers(HttpMethod.POST, "/pedidos").permitAll() //fazer pedido
+                        .requestMatchers(HttpMethod.GET,"/config/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/clientes").permitAll() //criar conta
                         .requestMatchers(HttpMethod.GET, "/produtos/**").permitAll() //ver a vitrine
-                        .requestMatchers(HttpMethod.GET,"/config/frete").permitAll()
                         .requestMatchers(HttpMethod.GET, "/categorias/**").permitAll() //ver categorias
                         .requestMatchers(HttpMethod.POST, "/webhook/mercadopago").permitAll() //rota para o mercado pago (pix)
+                        .requestMatchers(HttpMethod.POST, "/login/google").permitAll() //rota de login com google
                         .requestMatchers("/error").permitAll() //rota de erro liberada para não mascara excessões
 
                         //rotas pra ADM

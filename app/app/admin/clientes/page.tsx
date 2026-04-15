@@ -2,10 +2,18 @@
 
 import { useState, useEffect, FormEvent } from "react";
 import { api } from "@/lib/api";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/contexts/AuthContext";
 import ModalExclusao from "@/app/components/layout/ModalExclusao";
-import { Users, Mail, Phone, Trash2, Edit } from "lucide-react";
+import {
+    Users,
+    Mail,
+    Phone,
+    Trash2,
+    Edit,
+    Eye,
+    EyeOff
+} from "lucide-react";
 import toast from "react-hot-toast";
 
 export interface Cliente {
@@ -23,10 +31,11 @@ export default function ListaClientesPage() {
   const [erro, setErro] = useState("");
 
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { usuario } = useAuth();
 
-  const [filtroNome, setFiltroNome] = useState("");
-  const [filtroEmail, setFiltroEmail] = useState("");
+  const [filtroNome, setFiltroNome] = useState(searchParams?.get("nome") || "");
+  const [filtroEmail, setFiltroEmail] = useState(searchParams?.get("email") || "");
   const [filtroTelefone, setFiltroTelefone] = useState("");
 
   const [paginaAtual, setPaginaAtual] = useState(0);
@@ -41,7 +50,7 @@ export default function ListaClientesPage() {
 
   const [isModalExclusaoAberto, setIsModalExclusaoAberto] = useState(false);
   const [clienteParaExcluir, setClienteParaExcluir] = useState<Cliente | null>(null);
-
+  const [cpfsRevelados, setCpfsRevelados] = useState<Record<string, boolean>>({});
 
   const carregarClientes = async (pagina: number = 0) => {
     setCarregando(true);
@@ -91,6 +100,21 @@ export default function ListaClientesPage() {
     setPaginaAtual(0);
   }, [filtroNome, filtroEmail, filtroTelefone]);
 
+  const mascararCpf = (cpf: string | undefined) => {
+    if (!cpf) return "";
+    const cpfLimpo = cpf.replace(/\D/g, "");
+    if (cpfLimpo.length !== 11) return cpf;
+    return `***.***.${cpfLimpo.substring(6, 9)}-${cpfLimpo.substring(9, 11)}`;
+  };
+
+  //função pro olhinho do cpf
+  const toggleCpf = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCpfsRevelados(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const abrirModalEdicao = (cliente: Cliente) => {
     setClienteEditando(cliente);
@@ -119,7 +143,7 @@ export default function ListaClientesPage() {
       });
 
       fecharModalEdicao();
-      carregarClientes(paginaAtual); //atualiza a lista
+      carregarClientes(paginaAtual);
       toast.success("Cliente atualizado com sucesso!");
     } catch (error) {
       toast.error("Erro ao atualizar o cliente.");
@@ -192,7 +216,6 @@ export default function ListaClientesPage() {
         </div>
       </div>
 
-      {/* cliente e card mobile */}
       <div className="bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl overflow-hidden">
         {carregando ? (
           <div className="py-20 flex justify-center items-center gap-3 text-[#C2AE82] font-bold tracking-widest uppercase">
@@ -228,21 +251,43 @@ export default function ListaClientesPage() {
                       </div>
                     </div>
 
-                    <button
-                      onClick={(e) => { e.stopPropagation(); abrirModalExclusao(cliente); }}
-                      className="p-2 text-neutral-500 hover:text-red-500 hover:bg-red-950/20 rounded-lg transition-colors flex-shrink-0"
-                    >
-                      <Trash2 size={18} />
-                    </button>
+                    {usuario?.permissaoTotal && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); abrirModalExclusao(cliente); }}
+                        className="p-2 text-neutral-500 hover:text-red-500 hover:bg-red-950/20 rounded-lg transition-colors flex-shrink-0"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    )}
                   </div>
 
-                  <div className="space-y-1.5 pl-1">
+                  <div className="space-y-2 pl-1">
                     <p className="text-sm text-gray-300 flex items-center gap-2">
                       <Mail size={14} className="text-gray-500" /> {cliente.email}
                     </p>
                     <p className="text-sm text-gray-400 flex items-center gap-2">
                       <Phone size={14} className="text-gray-500" /> {cliente.telefone || <span className="text-gray-600 italic">Não informado</span>}
                     </p>
+                    <div className="text-sm text-gray-400 flex items-center gap-2">
+                      <span className="font-mono bg-neutral-800/50 px-2 py-0.5 rounded text-gray-300">
+                        {!cliente.cpf ? (
+                          <span className="text-gray-600 italic text-xs">CPF pendente</span>
+                        ) : cpfsRevelados[cliente.lookupId] ? (
+                          cliente.cpf
+                        ) : (
+                          mascararCpf(cliente.cpf)
+                        )}
+                      </span>
+                      {cliente.cpf && usuario?.permissaoTotal && (
+                        <button
+                          onClick={(e) => toggleCpf(cliente.lookupId, e)}
+                          className="text-gray-500 hover:text-[#C2AE82] transition-colors p-1 rounded-md"
+                          title={cpfsRevelados[cliente.lookupId] ? "Ocultar CPF" : "Mostrar CPF"}
+                        >
+                          {cpfsRevelados[cliente.lookupId] ? <EyeOff size={16} /> : <Eye size={16} />}
+                        </button>
+                      )}
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between text-xs text-gray-400 pt-3 border-t border-neutral-800/50">
@@ -295,9 +340,26 @@ export default function ListaClientesPage() {
                       </td>
 
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <p className="text-sm text-gray-300 font-mono">
-                          {cliente.cpf || <span className="text-gray-600 italic">CPF pendente</span>}
-                        </p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm text-gray-300 font-mono">
+                            {!cliente.cpf ? (
+                              <span className="text-gray-600 italic">CPF pendente</span>
+                            ) : cpfsRevelados[cliente.lookupId] ? (
+                              cliente.cpf
+                            ) : (
+                              mascararCpf(cliente.cpf)
+                            )}
+                          </p>
+                          {cliente.cpf && usuario?.permissaoTotal && (
+                            <button
+                              onClick={(e) => toggleCpf(cliente.lookupId, e)}
+                              className="text-gray-500 hover:text-[#C2AE82] transition-colors focus:outline-none p-1 rounded-md"
+                              title={cpfsRevelados[cliente.lookupId] ? "Ocultar CPF" : "Mostrar CPF"}
+                            >
+                              {cpfsRevelados[cliente.lookupId] ? <EyeOff size={16} /> : <Eye size={16} />}
+                            </button>
+                          )}
+                        </div>
                         <p className="text-xs text-gray-500 mt-1">
                           Cadastrado em: {cliente.dataCadastro ? new Date(cliente.dataCadastro).toLocaleDateString('pt-BR') : '-'}
                         </p>
@@ -312,13 +374,15 @@ export default function ListaClientesPage() {
                           <Edit size={18} strokeWidth={2} />
                         </button>
 
-                        <button
-                          onClick={(e) => { e.stopPropagation(); abrirModalExclusao(cliente); }}
-                          className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors border border-neutral-700 hover:border-red-900/50 shadow-sm"
-                          title="Excluir Cliente"
-                        >
-                          <Trash2 size={18} strokeWidth={2} />
-                        </button>
+                        {usuario?.permissaoTotal && (
+                          <button
+                            onClick={(e) => { e.stopPropagation(); abrirModalExclusao(cliente); }}
+                            className="p-2 bg-neutral-800 text-gray-400 rounded-lg hover:bg-red-950/30 hover:text-red-500 transition-colors border border-neutral-700 hover:border-red-900/50 shadow-sm"
+                            title="Excluir Cliente"
+                          >
+                            <Trash2 size={18} strokeWidth={2} />
+                          </button>
+                        )}
                       </td>
 
                     </tr>
@@ -330,7 +394,6 @@ export default function ListaClientesPage() {
         )}
       </div>
 
-      {/* PAGINAÇÃO */}
       {totalPaginas > 1 && (
         <div className="mt-8 flex items-center justify-center gap-4 bg-neutral-900 p-4 rounded-xl border border-neutral-800 shadow-lg">
           <button
@@ -353,7 +416,6 @@ export default function ListaClientesPage() {
         </div>
       )}
 
-      {/* ================= MODAL DE EDIÇÃO INLINE ================= */}
       {clienteEditando && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm px-4">
           <div className="bg-neutral-900 border-t-4 border-[#C2AE82] rounded-xl shadow-2xl p-6 w-full max-w-md animate-in fade-in zoom-in duration-200">
@@ -407,7 +469,6 @@ export default function ListaClientesPage() {
         </div>
       )}
 
-      {/* MODAL DE EXCLUSÃO REUTILIZÁVEL */}
       <ModalExclusao
         isOpen={isModalExclusaoAberto}
         onClose={() => setIsModalExclusaoAberto(false)}
@@ -415,11 +476,10 @@ export default function ListaClientesPage() {
         titulo="Excluir Cliente?"
         mensagem={
           <>
-            Tem certeza que deseja apagar o cadastro de <span className="text-white font-bold">"{clienteParaExcluir?.nome}"</span>? Todo o histórico dele será perdido.
+            Tem certeza que deseja apagar o cadastro de <span className="text-white font-bold">"{clienteParaExcluir?.nome}"</span>? O cliente será desativado.
           </>
         }
       />
-
     </div>
   );
 }

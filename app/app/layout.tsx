@@ -4,6 +4,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { CartProvider } from './contexts/CartContext';
 import { Toaster, DefaultToastOptions } from 'react-hot-toast';
 import ConditionalFooter from "./components/layout/CondicionalFooter";
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -33,6 +34,7 @@ const configuracaoToast: DefaultToastOptions = {
     },
 
     success: {
+      duration: 1000,
       style: {
         background: '#4ade80',
         color: '#000000',
@@ -61,10 +63,12 @@ export default function RootLayout({
        <Toaster position="top-right" reverseOrder={false} toastOptions={configuracaoToast}/>
         <AuthProvider>
           <CartProvider>
-            <main className="flex-grow">
-              {children}
-            </main>
-            <ConditionalFooter />
+            <GoogleOAuthProvider clientId="538785365807-vdpi1q4r3tn107shdcj36f9d4gf3dsss.apps.googleusercontent.com">
+              <main className="flex-grow">
+                {children}
+              </main>
+              <ConditionalFooter />
+            </GoogleOAuthProvider>
           </CartProvider>
         </AuthProvider>
       </body>

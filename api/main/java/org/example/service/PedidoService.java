@@ -118,16 +118,14 @@ public class PedidoService {
     //listar para admin
     public Page<Pedido> listarPedidosAdmin(PedidoBuscarDTO dto, Pageable pageable){
 
-        if (dto.getStatus() != null) {
-
-            return pedidoRepository.findByStatus(dto.getStatus(), pageable);
-        }
-
-        if(dto.getDataInicial() != null && dto.getDataFinal() != null){
-            return pedidoRepository.findByDataHoraBetween(dto.getDataInicial(), dto.getDataFinal(), pageable);
-        }
-
-        return pedidoRepository.findAll(pageable);
+        return pedidoRepository.buscarComFiltros(
+                dto.getClienteNome(),
+                dto.getStatus(),
+                dto.getPrecoMin(),
+                dto.getDataInicial(),
+                dto.getDataFinal(),
+                pageable
+        );
 
     }
 

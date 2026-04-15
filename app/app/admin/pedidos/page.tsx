@@ -186,7 +186,7 @@ export default function PedidosAdminPage() {
         <div>
           <label className="block text-xs font-bold text-gray-400 uppercase mb-1">Preço Mínimo (R$)</label>
           <input
-            type="number" min="0" step="10" placeholder="Ex: 100"
+            type="text" placeholder="Ex: 100"
             className="w-full px-3 py-2 bg-black border border-neutral-700 rounded-lg text-sm text-gray-100 focus:ring-1 focus:ring-[#C2AE82] outline-none"
             value={filtroPrecoMin} onChange={(e) => setFiltroPrecoMin(e.target.value)}
           />

@@ -1,11 +1,14 @@
 package org.example.rest;
 
 import jakarta.validation.Valid;
+import org.example.exception.RegraNegocioException;
 import org.example.model.Pessoa;
 import org.example.rest.dto.Autenticacao.AutenticacaoRequestDTO;
+import org.example.rest.dto.Autenticacao.GoogleTokenDTO;
 import org.example.rest.dto.Autenticacao.TokenResponseDTO;
 import org.example.rest.dto.Email.ValidarEmailRequestDTO;
 import org.example.security.TokenService;
+import org.example.service.AutenticacaoGoogleService;
 import org.example.service.ClienteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +35,9 @@ public class AutenticacaoRestController implements AutenticacaoRestControllerAPI
     @Autowired
     private ClienteService clienteService;
 
+    @Autowired
+    private AutenticacaoGoogleService autenticacaoGoogleService;
+
     @Override
     @PostMapping
     public ResponseEntity<TokenResponseDTO> efetuarLogin(@RequestBody @Valid AutenticacaoRequestDTO dados) {
@@ -47,14 +53,21 @@ public class AutenticacaoRestController implements AutenticacaoRestControllerAPI
 
     }
 
+    @PostMapping("/google")
+    public ResponseEntity<TokenResponseDTO> loginComGoogle(@RequestBody GoogleTokenDTO dto) throws RegraNegocioException {
+        // Envia o token para o Service fazer a mágica
+        String nossoTokenJwt = autenticacaoGoogleService.processarLoginGoogle(dto.getToken());
+        return ResponseEntity.ok(new TokenResponseDTO(nossoTokenJwt));
+    }
+
     @PostMapping("/esqueci-senha")
     public ResponseEntity<String> solicitarRecuperacao(@RequestBody Map<String, String> body) {
         try {
             clienteService.solicitarRecuperacaoSenha(body.get("email"));
             return ResponseEntity.ok("Código enviado para o e-mail.");
         } catch (Exception e) {
-            // Retorna 400 mas não dizemos exatamente qual foi o erro por segurança
-            // (evita que hackers fiquem testando quais e-mails existem no banco)
+            //retorna 400 mas não diz exatamente qual foi o erro por segurança
+            //(evita que hackers fiquem testando quais e-mails existem no banco)
             return ResponseEntity.badRequest().body("Se o e-mail existir, um código será enviado.");
         }
     }

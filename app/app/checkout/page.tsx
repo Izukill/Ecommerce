@@ -40,10 +40,9 @@ export default function CheckoutPage() {
   }, [carrinho, router, processando, pedidoRealizadoId, isModalPixAberto]);
 
   useEffect(() => {
-    if (usuario) {
+    if (usuario && usuario.email && usuario.perfil !== "ADM") {
       const buscarDadosEEnderecos = async () => {
         try {
-          // (Promise.all) faz as duas buscas ao mesmo tempo para a tela carregar mais rápido
           const [resPerfil, resEnderecos] = await Promise.all([
             api.get('/clientes/me'),
             api.get('/enderecos/meus-enderecos')
@@ -64,7 +63,7 @@ export default function CheckoutPage() {
             setEnderecosSalvos(listaEnderecos);
           }
         } catch (error) {
-          console.error("Erro ao puxar dados do checkout:", error);
+          console.error("Visitante ou token expirado. Não foi possível puxar dados.");
         }
       };
       buscarDadosEEnderecos();

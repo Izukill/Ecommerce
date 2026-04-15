@@ -51,12 +51,10 @@ export default function RegistroPage() {
   };
 
   return (
-    // Fundo padrão já escuro, apenas centralizamos
     <div className="min-h-screen flex items-center justify-center px-4">
-      {/* CARD:  */}
       <div className="max-w-md w-full space-y-8 bg-black p-10 rounded-xl shadow-2xl border-t-4 border-[#C2AE82]">
 
-        {/* Cabeçalho do Registro  */}
+        {/* registro  */}
         <div className="text-center">
           <Link href="/" className="text-3xl font-extrabold text-white tracking-tighter cursor-pointer">
             MIRLLE<span className="text-[#C2AE82]">FITNESS</span>
@@ -66,7 +64,7 @@ export default function RegistroPage() {
           </p>
         </div>
 
-        {/* Formulário */}
+        {/* formulário */}
         <form className="mt-8 space-y-6" onSubmit={handleRegistro}>
 
           {erro && (
@@ -82,7 +80,6 @@ export default function RegistroPage() {
           )}
 
           <div className="space-y-4">
-            {/* Input de Nome */}
             <div>
               <label htmlFor="nome" className="block text-sm font-bold text-gray-100">Nome Completo</label>
               <div className="relative mt-1">
@@ -95,7 +92,6 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Input de E-mail  */}
             <div>
               <label htmlFor="email" className="block text-sm font-bold text-gray-100">E-mail</label>
               <div className="relative mt-1">
@@ -108,7 +104,6 @@ export default function RegistroPage() {
               </div>
             </div>
 
-            {/* Inputs de Senha */}
             <div>
               <InputSenha
                 id="senha"
@@ -129,17 +124,15 @@ export default function RegistroPage() {
           </div>
 
           <div>
-            {/* Botão Principal: Fundo Preto, Texto Dourado */}
             <button
               type="submit" disabled={carregando || sucesso}
-              className="group relative w-full flex justify-center py-3 px-4 border text-sm font-bold rounded-md text-[#C2AE82] bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 transition-all shadow-md"
+              className="group relative w-full flex justify-center py-3 px-4 border text-sm font-bold rounded-md text-[#C2AE82] bg-black hover:bg-neutral-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black disabled:opacity-50 transition-all shadow-md border-neutral-800 hover:border-neutral-700"
             >
               {carregando ? "Criando conta..." : "Cadastrar"}
             </button>
           </div>
 
           <div className="text-center mt-4">
-            {/* Texto de Footer */}
             <p className="text-sm text-gray-400">
               Já tem uma conta? <Link href="/login" className="font-bold text-[#C2AE82] hover:underline">Faça login</Link>
             </p>
@@ -148,7 +141,7 @@ export default function RegistroPage() {
       </div>
       <ModalVerificacaoEmail
               isOpen={isModalVerificacaoAberto}
-              emailDestino={email} // Passamos o e-mail que ele acabou de digitar no form
+              emailDestino={email}
               onClose={() => setIsModalVerificacaoAberto(false)}
               aoVerificarComSucesso={() => {
                 toast.success("Tudo pronto! Agora você já pode fazer login.");
