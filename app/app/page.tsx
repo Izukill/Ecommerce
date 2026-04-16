@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, usePathname } from 'next/navigation';
 import Link from "next/link";
 import { api } from "@/lib/api";
@@ -25,7 +25,7 @@ interface VitrineCategoria {
   percentualDesconto?: number;
 }
 
-export default function HomePage() {
+function ConteudoHome() {
   const [vitrines, setVitrines] = useState<VitrineCategoria[]>([]);
   const [lancamentos, setLancamentos] = useState<Produto[]>([]);
   const [promocoes, setPromocoes] = useState<Produto[]>([]);
@@ -227,5 +227,17 @@ export default function HomePage() {
         />
       )}
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-neutral-950 flex justify-center items-center">
+        <div className="w-8 h-8 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }>
+      <ConteudoHome />
+    </Suspense>
   );
 }

@@ -9,6 +9,14 @@ interface Usuario {
   nome: string;
   email: string;
   lookupId: string;
+  permissaoTotal?: boolean;
+  categoriasPage?: boolean;
+  clientePage?: boolean;
+  relatoriosPage?: boolean;
+  produtosPage?: boolean;
+  pedidosPage?: boolean;
+  cargo?: string;
+  exp?: number;
 }
 
 interface AuthContextType {

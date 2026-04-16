@@ -149,7 +149,7 @@ export default function ListaProdutosPage() {
 
     try {
       await api.delete(`/produtos/${produtoParaExcluir.lookupId}`);
-      carregarDados(paginaAtual);
+      carregarDados();
       fecharModalExclusao();
     } catch (error) {
       toast.error("Erro ao excluir o produto. Ele pode estar atrelado a algum pedido.");
@@ -162,7 +162,7 @@ export default function ListaProdutosPage() {
 
       try {
         await api.patch(`/produtos/${produtoParaAtivar.lookupId}/ativar`);
-        carregarDados(paginaAtual);
+        carregarDados();
         fecharModalAtivacao();
       } catch (error: any) {
           console.error("Erro completo:", error.response?.data || error.message);

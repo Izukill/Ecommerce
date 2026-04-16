@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Header from '@/app/components/layout/Header';
 import { useAuth } from '@/app/contexts/AuthContext';
@@ -12,7 +12,7 @@ import {
   LogOut
 } from 'lucide-react';
 
-export default function MinhaContaPage() {
+function ConteudoMinhaConta() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const abaUrl = searchParams.get('aba') || 'perfil';
@@ -33,7 +33,7 @@ export default function MinhaContaPage() {
       }
     }, [usuario, router]);
 
-    //enquanto o usuarioAuth não carrega do Contexto, exibe uma tela preta para não piscar
+    //enquanto o usuarioAuth não carrega do contexto, exibe uma tela preta para não piscar
     if (!usuario) {
       return <div className="min-h-screen bg-neutral-950"></div>;
     }
@@ -100,5 +100,14 @@ export default function MinhaContaPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+//suspense pro vercel não quebrar
+export default function MinhaContaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-neutral-950 flex justify-center items-center"><div className="w-8 h-8 border-4 border-[#C2AE82] border-t-transparent rounded-full animate-spin"></div></div>}>
+      <ConteudoMinhaConta />
+    </Suspense>
   );
 }

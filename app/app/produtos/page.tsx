@@ -55,7 +55,7 @@ function ConteudoProdutos() {
 
       //faz o filtro pra somente em promoção
       if (somenteOfertas) {
-        filtrados = filtrados.filter((p: Produto) => p.precoPromocional !== null && p.precoPromocional < p.preco);
+        filtrados = filtrados.filter((p: Produto) => typeof p.precoPromocional === 'number' && p.precoPromocional < p.preco);
       }
 
       if (novaBusca) {

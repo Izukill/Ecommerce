@@ -11,6 +11,9 @@ export interface PedidoResumo {
 
 export interface DashboardAdmin {
   faturamentoMes: number;
+  faturamentoUltimosMeses?: any[];
+  produtosMaisVendidos?: any[];
+  pedidosPorStatus?: any[];
   porcentagemPassada: number;
   produtosAtivos: number;
   pedidosMes: number;

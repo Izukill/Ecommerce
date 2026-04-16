@@ -19,6 +19,10 @@ export default function DetalhesProdutoPage() {
   const [variacaoSelecionada, setVariacaoSelecionada] = useState<Variacao | null>(null);
   const [quantidade, setQuantidade] = useState(1);
 
+  const handleAdicionarAoCarrinho = () => {
+    console.log("Adicionando ao carrinho...", { variacaoSelecionada, quantidade });
+  };
+
   useEffect(() => {
     const carregarProduto = async () => {
       try {
