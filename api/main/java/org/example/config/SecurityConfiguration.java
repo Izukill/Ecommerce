@@ -102,7 +102,7 @@ public class SecurityConfiguration {
         CorsConfiguration configuration = new CorsConfiguration();
 
         //libera a porta do seu Next.js (mudar depois de colocar ao ar)
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://mirllefitness.vercel.app"));
 
         //libera os métodos HTTP que o Front-end vai usar
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD","PATCH"));
