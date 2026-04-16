@@ -17,7 +17,7 @@ interface SeletorVariacoesProps {
 }
 
 const ORDEM_TAMANHOS: Record<string, number> = {
-  "P": 1, "M": 2, "G": 3, "GG": 4, "G1": 5, "G2": 6, "G3": 7, "U": 8
+  "P": 1, "M": 2, "G": 3, "GG": 4,
 };
 
 export default function SeletorVariacoes({ variacoes, onVariacaoSelecionada, onCorSelecionada }: SeletorVariacoesProps) {

@@ -5,8 +5,8 @@ import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { api } from "@/lib/api";
 
-import GaleriaProduto from "@/app/components/GaleriaProduto";
-import SeletorVariacoes, { Variacao } from "@/app/components/SeletorVariacoes";
+import GaleriaProduto from "@/app/components/produto/GaleriaProduto";
+import SeletorVariacoes, { Variacao } from "@/app/components/produto/SeletorVariacoes";
 
 export default function DetalhesProdutoPage() {
   const params = useParams();
