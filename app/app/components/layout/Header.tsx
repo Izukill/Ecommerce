@@ -39,6 +39,8 @@ export default function Header() {
 
   const [menuMobileAberto, setMenuMobileAberto] = useState(false);
   const [categoriasMobileAberto, setCategoriasMobileAberto] = useState(false);
+  const menuMobileRef = useRef<HTMLDivElement>(null);
+  const backdropRef = useRef<HTMLDivElement>(null);
   const [modalLogoutAberto, setModalLogoutAberto] = useState(false);
 
   const handleLancamentosClick = (e: React.MouseEvent) => {
@@ -94,12 +96,94 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (menuMobileAberto || modalLogoutAberto) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [menuMobileAberto, modalLogoutAberto]);
+    const menu = menuMobileRef.current;
+    const backdrop = backdropRef.current;
+    if (!menu || !backdrop) return;
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let currentTranslate = 0;
+    let isArrastando = false;
+    let seMexeu = false;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      mouseX = e.touches[0].clientX;
+      mouseY = e.touches[0].clientY;
+
+      if (!menuMobileAberto && mouseX > 40) return; //pixel pra começar a mexer a header
+
+      isArrastando = true;
+      seMexeu = false;
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (!isArrastando) return;
+
+      const currentX = e.touches[0].clientX;
+      const currentY = e.touches[0].clientY;
+      const diffX = currentX - mouseX;
+      const diffY = currentY - mouseY;
+
+      if (!seMexeu && Math.abs(diffY) > Math.abs(diffX)) {
+        isArrastando = false;
+        return;
+      }
+
+      seMexeu = true;
+      const menuWidth = window.innerWidth * 0.85 > 384 ? 384 : window.innerWidth * 0.85;
+      menu.style.transition = 'none';
+      backdrop.style.transition = 'none';
+
+      if (menuMobileAberto) {
+        currentTranslate = Math.max(-menuWidth, Math.min(0, diffX));
+      } else {
+        currentTranslate = Math.max(-menuWidth, Math.min(0, -menuWidth + diffX));
+      }
+
+      menu.style.transform = `translateX(${currentTranslate}px)`;
+      const percentOpen = 1 - Math.abs(currentTranslate) / menuWidth;
+      backdrop.style.opacity = (percentOpen * 0.8).toString();
+    };
+
+    const handleTouchEnd = () => {
+      if (!isArrastando) return;
+      isArrastando = false;
+
+      if (seMexeu) {
+        const menuWidth = window.innerWidth * 0.85 > 384 ? 384 : window.innerWidth * 0.85;
+
+        menu.style.transition = 'transform 0.3s ease-out';
+        backdrop.style.transition = 'opacity 0.3s ease-out';
+        menu.style.transform = '';
+        backdrop.style.opacity = '';
+
+        if (menuMobileAberto && currentTranslate < -60) {
+          setMenuMobileAberto(false);
+        } else if (!menuMobileAberto && currentTranslate > -menuWidth + 60) {
+          setMenuMobileAberto(true);
+        }
+      }
+    };
+
+    document.addEventListener('touchstart', handleTouchStart);
+    document.addEventListener('touchmove', handleTouchMove, { passive: false });
+    document.addEventListener('touchend', handleTouchEnd);
+
+    return () => {
+      document.removeEventListener('touchstart', handleTouchStart);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+
+      // Limpeza de segurança caso o componente desmonte no meio do arrasto
+      if (menu && backdrop) {
+        menu.style.transform = '';
+        backdrop.style.opacity = '';
+        menu.style.transition = '';
+        backdrop.style.transition = '';
+      }
+    };
+  }, [menuMobileAberto]);
+
 
   const abrirModalLogout = () => {
     setMenuAberto(false);
@@ -243,29 +327,34 @@ export default function Header() {
         </div>
 
         {/* menu mobile */}
-        {menuMobileAberto && (
-          <div className="fixed inset-0 z-[100] lg:hidden">
-            <div
-              className="absolute inset-0 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300"
-              onClick={() => setMenuMobileAberto(false)}
-            ></div>
+        <div className={`fixed inset-0 z-[100] lg:hidden ${menuMobileAberto ? 'pointer-events-auto' : 'pointer-events-none'}`}>
 
-            {/* menu desliza da esquerda */}
-            <div className="absolute top-0 left-0 bottom-0 w-[85%] max-w-sm bg-neutral-950 border-r border-neutral-800 shadow-2xl flex flex-col animate-in slide-in-from-left duration-300">
+          {/* Fundo escuro (Backdrop) */}
+          <div
+            ref={backdropRef}
+            className={`absolute inset-0 z-40 bg-black/80 backdrop-blur-sm transition-opacity duration-300 ease-out ${menuMobileAberto ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            onClick={() => setMenuMobileAberto(false)}
+          ></div>
 
-              <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-[#C2AE82]">
-                <Link href="/#comeco" onClick={handleMenuClick}>
-                  <span className="text-xl font-extrabold tracking-tighter text-black">
-                    MIRLLE<span className="text-black/70">FITNESS</span>
-                  </span>
-                </Link>
-                <button
-                  onClick={() => setMenuMobileAberto(false)}
-                  className="p-2 -mr-2 text-black hover:text-white transition-colors rounded-full"
-                >
-                  <X size={28} strokeWidth={2.5} />
-                </button>
-              </div>
+          {/* menu desliza da esquerda */}
+          <div
+            ref={menuMobileRef}
+            className={`absolute top-0 left-0 bottom-0 z-50 w-[85%] max-w-sm bg-neutral-950 border-r border-neutral-800 shadow-2xl flex flex-col transform transition-transform duration-300 ease-out ${menuMobileAberto ? 'translate-x-0' : '-translate-x-full'}`}
+          >
+
+            <div className="flex items-center justify-between p-6 border-b border-neutral-800 bg-[#C2AE82]">
+              <Link href="/#comeco" onClick={handleMenuClick}>
+                <span className="text-xl font-extrabold tracking-tighter text-black">
+                  MIRLLE<span className="text-black/70">FITNESS</span>
+                </span>
+              </Link>
+              <button
+                onClick={() => setMenuMobileAberto(false)}
+                className="p-2 -mr-2 text-black hover:text-white transition-colors rounded-full"
+              >
+                <X size={28} strokeWidth={2.5} />
+              </button>
+            </div>
 
               {/* link pra lançamento */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
@@ -372,7 +461,6 @@ export default function Header() {
 
             </div>
           </div>
-        )}
 
       </header>
       <ModalLogout
