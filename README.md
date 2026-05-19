@@ -1,9 +1,14 @@
+<div align="center">
+
 # E-commerce Loja de Roupas
 
 ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
 ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
 ![Next JS](https://img.shields.io/badge/Next-black?style=for-the-badge&logo=next.js&logoColor=white)
 ![Banco Relacional](https://img.shields.io/badge/Banco_de_Dados-Relacional-blue?style=for-the-badge&logo=databricks&logoColor=white)
+
+<img src="app/public/adminlogo.png" width="180" >
+</div>
 
 ## 📑 Sumário
 
