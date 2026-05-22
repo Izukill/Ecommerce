@@ -5,6 +5,7 @@ COPY pom.xml .
 COPY api ./api
 RUN mvn clean package -DskipTests
 
+
 # Estágio 2: Run (Roda o servidor)
 FROM eclipse-temurin:21-jre-jammy
 WORKDIR /app
