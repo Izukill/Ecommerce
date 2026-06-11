@@ -12,25 +12,25 @@
 
 ## 📑 Sumário
 
-- [📖 Sobre o Projeto](#-sobre-o-projeto)
-- [🎯 Objetivos e Funcionalidades](#-objetivos-e-funcionalidades)
-- [🧪 Stack Tecnológica](#-stack-tecnológica)
-- [📁 Estrutura do Projeto](#-estrutura-do-projeto)
-- [⚡ Quick Start](#-quick-start)
-- [☁️ Infraestrutura e Deploy](#-infraestrutura-e-deploy)
-- [🏗️ Arquitetura e Modelagem](#-arquitetura-e-modelagem)
-- [📝 Padrão de Commits](#-padrão-de-commits)
-- [📊 Códigos de Status HTTP](#-códigos-de-status-http)
-- [📡 Referência da API](#-referência-da-api)
+- [Sobre o Projeto](#-sobre-o-projeto)
+- [Objetivos e Funcionalidades](#-objetivos-e-funcionalidades)
+- [Stack Tecnológica](#-stack-tecnológica)
+- [Estrutura do Projeto](#-estrutura-do-projeto)
+- [Quick Start](#-quick-start)
+- [☁Infraestrutura e Deploy](#-infraestrutura-e-deploy)
+- [Arquitetura e Modelagem](#-arquitetura-e-modelagem)
+- [Padrão de Commits](#-padrão-de-commits)
+- [Códigos de Status HTTP](#-códigos-de-status-http)
+- [Referência da API](#-referência-da-api)
 
 
-## 📖 Sobre o Projeto
+## Sobre o Projeto
 
 Este é o meu primeiro projeto independente de e-commerce, focado em criar uma solução completa de ponta a ponta. Inicialmente, o foco está na construção de um **Backend robusto utilizando Spring (Java)**, com planos futuros de integração com um **Frontend moderno construído em Next.js**.
 
 O principal objetivo deste repositório é aplicar na prática os meus conhecimentos de desenvolvimento, construindo uma API estruturada e integrada a um banco de dados relacional. 
 
-## 🎯 Objetivos e Funcionalidades
+## Objetivos e Funcionalidades
 
 * **Gestão de Catálogo:** Gerenciamento completo de produtos e suas variações (ex: tamanho, cor).
 * **Controle de Estoque:** Atualização e rastreio de disponibilidade de itens.
@@ -40,7 +40,7 @@ O principal objetivo deste repositório é aplicar na prática os meus conhecime
 
 ---
 
-## 🧪 Stack Tecnológica
+## Stack Tecnológica
 
 ### Frontend
 
@@ -71,7 +71,7 @@ O principal objetivo deste repositório é aplicar na prática os meus conhecime
 
 ---
 
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```text
     MirlleEcommerce/
@@ -118,7 +118,7 @@ O principal objetivo deste repositório é aplicar na prática os meus conhecime
 ```
 ---
 
-## ⚡ Quick Start
+## Quick Start
 
 ### Pré-requisitos
 
@@ -177,7 +177,7 @@ npm run dev
 http://localhost:3000
 
 ---
-## ☁️ Infraestrutura e Deploy
+## Infraestrutura e Deploy
 
 ```text
 
@@ -190,7 +190,7 @@ Banco de Dados (PostgreSQL/AWS)
 ```
 
 ___
-## 🏗️ Arquitetura e Modelagem
+## Arquitetura e Modelagem
 
 Para entender melhor a estrutura de dados e as entidades do sistema, consulte os diagramas abaixo (podem ser visualisado em "mermaid.live"):
 
@@ -450,7 +450,7 @@ classDiagram
 
 ---
 
-## 📝 Padrão de Commits
+## Padrão de Commits
 
 Para manter o histórico do projeto limpo e rastreável, este repositório segue uma convenção rigorosa de commits:
 
@@ -466,7 +466,7 @@ Para manter o histórico do projeto limpo e rastreável, este repositório segue
 
 ---
 
-## 📊 Códigos de Status HTTP
+## Códigos de Status HTTP
 
 | Código | Significado         |
 | ------ | ------------------- |
@@ -480,7 +480,7 @@ Para manter o histórico do projeto limpo e rastreável, este repositório segue
 | 500    | Erro interno        |
 
 
-## 📡 Referência da API
+## Referência da API
 
 Base URL:
 ```text

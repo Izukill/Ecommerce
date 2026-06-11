@@ -41,13 +41,13 @@ public class DatabaseSeeder implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
 
-        if (repository.findByEmail("jaqueline@gmail.com").isEmpty()) {
+        if (repository.findByEmail("admin@gmail.com").isEmpty()) {
 
 
             Administrador adm = Administrador.builder()
-                    .nome("Jaqueline Ferreira")
+                    .nome("Admin Principal")
                     .permissaoTotal(true)
-                    .email("jaqueline@gmail.com")
+                    .email("admin@gmail.com")
                     .ativo(true)
                     .pedidosPage(true)
                     .produtosPage(true)
@@ -56,14 +56,14 @@ public class DatabaseSeeder implements CommandLineRunner {
                     .relatoriosPage(true)
                     .tipoPerfil(EnumPerfil.ADM)
                     .cargo(EnumCargo.DONO)
-                    .senha(passwordEncoder.encode("batata"))
+                    .senha(passwordEncoder.encode("admin123"))
                     .lookupId(UUID.randomUUID())
                     .build();
 
             repository.save(adm);
 
 
-            System.out.println(">>> Admin padrão criado: jaqueline@gmail.com / batata");
+            System.out.println(">>> Admin padrão criado: admin@gmail.com / senha: admin123");
         }
 
         if (repository.findByEmail("luan@gmail.com").isEmpty()) {
