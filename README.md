@@ -26,9 +26,9 @@
 
 ## Sobre o Projeto
 
-Este é o meu primeiro projeto independente de e-commerce, focado em criar uma solução completa de ponta a ponta. Inicialmente, o foco está na construção de um **Backend robusto utilizando Spring (Java)**, com planos futuros de integração com um **Frontend moderno construído em Next.js**.
+Este é o meu projeto independente de e-commerce, o foco está na construção de um **Backend utilizando SpringBoot (Java)**, com uma integração **Frontend construído em Next.js**.
 
-O principal objetivo deste repositório é aplicar na prática os meus conhecimentos de desenvolvimento, construindo uma API estruturada e integrada a um banco de dados relacional. 
+O principal objetivo deste repositório é aplicar na prática os meus conhecimentos de desenvolvimento, construindo uma API estruturada e um Frontend funcional e responsívo para um ecommerce completo, treinando conceitos como conexão via axios e estilização com tailwind e o framework do next.
 
 ## Objetivos e Funcionalidades
 
@@ -36,7 +36,7 @@ O principal objetivo deste repositório é aplicar na prática os meus conhecime
 * **Controle de Estoque:** Atualização e rastreio de disponibilidade de itens.
 * **Fluxo de Pedidos:** Suporte ao ciclo de vida completo de uma compra.
 * **Controle de Acessos:** Diferentes níveis de permissão e acesso (ex: cliente, administrador).
-* **Aprendizado Prático:** Consolidar tecnologias modernas de mercado.
+* **Aprendizado Prático:** Consolidar tecnologias modernas de desenvolvimento web.
 
 ---
 
