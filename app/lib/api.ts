@@ -4,7 +4,6 @@ export const api = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/Mirlle/api",
 });
 
-//Configurando o Interceptador de Requisição
 api.interceptors.request.use(
   (config) => {
 
@@ -15,7 +14,6 @@ api.interceptors.request.use(
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("mirlle_token");
 
-      //se achou o token na memória, carimba ele no cabeçalho da requisição
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
       }

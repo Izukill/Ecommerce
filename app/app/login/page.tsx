@@ -7,7 +7,7 @@ import { api } from "@/lib/api";
 import InputSenha from "@/app/components/login/InputSenha";
 import { GoogleLogin } from '@react-oauth/google';
 
-// Função nativa para decodificar o token (sem instalar libs)
+//função nativa para decodificar o token (sem instalar libs)
 const decodificarToken = (token: string) => {
   try {
     const base64Url = token.split('.')[1];
@@ -45,7 +45,7 @@ export default function LoginPage() {
       localStorage.setItem("mirlle_token", meuTokenJwt);
       const dadosDoToken = decodificarToken(meuTokenJwt);
 
-      if (dadosDoToken && dadosDoToken.perfil === "ADMIN") {
+      if (dadosDoToken && dadosDoToken.perfil === "ADM") {
         window.location.href = "/admin";
       } else {
         window.location.href = "/";
@@ -72,7 +72,7 @@ export default function LoginPage() {
       localStorage.setItem("mirlle_token", tokenJWT);
       const dadosDoToken = decodificarToken(tokenJWT);
 
-      if (dadosDoToken && dadosDoToken.perfil === "ADMIN") {
+      if (dadosDoToken && dadosDoToken.perfil === "ADM") {
         router.push("/admin");
       } else {
         router.push("/");
